@@ -25,7 +25,7 @@
 // When changing, please make sure that the definition here is the same as when declared
 const char *CPgSession::s_typenames[]={"utinyint"};
 const typeinfo CPgSession::s_cust_types_type[]={
-    typeinfo( DBTYPE_UI1, 3 )
+    typeinfo( DBTYPE_UI1, 3, typeinfo::StdC_memcpy, typeinfo::StdGWwidth, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ) // utinyint
 };
 const unsigned long CPgSession::s_types_oids[]={
     16 /* bool */, 21 /* int2 */, 28 /* xid - transaction ID */, 26 /* oid */,
@@ -39,9 +39,9 @@ const typeinfo CPgSession::s_types_type[]={
     typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // oid
     typeinfo( DBTYPE_I4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // int4
     typeinfo( DBTYPE_I8, 20, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // int8
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 2 ), // text - var length string, no limit
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 2 ), // name - 63-char type for storing system identifiers
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 2 ), // varchar
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // text - var length string, no limit
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // name - 63-char type for storing system identifiers
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // varchar
     typeinfo( DBTYPE_ARRAY|DBTYPE_STR, ~0 ), // text[]. XXX - Is this the right way to handle this? Should consider DBTYPE_VECTOR
     typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // timestamp
     typeinfo( DBTYPE_NUMERIC, 39, COPY_numeric, GetWidth_numeric, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_numeric ), // numeric

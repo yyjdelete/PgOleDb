@@ -27,103 +27,101 @@
 #include "PgMultipleResults.h"
 
 // Static functions
-static HRESULT ParseDBBind( const DBBINDING *bindings, const void *pData, DWORD &status,
-                           DWORD &length, const void *&data )
+static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &status,
+                           DWORD &dst_length, auto_array<char> &dst_data,
+                           IDataConvert *idataconv, DBTYPE dst_type ) throw (PgOleError)
 {
+    HRESULT hr;
     status=DBSTATUS_E_UNAVAILABLE;
-    length=0;
+    DWORD *plength=NULL;
+    void *data;
 
     // Check what does the binding contain
     if( (bindings->eParamIO&DBPARAMIO_INPUT)==0 ) {
         // Parameter is not input - pass NULL
         status=DBSTATUS_S_ISNULL;
-        length=0;
-        data=NULL;
+        dst_length=0;
 
         return S_OK;
     }
 
-    const unsigned char *buffer=reinterpret_cast<const unsigned char *>(pData);
+    unsigned char *buffer=reinterpret_cast<unsigned char *>(pData);
 
     if( (bindings->dwPart&DBPART_STATUS)!=0 ) {
-        status=*reinterpret_cast<const DWORD *>(buffer+bindings->obStatus);
+        status=*reinterpret_cast<DWORD *>(buffer+bindings->obStatus);
     }
 
     if( (bindings->dwPart&DBPART_LENGTH)!=0 ) {
-        length=*reinterpret_cast<const DWORD *>(buffer+bindings->obLength);
+        plength=reinterpret_cast<DWORD *>(buffer+bindings->obLength);
     }
 
     if( (bindings->dwPart&DBPART_VALUE)==0 && status!=DBSTATUS_S_ISNULL &&
         status!=DBSTATUS_S_DEFAULT && status!=DBSTATUS_S_IGNORE ) {
-        // No "value", and also not null or default.
-        return E_FAIL; // XXX Find a better return code here
+        throw PgOleError(E_FAIL, "No \"value\", and also not null or default"); // XXX Find a better return code here
     }
 
     data=buffer+bindings->obValue;
 
-    return S_OK;
+    hr=idataconv->GetConversionSize(bindings->wType, dst_type, plength, &dst_length, data);
+    if( FAILED(hr) )
+        throw PgOleError( hr, "Failure getting conversion destination data size" );
+
+    dst_data=auto_array<char>(new char[dst_length]);
+    if( dst_data.get()==NULL )
+        throw PgOleError(E_OUTOFMEMORY, "No memory for converted data" );
+    
+    DWORD dst_status;
+    hr=idataconv->DataConvert(bindings->wType, dst_type, *plength,
+        &dst_length, data, dst_data.get(), dst_length, status, &dst_status,
+        0, 0, DBDATACONVERT_DEFAULT );
+    if( SUCCEEDED(hr) )
+        status=dst_status;
+    else
+        throw PgOleError(hr, "Data conversion failed");
+    
+    return hr;
 }
 
-static size_t GetPGWidth( const typeinfo *info, const DBBINDING *bindings, const void *pData,
-                         DWORD *status )
+static size_t GetPGWidth( const typeinfo *info, const DBBINDING *bindings, void *pData,
+                         DWORD *status, IDataConvert *idataconv )
 {
     DWORD stat;
-    DWORD length;
-    const void *data;
+    DWORD dst_length;
+    auto_array<char> dst_data;
 
     if( status==NULL )
         status=&stat;
 
-    HRESULT hr=ParseDBBind( bindings, pData, *status, length, data );
+    HRESULT hr=ParseDBBind( bindings, pData, *status, dst_length, dst_data, idataconv, info->wType );
 
     if( FAILED(hr) || *status!=DBSTATUS_S_OK )
         return 0;
 
-    return info->PGGetLength( info, data, length );
+    return info->PGGetLength( info, dst_data.get(), dst_length );
 }
 
 /* PGCopy wraps the actual parameter copy. It handles the NULL cases.
  * It must be passed the exact same type as it expects.
  */
-static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, const void *pData,
+static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, void *pData,
                       void *buffer, size_t buflen, IDataConvert *idataconv )
 {
-    DWORD status;
-    DWORD length;
-    void *data;
-
+    HRESULT hr=S_OK;
     try {
-        HRESULT hr=ParseDBBind( bindings, pData, status, length, data );
-        if( FAILED(hr) )
-            throw(hr);
-        
+        DWORD status;
         DWORD dst_length;
-        DWORD dst_status;
-        
-        hr=idataconv->GetConversionSize(bindings->wType, info->wType, &length,
-            &dst_length, data );
-        if( FAILED(hr) )
-            throw(hr);
-        
-        std::auto_ptr<char> dst_data(new char[dst_length]);
-        if( dst_data.get()==NULL )
-            throw(E_OUTOFMEMORY);
-        
-        hr=idataconv->DataConvert(bindings->wType, info->wType, length,
-            &dst_length, data, dst_data.get(), dst_length, status, &dst_status,
-            0, 0, DBDATACONVERT_DEFAULT );
-        if( FAILED(hr) )
-            throw(hr);
-        
-        if( FAILED(hr) || status==DBSTATUS_S_ISNULL || status==DBSTATUS_S_DEFAULT ||
-            status==DBSTATUS_S_IGNORE ) {
-            return hr;
-        }
-        
-        return info->PGCopyData( info, dst_data.get(), dst_length, buffer, buflen );
-    } catch( HRESULT hres ) {
-        return hres;
+        auto_array<char> dst_data;
+
+        hr=ParseDBBind( bindings, pData, status, dst_length, dst_data, idataconv, info->wType );
+
+        if( SUCCEEDED(hr) && status!=DBSTATUS_S_ISNULL )
+            hr=info->PGCopyData( info, dst_data.get(), dst_length, buffer, buflen );
+    } catch( const PgOleError &err ) {
+        hr=err.hr();
+        ATLTRACE2(atlTraceDBProvider, 0, "PGCopy: %s\n", err.str());
     }
+
+    return hr;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -509,6 +507,8 @@ HRESULT CPgCommand::FillParams()
             WCHAR tmp[2];
             tmp[1]=L'\0';
 
+            ++i;
+
             while( *i!=0 && *i!=L'"' ) {
                 if( *i==L'\\' && *(i+1)!=0 )
                     ++i;
@@ -516,6 +516,9 @@ HRESULT CPgCommand::FillParams()
                 tmp[0]=*(i++);
                 function_name+=tmp;
             }
+
+            if( *i==L'"' )
+                ++i;
         } else { // identifier is unquoted - scan until whitespace
             func_quoted=false;
             WCHAR tmp[2];
@@ -733,7 +736,8 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
 
             offsets[i]=buffsize;
             DWORD status;
-            paramLengths[i]=GetPGWidth( info, &rgBindings[i], pParams->pData, &status );
+            paramLengths[i]=GetPGWidth( info, &rgBindings[i], pParams->pData, &status,
+                m_spConvert );
             buffsize+=paramLengths[i];
             // XXX Need to handle the status
         }

@@ -139,6 +139,24 @@ void COPY_string( void *dst, size_t count, const PGresult *res,
     }
 }
 
+size_t PGWidthString(const typeinfo *_this, const void *data, size_t length)
+{
+    // Can't guesstimate this one. Must return precise length.
+    // XXX Do we need to return the terminating NULL?
+    return WideCharToMultiByte( CP_UTF8, 0, static_cast<const WCHAR *>(data), -1, NULL, 0,
+        NULL, NULL );
+}
+
+HRESULT PGC_string(const typeinfo *_this, const void *data, size_t length, void *dst,
+                   size_t dstlen )
+{
+    if( WideCharToMultiByte( CP_UTF8, 0, static_cast<const WCHAR *>(data), -1,
+            static_cast<char *>(dst), dstlen, NULL, NULL )!=dstlen )
+        return E_FAIL;
+
+    return S_OK;
+}
+
 struct numeric_transfer {
     signed short ndigits;
     signed short weight;

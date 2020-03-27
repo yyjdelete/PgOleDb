@@ -233,6 +233,9 @@ void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresul
 int GetWidth_string( const PGresult *res, int tup_num, int field_num );
 void COPY_string( void *dst, size_t count, const PGresult *res,
                     int tup_num, int field_num);
+size_t PGWidthString(const typeinfo *_this, const void *data, size_t length);
+HRESULT PGC_string(const typeinfo *_this, const void *data, size_t length, void *dst,
+                   size_t dstlen );
 int GetWidth_numeric( const PGresult *res, int tup_num, int field_num );
 void COPY_numeric( void *dst, size_t count, const PGresult *res,
                     int tup_num, int field_num);

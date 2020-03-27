@@ -1,3 +1,19 @@
+2004-05-17  shachar
+	* PgCommand.cpp:
+		Report status of type post-conversion
+
+	* PgCommand.cpp:
+		Cleanup of type conversion code
+		Fixed bug with types that require the source data to calculate destination width
+
+	* PgSess.cpp:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Add input support for utinyint and the strings
+
+	* PgCommand.cpp:
+		Fix bug in the case of a quoted procedure name
+
 2004-05-15  shachar
 	* OleDb.rc:
 		Update version number for release 1.0.0.9
