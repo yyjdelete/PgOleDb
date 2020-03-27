@@ -88,8 +88,8 @@ private:
     static const typeinfo s_cust_types_type[1];
     // Can't use a symbolic constant due to C++ syntax.
     // Must be same number for following two statements - enforced using ASSERT
-    static const unsigned long s_types_oids[10];
-    static const typeinfo s_types_type[10];
+    static const unsigned long s_types_oids[11];
+    static const typeinfo s_types_type[11];
 
 public:
 private:
@@ -107,7 +107,7 @@ BEGIN_COM_MAP(CPgSession)
 	COM_INTERFACE_ENTRY(IObjectWithSite)
 	COM_INTERFACE_ENTRY(IDBCreateCommand)
 	COM_INTERFACE_ENTRY(IDBSchemaRowset)
-//    COM_INTERFACE_ENTRY(ITransactionLocal)
+    COM_INTERFACE_ENTRY(ITransactionLocal)
 	COM_INTERFACE_ENTRY(IPgSession)
 END_COM_MAP()
 BEGIN_SCHEMA_MAP(CPgSession)

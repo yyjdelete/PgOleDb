@@ -1,3 +1,69 @@
+2004-04-12  shachar
+	* PgSess.cpp:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+	* Unicode.h:
+		Will now return Unicode strings as results. The provider is now fully unicode
+		end to end.
+
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgRS.cpp:
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Added support for the "timestamp" var type
+		Some more changes to the type structure - callback for filling in the
+		ATLCOLUMNINFO structure.
+
+	* OleDb.rc:
+		Version update 1.0.0.7
+
+2004-04-08  shachar
+	* PgSess.cpp:
+		Bug - forgot to reset the transaction flag upon commit and abort
+
+	* OleDb.rc:
+		Advance version number
+
+	* INSTALL:
+		Bring the installation instructions up to date.
+
+2004-04-07  shachar
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgRS.cpp:
+	* PgSess.cpp:
+	* StdAfx.h:
+	* Unicode.h:
+		Queries now use UTF-8 as their locale.
+		Session locale is explicitly set to UNICODE on session initiation
+
+	* TypeInfo.h:
+		Fix bug in assert for data size
+
+	* PgSess.h:
+		Restore the transactions disabled by mistake
+
+2004-04-06  shachar
+	* PgRS.cpp:
+		Properly align the data in memory when retrieving
+
+	* TypeInfo.h:
+		Fix compilation problems when the internal Postgresql include
+		is not included (release mode)
+
+	* PgSess.cpp:
+		Fix incorrect type assigned to tinyint
+
+	* OleDb.def:
+	* OleDb.dsp:
+	* OleDb.mak:
+	* OleDb.rc:
+		Update version number to 1.0.0.5
+		Change output file name to PgOleDb, to avoid confusion.
+
 2004-04-04  shachar
 	* OleDb.idl:
 	* PgDs.cpp:

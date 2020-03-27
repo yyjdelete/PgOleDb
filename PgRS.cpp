@@ -55,7 +55,7 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
     //CComBSTR command=OLESTR("DECLARE oledbcursor BINARY CURSOR WITH HOLD FOR ");
     //command+=szCommand;
 
-    PGresult *res = static_cast<CPgSession *>(isess)->PQexec(OLE2CA(szCommand));
+    PGresult *res = static_cast<CPgSession *>(isess)->PQexec(OLE2CU8(szCommand));
     ExecStatusType stat=PQresultStatus(res);
 
     AtlTrace2(atlTraceDBProvider, 0, "CPgCommand::Execute got status \"%s\" from command\n",
@@ -84,25 +84,21 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
                 ATLCOLUMNINFO info;
                 
                 info.pwszName=A2OLE(PQfname(res, i));
-                info.pTypeInfo=NULL;
                 info.iOrdinal=i+1; // XXX Only bookmark is 0
-                info.ulColumnSize=PQfsize(res, i);
-                if( info.ulColumnSize<0 )
-                    info.ulColumnSize=~0;
-                info.bScale=0;
-                info.dwFlags=DBCOLUMNFLAGS_ISFIXEDLENGTH|DBCOLUMNFLAGS_ISNULLABLE|
-                    DBCOLUMNFLAGS_MAYBENULL;
                 info.cbOffset=0;
-
-                info.columnid.eKind=DBKIND_PROPID;
-                info.columnid.uName.ulPropid=PQftablecol(res, i);
-
+                        
                 unsigned long restype=PQftype(res, i);
                 const typeinfo *typinfo=static_cast<CPgSession *>(isess)->
                     GetTypeInfo(restype);
 
-                info.wType=typinfo->wType;
-                info.bPrecision=typinfo->bPrecision;
+                if( typinfo!=NULL ) {
+                    typinfo->Status( typinfo, &info, res, i );
+                } else {
+                    // We are asked to work with unhandled data type
+                    ATLASSERT(!"Unhandled type in query result");
+
+                    typeinfo::StatUnknown( &info, res, i );
+                }
 
                 // Add the column to the array
                 m_colInfo.Add(CATLCOLUMNINFO(info));
@@ -172,7 +168,6 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
     
     size_t offset=0;
     for( int i=0; i<nfields; ++i ) {
-        m_offsets[i]=offset;
         int colsize=0;
         
         if( !PQgetisnull(m_res, nIndex, i) ) {
@@ -180,6 +175,9 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
 
             if( info!=NULL ) {
                 colsize=info->GetWidth(m_res, nIndex, i);
+                // Make sure alignment is ok
+                offset+=info->alignment-1;
+                offset-=offset%info->alignment;
             } else {
                 ATLASSERT(info!=NULL);
                 ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::operator[] Query resulted in "
@@ -188,7 +186,7 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
             }
         }
 
-        // XXX Need to make sure alignment is ok
+        m_offsets[i]=offset;
         offset+=colsize;
     }
     

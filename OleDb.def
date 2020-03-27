@@ -1,6 +1,6 @@
 ; OleDb.def : Declares the module parameters.
 
-LIBRARY      "OleDb.DLL"
+LIBRARY      "PgOleDb.DLL"
 
 EXPORTS
 	DllCanUnloadNow     @1 PRIVATE

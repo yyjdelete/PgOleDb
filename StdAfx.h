@@ -53,6 +53,8 @@ extern CComModule _Module;
 #include <libpq-int.h>
 #endif
 
+#include "Unicode.h"
+
 // catalog/pg_type.h holds the type information
 
 //{{AFX_INSERT_LOCATION}}

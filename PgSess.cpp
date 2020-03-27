@@ -25,12 +25,12 @@
 // When changing, please make sure that the definition here is the same as when declared
 const char *CPgSession::s_typenames[]={"utinyint"};
 const typeinfo CPgSession::s_cust_types_type[]={
-    typeinfo( DBTYPE_UI8, 3 )
+    typeinfo( DBTYPE_UI1, 3 )
 };
 const unsigned long CPgSession::s_types_oids[]={
     16 /* bool */, 21 /* int2 */, 28 /* xid - transaction ID */, 26 /* oid */,
     23 /* int4 */, 20 /* int8 */, 25 /* text */,
-    19 /* name */, 1043 /* varchar */, 1009 /* text[] */ };
+    19 /* name */, 1043 /* varchar */, 1009 /* text[] */, 1114 /* timestamp */ };
 const typeinfo CPgSession::s_types_type[]={
     typeinfo( DBTYPE_BOOL, 1 ), // bool
     typeinfo( DBTYPE_I2, 5, typeinfo::StdC_ntoh_2 ), // int2
@@ -38,10 +38,11 @@ const typeinfo CPgSession::s_types_type[]={
     typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4 ), // oid
     typeinfo( DBTYPE_I4, 10, typeinfo::StdC_ntoh_4 ), // int4
     typeinfo( DBTYPE_I8, 20, typeinfo::StdC_ntoh_8 ), // int8
-    typeinfo( DBTYPE_STR, ~0, typeinfo::StdC_nullterm, typeinfo::StdGWwidth_1 ), // text - var length string, no limit
-    typeinfo( DBTYPE_STR, ~0, typeinfo::StdC_nullterm, typeinfo::StdGWwidth_1 ), // name - 63-char type for storing system identifiers
-    typeinfo( DBTYPE_STR, ~0, typeinfo::StdC_nullterm, typeinfo::StdGWwidth_1 ), // varchar
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, 2 ), // text - var length string, no limit
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, 2 ), // name - 63-char type for storing system identifiers
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, 2 ), // varchar
     typeinfo( DBTYPE_ARRAY|DBTYPE_STR, ~0 ), // text[]. XXX - Is this the right way to handle this? Should consider DBTYPE_VECTOR
+    typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, 4, GetStatus_timestamp ), // timestamp
 };
 
 HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
@@ -58,6 +59,13 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
         
         MessageBox( NULL, error, "CPgSession::PgConnectDB error", MB_ICONEXCLAMATION|MB_OK );
     } else {
+        {
+            // Set the client encoding to UTF-8
+            // XXX - Should, ideally, check return status. I'm not sure what we are supposed to do on failure here, though.
+            PGresult *res=PQexec( "SET client_encoding TO \"Unicode\"" );
+
+            PQclear( res );
+        }
         /* Find out if our database has any custom types, and if so, which, and what is
          * their OID.
          */
@@ -70,7 +78,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
         for( int i=0; i<(sizeof(s_typenames)/sizeof(s_typenames[0])); ++i ) {
             // If this assert fails, it means that the number at the declaration of
             // s_typenames doesn't match the number of actual definitions
-            ATLASSERT(s_typenames!=NULL && s_cust_types_type[i].alignment!=0);
+            ATLASSERT(s_typenames!=NULL && s_cust_types_type[i].wType!=DBTYPE_EMPTY);
 
             _bstr_t query("select oid from pg_type where typname='");
             query+=s_typenames[i];
@@ -98,7 +106,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
         for( /* int */ i=0; i<(sizeof(s_types_oids)/sizeof(s_types_oids[0])); ++i ) {
             // If this assert fails, it means that the number at the declaration of
             // s_types_oids doesn't match the number of actual definitions
-            ATLASSERT(s_types_oids!=0 && s_types_type[i].alignment!=0);
+            ATLASSERT(s_types_oids!=0 && s_types_type[i].wType!=DBTYPE_EMPTY);
 
             m_types[s_types_oids[i]]=s_types_type[i];
         }
@@ -110,8 +118,9 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
             for( i=0; i<PQntuples(res); ++i ) {
                 unsigned long oid=ntohl(*reinterpret_cast<unsigned long *>(PQgetvalue( res, i, 0 )));
                 std::map<unsigned int, typeinfo>::iterator j=m_types.find(oid);
-                if( j!=m_types.end() ) {
-                    // We have the type this row refers to in our map
+                if( j!=m_types.end() && j->second.alignment==0 ) {
+                    // We have the type this row refers to in our map,
+                    // and there is no alignment override for it
                     switch( *reinterpret_cast<const char *>(PQgetvalue( res, i, 1)) ) {
                     case 'c':
                         j->second.alignment=1;
@@ -127,13 +136,15 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
                         break;
                     default:
                         ATLASSERT(!"Unknown alignment char!");
-                        j->second.alignment=0;
+                        j->second.alignment=1;
                         break;
                     }
                 }
             }
         } else {
             // Pretty serious condition - catalog table not queryable!
+            ATLASSERT( !"pg_type catalog table not queryable!" );
+            hr=E_FAIL;
         }
 
         PQclear(res);
@@ -231,6 +242,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::Commit( /* [in] */ BOOL fRetaining, /* [in
     HRESULT res=S_OK;
 
     if( PQresultStatus( query_res )==PGRES_COMMAND_OK ) {
+        m_transaction=false;
+
         if( fRetaining )
             // We do not support retaining
             res=XACT_E_CANTRETAIN;
@@ -266,6 +279,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::Abort( /* [unique][in] */ BOID __RPC_FAR *
     HRESULT res=S_OK;
 
     if( PQresultStatus( query_res )==PGRES_COMMAND_OK ) {
+        m_transaction=false;
+
         if( fRetaining )
             // We do not support retaining
             res=XACT_E_CANTRETAIN;
