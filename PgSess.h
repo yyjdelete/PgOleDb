@@ -23,6 +23,9 @@
 #include "resource.h"       // main symbols
 #include "PgRS.h"
 
+#include "PgDBSchemaRowsetImpl.h"
+#include "ErrorLookupService.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CPgSession
 class ATL_NO_VTABLE CPgSession : 
@@ -31,7 +34,7 @@ class ATL_NO_VTABLE CPgSession :
 	public IOpenRowsetImpl<CPgSession>,
 	public ISessionPropertiesImpl<CPgSession>,
 	public IObjectWithSiteSessionImpl<CPgSession>,
-	public IDBSchemaRowsetImpl<CPgSession>,
+	public CPgDBSchemaRowsetImpl<CPgSession>,
 	public IDBCreateCommandImpl<CPgSession, CPgCommand>,
     public ITransactionLocal,
 	public IPgSession
@@ -46,11 +49,7 @@ public:
 		return FInit();
 	}
 	STDMETHOD(OpenRowset)(IUnknown *pUnk, DBID *pTID, DBID *pInID, REFIID riid,
-					   ULONG cSets, DBPROPSET rgSets[], IUnknown **ppRowset)
-	{
-		CPgRowset* pRowset;
-		return CreateRowset(pUnk, pTID, pInID, riid, cSets, rgSets, ppRowset, pRowset);
-	}
+					   ULONG cSets, DBPROPSET rgSets[], IUnknown **ppRowset);
     STDMETHOD(PgConnectDB)( BSTR connectString );
     STDMETHOD(PgTransactionLevel)( DWORD *level );
     ~CPgSession()
@@ -65,11 +64,19 @@ public:
     PGresult *PQexec(const char *query, int nParams, const unsigned int paramTypes[],
         const char * const *paramValues, const int *paramLengths, const int *paramFormats )
     {
+        CErrorLookupService::ClearError();
         ATLTRACE2(atlTraceDBProvider, 1, "CPgSession::PQexec %d, \"%.400s\"\n", nParams, query);
 
         PGresult *res=::PQexecParams( m_conn, query, nParams, paramTypes, paramValues,
             paramLengths, paramFormats, 1 );
 
+        switch( PQresultStatus(res) ) {
+        case PGRES_COMMAND_OK:
+        case PGRES_TUPLES_OK:
+            break;
+        default:
+            CErrorLookupService::ReportCustomError(PQerrorMessage(), E_FAIL, IID_IPgSession);
+        }
         return res;
     }
     char *PQerrorMessage()
@@ -128,11 +135,6 @@ BEGIN_COM_MAP(CPgSession)
     COM_INTERFACE_ENTRY(ITransactionLocal)
 	COM_INTERFACE_ENTRY(IPgSession)
 END_COM_MAP()
-BEGIN_SCHEMA_MAP(CPgSession)
-//	SCHEMA_ENTRY(DBSCHEMA_TABLES, CPgSessionTRSchemaRowset)
-//	SCHEMA_ENTRY(DBSCHEMA_COLUMNS, CPgSessionColSchemaRowset)
-//	SCHEMA_ENTRY(DBSCHEMA_PROVIDER_TYPES, CPgSessionPTSchemaRowset)
-END_SCHEMA_MAP()
 public:
     // ITransactionLocal methods
     virtual HRESULT STDMETHODCALLTYPE Commit( 
@@ -161,6 +163,8 @@ private:
     bool m_transaction; // Whether there is a transaction in progress.
     XACTTRANSINFO m_transactioninfo;
     unsigned long m_transid;
+public:
+    static const PGSCHEMA_INFO s_schema_queries[3];
 };
 
 #endif //__CPgSession_H_

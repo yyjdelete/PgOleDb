@@ -27,3 +27,15 @@ version 7.4 or up. The later requirement may be loosened in the future.
 
 Attempting to connect to a database running version 7.3.x or down will result in an error
 message saying "Couldn't query pg_type".
+
+EXTENDED LOGGING
+If anything goes wrong, extended logging can be turned on for the provider. To turn on extended
+logging, modify in the registry the key:
+HKEY_LOCAL_MACHINE\Software\PostgreSQL\OLE DB Provider
+Under that key, create to values. One should be called "LogFile", and should specify full path
+(directory + filename) of the log file to create. The second should be "LogLevel" (type DWORD),
+and should specify what level of verbosity the logs should have. Setting it to "3" should give
+fairly complete coverage.
+
+When logging is no longer desired, please make sure to either remove or empty the "LogFile" value.
+Failing to do so may result in unnecessary disk space wasted.

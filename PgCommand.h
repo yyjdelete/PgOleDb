@@ -49,6 +49,7 @@ class ATL_NO_VTABLE CPgCommand :
 	public IConvertTypeImpl<CPgCommand>,
 	public ICommandWithParameters,
     public IPgCommand,
+    public IPgCommandText,
 	public IColumnsInfo
 {
 public:
@@ -101,6 +102,15 @@ public:
 
         return hr;
     }
+    STDMETHOD(PgSetCommandText)( REFGUID rguidDialect, LPCOLESTR command)
+    {
+        HRESULT hr=SetCommandText(rguidDialect, command);
+        if(SUCCEEDED(hr))
+            m_parsed_command=command;
+
+        return hr;
+    }
+
     // ICommandWithParameters
     STDMETHOD(GetParameterInfo) (
         ULONG         *pcParams,

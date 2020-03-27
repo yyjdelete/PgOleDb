@@ -1,3 +1,151 @@
+2005-03-16  shachar
+	* PgDBSchemaRowsetImpl.h:
+		Implement GetSchemas
+
+2005-03-03  shachar
+	* PgDBSchemaRowsetImpl.h:
+	* PgSess.cpp:
+		Working tables schema queries
+
+	* PgDBSchemaRowsetImpl.h:
+		Fix run time error if no schema constraint was given
+
+2005-03-02  shachar
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* PgDBSchemaRowsetImpl.h:
+	* PgSess.cpp:
+	* PgSess.h:
+		Initial implementation of schema support
+
+2004-12-15  shachar
+	* OleDb.idl:
+	* PgCommand.h:
+		Add the "IPgCommandText" interface
+		Allow setting command parameters to be sent to PostgreSQL as $1 $2 etc.
+
+2004-11-30  shachar
+	* OleDb.rc:
+		Prepare release 1.0.0.16
+
+2004-11-25  shachar
+	* ErrorLookupService.cpp:
+		Small enhancement to logging mechanism
+
+	* PgRS.cpp:
+		Improve error reporting on command failure
+		make sure that the error returned from Postgres is the innermost error
+
+2004-11-24  shachar
+	* PgCommand.cpp:
+		Report errors in command execution, even if the result set
+		requested interface IID_NULL
+
+2004-11-10  shachar
+	* PgRS.h:
+		Fix potential resource leak
+
+	* OleDb.rc:
+	* Pg.rgs:
+	* README:
+		Document the logging options.
+		Remove the logging values from the OLE registration, so that user settings are not overriden.
+
+	* OleDb.mak:
+	* PgRS.cpp:
+	* PgRS.h:
+		Located the access violation bug that has been haunting us since 1.0.0.8.
+		Working around the ATL bug that triggered it by resetting pointer in CPgRowset::GetColumnInfo
+
+	* OleDb.mak:
+		Prepare release 1.0.0.15
+
+	* PgSess.cpp:
+	* PgSess.h:
+		Revert a mistaken commit
+
+	* PgCommand.cpp:
+	* PgRS.cpp:
+	* PgSess.cpp:
+	* PgSess.h:
+		Move the error reporting to the OLE DB infrastructure
+
+	* PgSess.cpp:
+		Initial, untested implementation of OpenRowset
+
+2004-11-09  shachar
+	* PgCommand.cpp:
+	* PgSess.cpp:
+	* PgSess.h:
+		Preliminary "OpenRowset" implementation
+
+2004-10-28  shachar
+	* ErrorLookupService.cpp:
+	* ErrorLookupService.h:
+	* OleDb.cpp:
+	* OleDb.dsp:
+	* OleDb.idl:
+	* OleDb.mak:
+	* OleDb.rc:
+	* Pg.rgs:
+	* PgSess.cpp:
+	* resource.h:
+		Merge B_VERBOSE_ERROR to main
+
+	* ErrorLookupService.cpp:
+	* ErrorLookupService.h:
+	* PgSess.cpp:
+		Use static message map. Error reporting now works
+
+	* ErrorLookupService.cpp:
+	* ErrorLookupService.h:
+	* OleDb.idl:
+		CoCreateInstance now working
+
+	* OleDb.cpp:
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgCommand.cpp:
+	* PgRS.cpp:
+	* PgSess.cpp:
+	* StdAfx.h:
+		Add mechanism for dumping progress reports to a file
+
+2004-10-21  shachar
+	* ErrorLookupService.cpp:
+	* ErrorLookupService.h:
+		Bring it back to the CoCreateInstance mechanism, which still
+		doesn't work
+
+2004-10-19  shachar
+	* ErrorLookupService.cpp:
+	* ErrorLookupService.h:
+	* ErrorLookupService.rgs:
+	* OleDb.cpp:
+	* OleDb.dsp:
+	* OleDb.idl:
+	* OleDb.mak:
+	* OleDb.rc:
+	* Pg.rgs:
+	* PgSess.cpp:
+	* resource.h:
+		Intermediate state. Extended error handler already registered.
+
+2004-09-28  shachar
+	* StdAfx.h:
+		Add an include for <string>, reported by Merlin Moncure
+
+	* INSTALL:
+	* README:
+		Fix libpq's name in the readme
+
+	* OleDb.dsp:
+	* OleDb.mak:
+		Remove the Unicode build targets. They don't compile, and they
+		are not necessary anyways.
+
 2004-09-21  shachar
 	* PgSess.cpp:
 	* TypeInfo.cpp:
@@ -8,6 +156,9 @@
 	* PgSess.h:
 	* StdAfx.h:
 		Increase trace verbosity and organize trace levels
+
+	* OleDb.rc:
+		Prepare release 1.0.0.14
 
 	* PgCommand.cpp:
 		Increase trace verbosity and organize trace levels

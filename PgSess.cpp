@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "OleDb.h"
 #include "PgSess.h"
+#include "ErrorLookupService.h"
 
 // When changing, please make sure that the definition here is the same as when declared
 const char *CPgSession::s_typenames[]={"utinyint", "varcharci"};
@@ -52,19 +53,53 @@ const typeinfo CPgSession::s_types_type[]={
     typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // bpchar
 };
 
+const CPgSession::PGSCHEMA_INFO CPgSession::s_schema_queries[]={
+    // First part of tables query - tables
+    CPgSession::PGSCHEMA_INFO(DBSCHEMA_TABLES, L"select null as \"TABLE_CATALOG\", "
+        L"schemaname as \"TABLE_SCHEMA\", tablename as \"TABLE_NAME\", "
+        L"CASE WHEN schemaname='pg_catalog' or schemaname='information_schema' THEN "
+        L"'SYSTEM TABLE' ELSE 'TABLE' END as \"TABLE_TYPE\", "
+        L"NULL as \"TABLE_GUID\", NULL as \"DESCRIPTION\", NULL as \"TABLE_PROPID\", "
+        L"NULL as \"DATE_CREATED\", NULL as \"DATE_MODIFIED\" from pg_tables",
+        // Constraints
+        DBTYPE_WSTR, NULL,
+        DBTYPE_WSTR, L"schemaname",
+        DBTYPE_WSTR, L"tablename",
+        DBTYPE_WSTR, L"CASE WHEN schemaname='pg_catalog' or schemaname='information_schema' THEN "
+            L"'SYSTEM TABLE' ELSE 'TABLE' END"),
+    // Second part of tables query - views
+    CPgSession::PGSCHEMA_INFO(DBSCHEMA_TABLES, L"select null as \"TABLE_CATALOG\", "
+        L"schemaname as \"TABLE_SCHEMA\", viewname as \"TABLE_NAME\", "
+        L"CASE WHEN schemaname='pg_catalog' or schemaname='information_schema' THEN "
+        L"'SYSTEM VIEW' ELSE 'VIEW' END as \"TABLE_TYPE\", "
+        L"NULL as \"TABLE_GUID\", NULL as \"DESCRIPTION\", NULL as \"TABLE_PROPID\", "
+        L"NULL as \"DATE_CREATED\", NULL as \"DATE_MODIFIED\" from pg_views",
+        // Constraints
+        DBTYPE_WSTR, NULL,
+        DBTYPE_WSTR, L"schemaname",
+        DBTYPE_WSTR, L"viewname",
+        DBTYPE_WSTR, L"CASE WHEN schemaname='pg_catalog' or schemaname='information_schema' THEN "
+            L"'SYSTEM VIEW' ELSE 'VIEW' END"),
+    // Third part of tables query - sort order
+    CPgSession::PGSCHEMA_INFO(IID_NULL, L"4, 1, 2, 3"),
+//    DBSCHEMA_COLUMNS,
+//    DBSCHEMA_PROVIDER_TYPES
+};
+
 HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
 {
+    CErrorLookupService::ClearError();
     USES_CONVERSION;
     HRESULT hr=S_OK;
     
     m_conn=PQconnectdb(OLE2CA(connectString));
     if( PQstatus(m_conn)!=CONNECTION_OK ) {
         hr=E_FAIL;
-        const char *error=PQerrorMessage(); // XXX - need to pass this string to the caller
-        AtlTrace2(atlTraceDBProvider, 0, "PgSource::PgConnectDB failed to open database connection:\n%s",
+        const char *error=PQerrorMessage();
+        ATLTRACE2(atlTraceDBProvider, 0, "PgSource::PgConnectDB failed to open database connection:\n%s",
             error);
         
-        MessageBox( NULL, error, "CPgSession::PgConnectDB error", MB_ICONEXCLAMATION|MB_OK );
+        CErrorLookupService::ReportCustomError(error, hr, IID_IPgSession);
     } else {
         {
             // Set the client encoding to UTF-8
@@ -175,7 +210,10 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
             }
         } else {
             // Pretty serious condition - catalog table not queryable!
-            ATLASSERT( !"pg_type catalog table not queryable!" );
+            ATLTRACE2(atlTraceDBProvider, 0,
+                "PgSource::PgConnectDB pg_type catalog table not queryable!" );
+            CErrorLookupService::ReportCustomError("pg_type catalog table not queryable!", E_FAIL,
+                IID_IPgSession);
             hr=E_FAIL;
         }
 
@@ -201,6 +239,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::StartTransaction( /* [in] */ ISOLEVEL isoL
         /* [in] */ ULONG isoFlags, /* [in] */ ITransactionOptions __RPC_FAR *pOtherOptions,
         /* [out] */ ULONG __RPC_FAR *pulTransactionLevel)
 {
+    CErrorLookupService::ClearError();
+
     // Sanity call and params
     if( isoFlags!=0 )
         return XACT_E_NOISORETAIN;
@@ -250,11 +290,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::StartTransaction( /* [in] */ ISOLEVEL isoL
             *pulTransactionLevel=1;
     } else {
         res=E_FAIL;
-        const char *error=PQerrorMessage(); // XXX - need to pass this string to the caller
-        AtlTrace2(atlTraceDBProvider, 0, "CPgSession::StartTransacion failed:\n%s",
-            error);
-        
-        MessageBox( NULL, error, "CPgSession::StartTransacion failed", MB_ICONEXCLAMATION|MB_OK );
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::StartTransacion failed\n");
+        CErrorLookupService::ReportCustomError("StartTransaction failed", E_FAIL, IID_ITransactionLocal);
     }
 
     PQclear( query_res );
@@ -265,13 +302,14 @@ HRESULT STDMETHODCALLTYPE CPgSession::StartTransaction( /* [in] */ ISOLEVEL isoL
 HRESULT STDMETHODCALLTYPE CPgSession::Commit( /* [in] */ BOOL fRetaining, /* [in] */ DWORD grfTC,
         /* [in] */ DWORD grfRM)
 {
+    CErrorLookupService::ClearError();
     if( !m_transaction ) {
-        AtlTrace2(atlTraceDBProvider, 0, "CPgSession::Commit called not inside a transaction\n");
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Commit called not inside a transaction\n");
         return XACT_E_NOTRANSACTION;
     }
 
     if( grfTC!=0 || grfRM!=0 ) {
-        AtlTrace2(atlTraceDBProvider, 0, "CPgSession::Commit called with unsupported flags\n");
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Commit called with unsupported flags\n");
         return XACT_E_NOTSUPPORTED;
     }
 
@@ -287,11 +325,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::Commit( /* [in] */ BOOL fRetaining, /* [in
             res=XACT_E_CANTRETAIN;
     } else {
         res=E_FAIL;
-        const char *error=PQerrorMessage(); // XXX - need to pass this string to the caller
-        AtlTrace2(atlTraceDBProvider, 0, "CPgSession::Commit failed:\n%s",
-            error);
-        
-        MessageBox( NULL, error, "CPgSession::StartTransacion failed", MB_ICONEXCLAMATION|MB_OK );
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Commit failed\n");
+        CErrorLookupService::ReportCustomError("Commit failed", E_FAIL, IID_ITransaction);
     }
 
     PQclear( query_res );
@@ -302,13 +337,14 @@ HRESULT STDMETHODCALLTYPE CPgSession::Commit( /* [in] */ BOOL fRetaining, /* [in
 HRESULT STDMETHODCALLTYPE CPgSession::Abort( /* [unique][in] */ BOID __RPC_FAR *pboidReason,
         /* [in] */ BOOL fRetaining, /* [in] */ BOOL fAsync)
 {
+    CErrorLookupService::ClearError();
     if( !m_transaction ) {
-        AtlTrace2(atlTraceDBProvider, 0, "CPgSession::Abort called not inside a transaction\n");
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Abort called not inside a transaction\n");
         return XACT_E_NOTRANSACTION;
     }
 
     if( fAsync ) {
-        AtlTrace2(atlTraceDBProvider, 0, "CPgSession::Abort called with unsupported fAsync=TRUE\n");
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Abort called with unsupported fAsync=TRUE\n");
         return XACT_E_NOTSUPPORTED;
     }
 
@@ -324,11 +360,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::Abort( /* [unique][in] */ BOID __RPC_FAR *
             res=XACT_E_CANTRETAIN;
     } else {
         res=E_FAIL;
-        const char *error=PQerrorMessage(); // XXX - need to pass this string to the caller
-        AtlTrace2(atlTraceDBProvider, 0, "CPgSession::Abort failed:\n%s",
-            error);
-        
-        MessageBox( NULL, error, "CPgSession::StartTransacion failed", MB_ICONEXCLAMATION|MB_OK );
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Abort failed\n");
+        CErrorLookupService::ReportCustomError("Abort transaction failed", E_FAIL, IID_ITransaction );
     }
 
     PQclear( query_res );
@@ -346,4 +379,38 @@ HRESULT STDMETHODCALLTYPE CPgSession::GetTransactionInfo(
     }
 
     return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CPgSession::OpenRowset(IUnknown *pUnk, DBID *pTID, DBID *pInID, REFIID riid,
+                      ULONG cSets, DBPROPSET rgSets[], IUnknown **ppRowset)
+{
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::OpenRowset\n");
+    CErrorLookupService::ClearError();
+
+    if( pInID!=NULL ) {
+        CErrorLookupService::ReportError(DB_E_NOINDEX, IID_IOpenRowset);
+    }
+
+    CPgRowset* pRowset;
+    HRESULT hr=CreateRowset(pUnk, pTID, pInID, riid, cSets, rgSets, ppRowset, pRowset);
+
+    if( SUCCEEDED(hr) ) {
+        static const int NUM_PARAMS=1;
+        unsigned int paramTypes[NUM_PARAMS];
+        const char * paramValues[NUM_PARAMS];
+        int paramLengths[NUM_PARAMS];
+        int paramFormats[NUM_PARAMS];
+
+        paramTypes[0]=0; // Untyped
+        paramValues[0]=_bstr_t(pTID->uName.pwszName);
+        paramLengths[0]=0;
+        paramFormats[0]=0;
+
+        PGresult *res=PQexec("SELECT * FROM $1", 1, paramTypes, paramValues, paramLengths,
+            paramFormats);
+
+        pRowset->PostConstruct(this, res);
+    }
+
+    return hr;
 }

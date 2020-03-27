@@ -136,6 +136,8 @@
 #define IDS_DBPROP_ROWRESTRICT          231
 #define IDS_DBPROP_ROWTHREADMODEL       232
 #define IDS_DBPROP_ORDEREDBOOKMARKS     233
+#define IDS_ERRORLOOKUPSERVICE_DESC     234
+#define IDR_ErrorLookupService          235
 
 // Next default values for new objects
 // 
@@ -144,6 +146,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        201
 #define _APS_NEXT_COMMAND_VALUE         32768
 #define _APS_NEXT_CONTROL_VALUE         201
-#define _APS_NEXT_SYMED_VALUE           234
+#define _APS_NEXT_SYMED_VALUE           236
 #endif
 #endif

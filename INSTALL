@@ -12,7 +12,7 @@ Digest of the steps required:
 Long description
 
 The project itself no longer carries the header files for libpq. In order to compile this
-project, you will first need to compile pqlib as a native Win32 DLL, or get the precompiled
+project, you will first need to compile libpq as a native Win32 DLL, or get the precompiled
 version from http://gborg.postgresql.org/project/oledb/download/download.php. Please note that
 you will need to download the PostgreSQL sources whether you compile libpq yourself or not.
 

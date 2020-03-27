@@ -22,6 +22,10 @@ HKCR
 			'OLE DB Provider' = s 'PostgreSQL OLE DB Provider'
 			OLEDB_SERVICES = d '4294967295'
 			'TypeLib' = s '{E1DA2BDE-8336-4EBE-8AEA-32790B1A5E00}'
+			ExtendedErrors = s 'Extended Error Service'
+			{
+				{8B719086-FA57-45EA-8BDF-D01FDD8BDDF0} = s 'PostgreSQL OLE DB Extended Error Lookup Service'
+			}
 		}
 	}
 }
@@ -31,10 +35,8 @@ HKLM
 	{
 		PostgreSQL
 		{
-			ForceRemove 'OLE DB Provider'
+			'OLE DB Provider'
 			{
-				val LogFile = s ''
-				val LogLevel = d '2'
 			}
 		}
 	}

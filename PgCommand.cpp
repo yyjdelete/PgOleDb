@@ -25,6 +25,7 @@
 #include "PgCommand.h"
 #include "PgSess.h"
 #include "PgMultipleResults.h"
+#include "ErrorLookupService.h"
 
 using namespace std;
 class stringci : public string
@@ -141,7 +142,7 @@ static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &statu
 
     if( (bindings->dwPart&DBPART_VALUE)==0 && status!=DBSTATUS_S_ISNULL &&
         status!=DBSTATUS_S_DEFAULT && status!=DBSTATUS_S_IGNORE ) {
-        throw PgOleError(E_FAIL, "No \"value\", and also not null or default"); // XXX Find a better return code here
+        throw PgOleError(E_INVALIDARG, "No \"value\", and also not null or default");
     }
 
     data=buffer+bindings->obValue;
@@ -297,12 +298,8 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
         
         if( pcRowsAffected!=NULL )
             *pcRowsAffected=atol(PQcmdTuples(res));
-
-        if( riid!=IID_NULL )
-            hr=CreateResult(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, res );
-        else {
-            PQclear(res);
-        }
+        
+        hr=CreateResult(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, res );
         
         if( FAILED(hr) ) {
             throw PgOleError(hr, "Error creating rowset");
@@ -311,6 +308,9 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
     } catch( const PgOleError &err ) {
         hr=err.hr();
         ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute error: %s\n", err.str());
+        if( err.str() ) {
+            CErrorLookupService::ReportCustomError(err.str(), hr, IID_ICommand );
+        }
     }
 
     if( transactioninitiated ) {
@@ -455,7 +455,20 @@ HRESULT CPgCommand::CreateRowset(IUnknown* pUnkOuter, REFIID riid,
     // themselves.
     CPgRowset *pRowsetObj;
 
-    hr=ICommandTextImpl<CPgCommand>::CreateRowset( pUnkOuter, riid, pParams,
+    // This variable is used in case IID_NULL was the interface asked.
+    CComPtr<IUnknown> pRowset;
+    IID iid;
+
+    if( riid!=IID_NULL ) {
+        iid=riid;
+    } else {
+        // Create a rowset, and have the "pRowset" destructor return it when this
+        // function is over.
+        iid=IID_IUnknown;
+        ppRowset=&pRowset;
+    }
+
+    hr=ICommandTextImpl<CPgCommand>::CreateRowset( pUnkOuter, iid, pParams,
         pcRowsAffected, ppRowset, pRowsetObj );
 
     if( SUCCEEDED(hr) ) {
@@ -466,18 +479,18 @@ HRESULT CPgCommand::CreateRowset(IUnknown* pUnkOuter, REFIID riid,
 
         hr=(*ppRowset)->QueryInterface(&object);
         if(SUCCEEDED(hr)) {
+            // Ok, we're sure it's a valid rowset - make sure our CComPtr doesn't release it
+            (*ppRowset)->AddRef();
+
             CComPtr<IPgSession> isess=NULL;
             hr=GetDBSession(IID_IPgSession, reinterpret_cast<IUnknown **>(&isess));
 
             CPgRowset *prs=static_cast<CPgRowset *>(static_cast<IPgRowset *>(object));
-            prs->PostConstruct( static_cast<CPgSession *>(static_cast<IPgSession *>(isess)),
+            hr=prs->PostConstruct( static_cast<CPgSession *>(static_cast<IPgSession *>(isess)),
                 pRes );
         } else {
             throw PgOleError( hr, "Couldn't get desired interface for created rowset");
         }
-
-        // Ok, we're sure it's a valid rowset - make sure our CComPtr doesn't release it
-        (*ppRowset)->AddRef();
     }
 
     return hr;
@@ -537,6 +550,7 @@ HRESULT CPgCommand::SetParameterInfo (
         const DBPARAMBINDINFO   rgParamBindInfo[])
 {
     ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::SetParameterInfo\n");
+    CErrorLookupService::ClearError();
 
     if( cParams==0 ) {
         m_params.clear();
@@ -601,13 +615,17 @@ HRESULT CPgCommand::MapParameterNames (
         LONG __RPC_FAR   rgParamOrdinals[])
 {
     // But we do not support named parameters!
-    return E_FAIL;
+    CErrorLookupService::ClearError();
+    CErrorLookupService::ReportCustomError("Named parameters are not supported", E_NOTIMPL,
+        IID_ICommandWithParameters );
+    return E_NOTIMPL;
 }
 
 
 HRESULT CPgCommand::FillParams()
 {
     ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::FillParams\n");
+    CErrorLookupService::ClearError();
 
     /* Parse the command line, looking for question marks and such.
      * If the command format is "{ call procname(foo) }", translate to
@@ -650,6 +668,9 @@ HRESULT CPgCommand::FillParams()
         if( !match || !iswspace(*i) ) { // Parse error - unknown command other than "call"
             ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::FillParams Unsupported call type %s\n",
                 OLE2CA(szCommand));
+            CErrorLookupService::ReportCustomError("Unsupported call type", E_FAIL,
+                IID_ICommand );
+
             hr=E_FAIL;
 
             goto error;
@@ -693,7 +714,9 @@ HRESULT CPgCommand::FillParams()
         if( *i==0 ) {
             ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::FillParams Error parsing %s\n",
                 OLE2CA(szCommand));
-            hr=E_FAIL;
+            CErrorLookupService::ReportCustomError("Parse error trying in { call } type command", DB_E_ERRORSINCOMMAND,
+                IID_ICommand );
+            hr=DB_E_ERRORSINCOMMAND;
             
             goto error;
         }
@@ -736,8 +759,13 @@ HRESULT CPgCommand::FillParams()
             if( PQresultStatus(res)!=PGRES_TUPLES_OK ) {
                 hr=E_FAIL;
                 isess->Release();
-                AtlTrace2(atlTraceDBProvider, 0, "CPgCommand:FillParams error running query \"%s\": \"%s\"\n",
+                ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand:FillParams error running query \"%s\": \"%s\"\n",
                     static_cast<LPCSTR>(argsquery), PQresultErrorMessage(res) );
+                CErrorLookupService::ReportCustomError(PQresultErrorMessage(res), E_FAIL,
+                    IID_ICommand );
+                CErrorLookupService::ReportCustomError("Error finding out procedure's parameters",
+                    E_FAIL, IID_ICommand );
+
                 PQclear(res);
 
                 goto error;
@@ -746,9 +774,11 @@ HRESULT CPgCommand::FillParams()
             if( PQntuples( res )!=1 ) {
                 hr=E_FAIL;
                 isess->Release();
-                AtlTrace2(atlTraceDBProvider, 0, "CPgCommand::FillParams expected one row, got %d\n",
+                ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::FillParams expected one row, got %d\n",
                     PQntuples(res) );
                 PQclear(res);
+                CErrorLookupService::ReportCustomError("Procedure name for automatic arguments is not unique", E_FAIL,
+                    IID_ICommand );
 
                 goto error;
             }
@@ -783,7 +813,9 @@ HRESULT CPgCommand::FillParams()
         } else { // Copy parameters
             // XXX - Not implemented yet!
             ATLASSERT(!"Parametered calling of stored procedures not yet implemented");
-            hr=E_FAIL;
+            hr=E_NOTIMPL;
+            CErrorLookupService::ReportCustomError("Parameterized calls of stored procedures is not implemented",
+                E_NOTIMPL, IID_ICommand );
 
             goto error;
         }
@@ -892,8 +924,13 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
             const typeinfo *info=sess->GetTypeInfo(m_params[i].oid);
 
             if( info==NULL ) {
+                char error_msg[250];
+                _snprintf(error_msg, sizeof(error_msg),
+                    "Cannot convert type from PostgreSQL oid type %d to DBTYPE.", m_params[i].oid );
+                ATLTRACE2(atlTraceDBProvider, 0, error_msg);
+
                 // Major oops - we are asked to handle a type we don't know how
-                throw( E_FAIL );
+                throw( PgOleError(E_FAIL, error_msg) );
             }
 
             offsets[i]=buffsize;

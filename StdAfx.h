@@ -32,8 +32,19 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0400
 #endif
+
+#include <windows.h>
+
 #define _ATL_APARTMENT_THREADED
 #define ATL_TRACE_LEVEL 3
+
+#ifdef TRACEOVERRIDE
+#define ATLTRACE PgAtlTrace
+#define ATLTRACE2 PgAtlTrace2
+void _cdecl PgAtlTrace2(DWORD category, UINT level, LPCTSTR lpszFormat, ...);
+#endif
+
+extern int gLogLevel;
 
 #include <atlbase.h>
 //You may derive a class from CComModule and use it if you want to override
@@ -48,6 +59,7 @@ extern CComModule _Module;
 #include <map>
 #include <vector>
 #include <list>
+#include <string>
 
 // Postgresql libpq includes
 #include <libpq-fe.h>

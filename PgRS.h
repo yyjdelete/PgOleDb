@@ -58,6 +58,8 @@ public:
 	void RemoveAll()
 	{
         ClearInternal();
+        if( m_res!=NULL )
+            PQclear(m_res);
         m_res=NULL;
 	}
 	int GetSize() const
@@ -149,9 +151,13 @@ END_COM_MAP()
 
     HRESULT PostConstruct( CPgSession *sess, PGresult *pRes );
 
+	STDMETHOD(GetColumnInfo)(ULONG *pcColumns,
+							 DBCOLUMNINFO **prgInfo,
+							 OLECHAR **ppStringsBuffer);
+
     ~CPgRowset();
 private:
-    CSimpleArray<ATLCOLUMNINFO> m_colInfo;
+    CSimpleArray<CATLCOLUMNINFO> m_colInfo;
     friend class CPgRemoteStorage;
 };
 

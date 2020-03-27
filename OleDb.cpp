@@ -19,7 +19,6 @@
 
 // OleDb.cpp : Implementation of DLL Exports.
 
-
 // Note: Proxy/Stub Information
 //      To build a separate proxy/stub DLL, 
 //      run nmake -f PgOleDbps.mk in the project directory.
@@ -32,13 +31,18 @@
 #include "OleDb_i.c"
 #include "PgSess.h"
 #include "PgDS.h"
+#include "ErrorLookupService.h"
 
 
 CComModule _Module;
 
 BEGIN_OBJECT_MAP(ObjectMap)
 OBJECT_ENTRY(CLSID_Pg, CPgSource)
+OBJECT_ENTRY(CLSID_ErrorLookupService, CErrorLookupService)
 END_OBJECT_MAP()
+
+static void TraceInit();
+static void TraceDestroy();
 
 /////////////////////////////////////////////////////////////////////////////
 // DLL Entry Point
@@ -50,9 +54,13 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*lpReserved*/)
     {
         _Module.Init(ObjectMap, hInstance, &LIBID_PGOLEDBLib);
         DisableThreadLibraryCalls(hInstance);
+        TraceInit();
     }
     else if (dwReason == DLL_PROCESS_DETACH)
+    {
         _Module.Term();
+        TraceDestroy();
+    }
     return TRUE;    // ok
 }
 
@@ -89,4 +97,74 @@ STDAPI DllUnregisterServer(void)
     return _Module.UnregisterServer(TRUE);
 }
 
+static HANDLE hLogFile=INVALID_HANDLE_VALUE;
+// 0 means only highest precedance messages are logged.
+int gLogLevel=0;
 
+static void TraceInit()
+{
+    HKEY hKey;
+
+    if( RegOpenKeyEx( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\PostgreSQL\\OLE DB Provider"), 0,
+        KEY_QUERY_VALUE, &hKey )==ERROR_SUCCESS )
+    {
+        DWORD dwValueSize;
+        DWORD res;
+
+        // If we're asked to override the default debug output, open the log file.
+#ifdef TRACEOVERRIDE
+        TCHAR filename[MAX_PATH];
+
+        dwValueSize=sizeof(filename);
+        res=RegQueryValueEx(hKey, _T("LogFile"), NULL, NULL, (LPBYTE)filename, &dwValueSize );
+
+        if( res==ERROR_SUCCESS && dwValueSize>1 )
+        {
+            hLogFile=CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ, // Allow reading the log while it's written
+                NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+        }
+
+        if( hLogFile!=INVALID_HANDLE_VALUE ) {
+            res=SetFilePointer(hLogFile, 0, NULL, FILE_END );
+
+            PgAtlTrace2(atlTraceDBProvider, 0, "Starting logging\n");
+        }
+#endif
+
+        // Read the desired log level
+        dwValueSize=sizeof(gLogLevel);
+        res=RegQueryValueEx(hKey, _T("LogLevel"), NULL, NULL, (LPBYTE)&gLogLevel, &dwValueSize );
+        if( res!=ERROR_SUCCESS )
+            gLogLevel=0;
+
+        RegCloseKey( hKey );
+    }
+}
+
+static void TraceDestroy()
+{
+    if( hLogFile!=INVALID_HANDLE_VALUE ) {
+        CloseHandle(hLogFile);
+        hLogFile=INVALID_HANDLE_VALUE;
+    }
+}
+
+void _cdecl PgAtlTrace2(DWORD category, UINT level, LPCTSTR lpszFormat, ...)
+{
+	if (category & ATL_TRACE_CATEGORY && level <= ATL_TRACE_LEVEL)
+	{
+		va_list args;
+		va_start(args, lpszFormat);
+
+		int nBuf;
+		TCHAR szBuffer[512];
+
+		nBuf = _vsntprintf(szBuffer, sizeof(szBuffer)/sizeof(*szBuffer), lpszFormat, args);
+		ATLASSERT(nBuf < sizeof(szBuffer)/sizeof(*szBuffer));
+
+        DWORD nWritten;
+
+        WriteFile(hLogFile, szBuffer, nBuf, &nWritten, NULL );
+		va_end(args);
+    }
+}

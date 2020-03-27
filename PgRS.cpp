@@ -22,6 +22,8 @@
 #include "PgRS.h"
 #include "PgSess.h"
 
+#include "ErrorLookupService.h"
+
 HRESULT CPgRowset::Execute(DBPARAMS * pParams, LONG* pcRowsAffected)
 {
     ATLTRACE2(atlTraceDBProvider, 0, "CPgRowset::Execute\n");
@@ -102,6 +104,7 @@ void CPgVirtualArray::AttachSess( CPgSession *session )
 
 HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
 {
+    CErrorLookupService::ClearError();
     ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::PostConstruct\n");
     USES_CONVERSION;
     m_rgRowData.AttachSess( sess );
@@ -109,7 +112,7 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
 
     ExecStatusType stat=PQresultStatus(pRes);
 
-    AtlTrace2(atlTraceDBProvider, 0, "CPgRowset::PostConstruct got status \"%s\" from command\n",
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgRowset::PostConstruct got status \"%s\" from command\n",
         PQresStatus(stat) );
         
     switch( stat ) {
@@ -122,10 +125,7 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
             for( int i=0; i<PQnfields(pRes); ++i ) {
                 ATLCOLUMNINFO info;
                 
-                OLECHAR *colname=U82W(PQfname(pRes, i));
-                info.pwszName=new OLECHAR[lstrlenW(colname)+1];
-                lstrcpyW(info.pwszName, colname );
-                //info.pwszName=U82W(PQfname(pRes, i));
+                info.pwszName=U82W(PQfname(pRes, i));
                 info.iOrdinal=i+1; // XXX Only bookmark is 0. We don't support bookmarks.
                 info.cbOffset=0;
                 
@@ -141,33 +141,33 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
                     message="Query returned unhandled type ";
                     _ltot( pRestype, number, 10 );
                     message+=number;
-                    MessageBox( NULL, message, "Error", MB_ICONEXCLAMATION );
-
-                    ATLASSERT(!"Unhandled type in query pResult");
-                    
-                    typeinfo::StatUnknown( &info, pRes, i );
+                    ATLTRACE2(atlTraceDBProvider, 0, (const char *)message );
+                    throw PgOleError(E_FAIL, message);
                 }
                 
                 // Add the column to the array
-                m_colInfo.Add(info);
+                m_colInfo.Add(CATLCOLUMNINFO(info));
             }
         }
         break;
     case PGRES_EMPTY_QUERY:
         /* No command? */
+        CErrorLookupService::ReportCustomError(sess->PQerrorMessage(), DB_E_NOCOMMAND, IID_IRowset );
         throw PgOleError(DB_E_NOCOMMAND, "Backend returned \"no command\"");
         break;
         //    case PGpRes_FATAL_ERROR:
         //        hr=DB_E_ERRORSINCOMMAND;
         //        break;
+    case PGRES_FATAL_ERROR:
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute returned fatal error\n" );
+        CErrorLookupService::ReportCustomError(sess->PQerrorMessage(), E_FAIL, IID_IRowset );
+        throw PgOleError(E_FAIL, "Fatal error in query");
+        break;
     default:
-        AtlTrace2(atlTraceDBProvider, 0, "CPgCommand::Execute unhandled status\n%s\n",
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute unhandled status\n%s\n",
             sess->PQerrorMessage() );
-        /* XXX until we return error details */
-        MessageBox(NULL, sess->PQerrorMessage(),
-            "CPgCommand:Execute unhandled error", MB_ICONEXCLAMATION|MB_OK );
-        ATLASSERT(FALSE);
-        throw PgOleError(E_FAIL, sess->PQerrorMessage());
+        CErrorLookupService::ReportCustomError(sess->PQerrorMessage(), E_FAIL, IID_IRowset );
+        throw PgOleError(E_FAIL, "Unhandled status in query result");
         break;
     }
 
@@ -183,9 +183,31 @@ CPgRowset::~CPgRowset()
     if( SUCCEEDED(GetSite(IID_IPgCommand, reinterpret_cast<void **>(&cmd)))) {
         static_cast<CPgCommand *>(static_cast<IPgCommand *>(cmd))->ClearRowset(this);
     }
+}
 
-    // Manually release the m_colInfo member
-    for( int i=0; i!=m_colInfo.GetSize(); ++i ) {
-        delete [] m_colInfo[i].pwszName;
+HRESULT STDMETHODCALLTYPE CPgRowset::GetColumnInfo(ULONG *pcColumns,
+                                        DBCOLUMNINFO **prgInfo,
+                                        OLECHAR **ppStringsBuffer)
+{
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgRowset::GetColumnInfo\n");
+
+    HRESULT hr=IColumnsInfoImpl< CPgRowset >::GetColumnInfo( pcColumns, prgInfo, ppStringsBuffer );
+
+    // There is a bug in some versions of ATL which causes GetColumnInfo to expose internal
+    // pointers. A compile time check would have been ideal here, but a runtime check will
+    // have to do.
+    if( SUCCEEDED(hr) && *pcColumns>0 && (*prgInfo)[0].pwszName!=*ppStringsBuffer )
+    {
+        ATLTRACE2(atlTraceDBProvider, 0, "Working around bug in IColumnsInfoImpl::GetColumnInfo\n");
+
+        for( ULONG iCol=0, iOffset=0; iCol<*pcColumns; ++iCol )
+        {
+            if( (*prgInfo)[iCol].pwszName!=NULL ) {
+                (*prgInfo)[iCol].pwszName=*ppStringsBuffer+iOffset;
+                iOffset+=wcslen(*ppStringsBuffer+iOffset)+1;
+            }
+        }
     }
+
+    return hr;
 }

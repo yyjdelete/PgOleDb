@@ -56,6 +56,28 @@ import "ocidl.idl";
     interface IPgCommand : IUnknown
     {
     };
+	
+    [
+        object,
+        uuid(CB899356-AAA8-4971-9610-4A76A462FFE6),
+        helpstring("IPgCommandText Interface"),
+        pointer_default(unique)
+    ]
+    interface IPgCommandText : IUnknown
+    {
+		[helpstring("method PgSetCommandText sets the command's text allowing \"$1\" ordered parameters passing")] HRESULT PgSetCommandText(REFGUID rguidDialect, LPCOLESTR command);
+    };
+
+	[
+		object,
+		uuid(ACA13C09-C87B-4CAC-B9FA-562AD3F28C1B),
+		helpstring("IPgErrorLookup Interface"),
+		pointer_default(unique)
+	]
+	interface IPgErrorLookup : IUnknown
+	{
+		[helpstring("method RegisterCustomErrorMessage")] HRESULT RegisterCustomErrorMessage([in] BSTR Msg, [out] DWORD *AllocatedHRes);
+	};
 [
 	uuid(E1DA2BDE-8336-4EBE-8AEA-32790B1A5E00),
 	version(1.0),
@@ -81,5 +103,14 @@ library PGOLEDBLib
 	coclass PgSession
 	{
 		[default] interface IPgSession;
+	};
+	
+	[
+		uuid(8B719086-FA57-45EA-8BDF-D01FDD8BDDF0),
+		helpstring("ErrorLookupService Class")
+	]
+	coclass ErrorLookupService
+	{
+		[default] interface IPgErrorLookup;
 	};
 };

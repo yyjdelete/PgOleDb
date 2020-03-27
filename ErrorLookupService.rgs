@@ -1,0 +1,25 @@
+HKCR
+{
+	PostgreSQL.ErrorLookup.1 = s 'PostgreSQL OLE DB Extended Error Lookup Service'
+	{
+		CLSID = s '{8B719086-FA57-45EA-8BDF-D01FDD8BDDF0}'
+		CurVer = s 'PostgreSQL.ErrorLookup.1'
+	}
+	PostgreSQL.ErrorLookup = s 'PostgreSQL OLE DB Extended Error Lookup Service'
+	{
+		CLSID = s '{8B719086-FA57-45EA-8BDF-D01FDD8BDDF0}'
+		CurVer = s 'PostgreSQL.ErrorLookup.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {8B719086-FA57-45EA-8BDF-D01FDD8BDDF0} = s 'PostgreSQL OLE DB Extended Error Lookup Service'
+		{
+			ProgID = s 'PostgreSQL.ErrorLookup.1'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			VersionIndependentProgID = s 'PostgreSQL.ErrorLookup'
+		}
+	}
+}
