@@ -1,0 +1,74 @@
+/*
+ * This file is part of OleDb, an OLE DB provider for PostgreSQL
+ * Copyright (C) 2004 Shachar Shemesh for Lingnu Open Systems Consulting (http://www.lignu.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+// OleDb.idl : IDL source for OleDb.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (OleDb.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	[
+		object,
+		uuid(E862CC02-DA46-46DA-8FB3-2D80FA4CFD58),
+		helpstring("IPgSession Interface"),
+		pointer_default(unique)
+	]
+	interface IPgSession : IUnknown
+	{
+		[id(1), helpstring("Connect to database with connection string")] HRESULT PgConnectDB([in] BSTR connectString);
+	};
+
+    [
+        object,
+        uuid(82774744-B737-4abb-8594-3E7647414950),
+        helpstring("IPgRowset Interface"),
+        pointer_default(unique)
+    ]
+    interface IPgRowset : IUnknown
+    {
+    };
+[
+	uuid(E1DA2BDE-8336-4EBE-8AEA-32790B1A5E00),
+	version(1.0),
+	helpstring("OleDb 1.0 Type Library")
+]
+library PGOLEDBLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(2359AFD8-FE70-459D-9625-ACA717D412F5),
+		helpstring("Pg OLE DB Provider")
+	]
+	coclass Pg
+	{
+		interface IUnknown;
+	};
+	[
+		uuid(D93ACDB7-8799-47FF-B5EA-751E4161ED16),
+		helpstring("PgSession Class")
+	]
+	coclass PgSession
+	{
+		[default] interface IPgSession;
+	};
+};

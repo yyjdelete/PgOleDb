@@ -1,0 +1,11 @@
+OleDb_i.c
+OleDb_p.c
+*.tlb
+*.plg
+*.opt
+*.ncb
+*.aps
+Release*
+Debug*
+OleDb.h
+dlldata.c

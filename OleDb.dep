@@ -1,0 +1,45 @@
+# Microsoft Developer Studio Generated Dependency File, included by OleDb.mak
+
+.\OleDb.cpp : \
+	".\OleDb.h"\
+	".\OleDb_i.c"\
+	".\PgDS.h"\
+	".\PgRS.h"\
+	".\PgSess.h"\
+	
+
+.\OleDb.rc : \
+	".\OleDb.tlb"\
+	".\Pg.rgs"\
+	
+
+.\PgDs.cpp : \
+	".\OleDb.h"\
+	".\PgDS.h"\
+	".\PgRS.h"\
+	".\PgSess.h"\
+	
+
+.\PgRS.cpp : \
+	".\OleDb.h"\
+	".\PgRS.h"\
+	".\PgSess.h"\
+	
+
+.\StdAfx.cpp : \
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\c.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\getaddrinfo.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\lib\dllist.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\libpq\pqcomm.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\pg_config.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\pg_config_manual.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\port.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\postgres_ext.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\include\postgres_fe.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\interfaces\libpq\libpq-fe.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\interfaces\libpq\libpq-int.h"\
+	"..\..\..\..\cygwin\home\sun\postgresql-7.4.1\src\interfaces\libpq\pqexpbuffer.h"\
+	"..\..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	"..\..\..\..\program files\microsoft visual studio\vc98\include\oledb.h"\
+	".\StdAfx.h"\
+	

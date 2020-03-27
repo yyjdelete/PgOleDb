@@ -1,0 +1,27 @@
+HKCR
+{
+	PostgreSQL.1 = s 'PostgreSQL OLE DB Provider'
+	{
+		CLSID = s '{2359AFD8-FE70-459D-9625-ACA717D412F5}'
+	}
+	PostgreSQL = s 'PostgreSQL OLE DB Provider'
+	{
+		CLSID = s '{2359AFD8-FE70-459D-9625-ACA717D412F5}'
+		CurVer = s 'PostgreSQL.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {2359AFD8-FE70-459D-9625-ACA717D412F5} = s 'PostgreSQL OLE DB Provider'
+		{
+			ProgID = s 'PostgreSQL.1'
+			VersionIndependentProgID = s 'PostgreSQL'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'OLE DB Provider' = s 'PostgreSQL OLE DB Provider'
+			OLEDB_SERVICES = d '4294967295'
+			'TypeLib' = s '{E1DA2BDE-8336-4EBE-8AEA-32790B1A5E00}'
+		}
+	}
+}

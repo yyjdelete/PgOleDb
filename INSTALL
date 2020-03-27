@@ -1,0 +1,30 @@
+This is Win32 only project, meant to be compiled with Visual Studio. However, it does require
+a little more than just double clicking the dsw file and choosing "compile" to set up.
+
+The project itself no longer carries the header files for libpq. In order to compile this
+project, you will first need to compile pqlib as a native Win32 DLL.
+
+Libpq is part of the PostgreSQL sources. The instructions for compiling libpq for Windows
+are available in the documentation for PostgreSQL. This driver requires, at the very least,
+the libpq that came with PostgreSQL 7.4. Just download the sources and extract the archive
+anywhere on your disk. Then follow the instructions in the manual. For 7.4, these can be
+found at:
+http://www.postgresql.org/docs/7.4/static/install-win32.html
+Instructions for the latest version can usually be found at:
+http://www.postgresql.org/docs/current/static/install-win32.html
+
+After you have compiled libpq, you need to copy the generated libpq.dll file to your
+system directory.
+
+In addition to the above, the project file for PGOle searches for certain libraries
+and include files under the postgresql source tree. In order to find it, you must set up
+an environemnt variable called "PSQLSRC" to point to the root of the tree. This can usually
+be achived by right clicking "My Computer" and changing the "Environemnt Settings".
+
+Once these initial steps have been carried out, you can compile the PGOle project as usual.
+If you are not a local Administrator you will need to register the resulting DLL with
+regsvr32 running as Administrator. If your local user is a member of the Administrators
+group, the registration takes place as part of the build process.
+
+Distributing the resulting DLL requires PGOle.dll and libpq.dll. You will need to run
+"regsvr32 PGOle.dll" on each machine where the provider needs to be installed.

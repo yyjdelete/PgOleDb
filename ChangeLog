@@ -1,0 +1,385 @@
+2004-04-04  shachar
+	* OleDb.idl:
+	* PgDs.cpp:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.cpp:
+	* TypeInfo.h:
+		Cleanup data retrieval code - will now use the types map for quicker and cleaner
+		access
+
+	* PgRS.cpp:
+		Fix tiny bug in column width calculation
+
+	* OleDb.rc:
+		Update version
+
+	* PgRS.cpp:
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.h:
+		Use the proper name for the new struct
+
+	* OleDb.rc:
+		Update version number
+
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.h:
+		Code cleanup
+
+	* PgRS.cpp:
+	* PgSess.cpp:
+	* PgSess.h:
+		Change types handling to a generic way that does not require switch-case
+		This improves efficiency, as well as centralize all type management into one
+		location
+
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+		Support returning NULL value
+
+2004-03-30  shachar
+	* OleDb.rc:
+		Increment version number
+
+	* OleDb.dsp:
+	* OleDb.mak:
+		Added _ATL_DEBUG to the project's preprocessor directives
+		Fixed absolute reference to postgresql sources on my computer to use $(PSQLSRC) instead
+
+	* PgSess.cpp:
+	* PgSess.h:
+		Added transaction support
+
+2004-03-21  shachar
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+		Added support for int8
+		Fixed problem with reporting smallint and int8 (byte order was not reversed)
+
+2004-03-16  shachar
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.cpp:
+	* PgSess.h:
+	* StdAfx.h:
+		Added support for custom defined types
+		remove double check on unknown types - it's now up to you if you want special
+		conversion of the type before passing to client to remeber to add it to
+		CPgCommand::Execute
+
+2004-03-06  shachar
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+		Solve a result resource leak
+		Add support for int2
+		Add a message box for certain errors, until a proper error reporting solution will be implemented
+
+2004-02-27  shachar
+	* PgRS.cpp:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+	* PgSess.h:
+		Some more column types added
+
+2004-02-19  shachar
+	* PgSess.h:
+		Add debug output on database connection open failure.
+
+2004-02-10  shachar
+	* PgRS.cpp:
+		Remove release of not used cursor
+
+	* PgRS.cpp:
+	* PgRS.h:
+		Cleaner implementation of data fetch
+
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgRS.cpp:
+	* PgRS.h:
+		Perform query operations and return data
+
+	* OleDb.dsp:
+	* OleDb.mak:
+		Add the "INSTALL" file to the project for more visibility
+
+2004-02-09  shachar
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+		Compiling but not working - began work on retreiving the data
+		queried.
+
+2004-01-25  shachar
+	* PgRS.cpp:
+	* PgRS.h:
+		Fixed problem with getting the results columns information
+
+2004-01-22  shachar
+	* PgRS.cpp:
+	* PgRS.h:
+		Set columns info in CPgCommand and CPgRowset
+
+2004-01-21  shachar
+	* OleDb.dep:
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+	* StdAfx.h:
+		Initial implementation of "Execute"
+
+	* INSTALL:
+		Reintroduce the "INSTALL" text file
+
+2004-01-18  shachar
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+		Row class implementation
+
+2004-01-17  shachar
+	* .cvsignore:
+	* AUTHORS:
+	* AdvProp.cpp:
+	* AdvProp.h:
+	* AdvProp.rgs:
+	* COPYING:
+	* ConnProp.cpp:
+	* ConnProp.h:
+	* ConnProp.rgs:
+	* INSTALL:
+	* OleDb.cpp:
+	* OleDb.def:
+	* OleDb.dsp:
+	* OleDb.dsw:
+	* OleDb.idl:
+	* OleDb.rc:
+	* OleDbps.def:
+	* OleDbps.mk:
+	* PGOle.cpp:
+	* PGOle.def:
+	* PGOle.dsp:
+	* PGOle.dsw:
+	* PGOle.idl:
+	* PGOle.rc:
+	* PGOle.rgs:
+	* PGOleDS.h:
+	* PGOleRS.cpp:
+	* PGOleRS.h:
+	* PGOleSess.h:
+	* PGOleps.def:
+	* PGOleps.mk:
+	* Pg.rgs:
+	* PgDS.h:
+	* PgDs.cpp:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+	* README:
+	* StdAfx.cpp:
+	* StdAfx.h:
+	* Test.cpp:
+	* Test.h:
+	* Test.rgs:
+	* license:
+	* pg_props.h:
+	* resource.h:
+		Move the Shachar branch into the main tree
+
+	* OleDb.dsp:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+		Intermediate (non compiling) backup
+
+	* OleDb.dsp:
+	* PgRS.cpp:
+	* PgRS.h:
+		Rowset skeleton done
+
+2004-01-14  shachar
+	* OleDb.dsp:
+	* OleDb.idl:
+	* PgSess.h:
+		Make session interface non-IDispatch
+
+2004-01-13  shachar
+	* OleDb.rc:
+		file OleDb.rc was initially added on branch B_SHACHAR.
+
+	* Pg.rgs:
+		file Pg.rgs was initially added on branch B_SHACHAR.
+
+	* PgRS.h:
+		file PgRS.h was initially added on branch B_SHACHAR.
+
+	* PGOle.rgs:
+		Change provider name
+
+	* OleDb.def:
+		file OleDb.def was initially added on branch B_SHACHAR.
+
+	* PgSess.h:
+		file PgSess.h was initially added on branch B_SHACHAR.
+
+	* PgDS.h:
+		file PgDS.h was initially added on branch B_SHACHAR.
+
+	* OleDb.idl:
+		file OleDb.idl was initially added on branch B_SHACHAR.
+
+	* PgRS.cpp:
+		file PgRS.cpp was initially added on branch B_SHACHAR.
+
+	* PgDs.cpp:
+		file PgDs.cpp was initially added on branch B_SHACHAR.
+
+	* OleDbps.mk:
+		file OleDbps.mk was initially added on branch B_SHACHAR.
+
+	* .cvsignore:
+	* OleDb.idl:
+	* PgDs.cpp:
+	* PgSess.h:
+	* resource.h:
+		Remove ugly upcast in PGSession by implementing a specific (unregistered)
+		interface
+
+	* .cvsignore:
+	* .cvsignore:
+	* COPYING:
+	* OleDb.cpp:
+	* OleDb.def:
+	* OleDb.dsp:
+	* OleDb.dsw:
+	* OleDb.h:
+	* OleDb.h:
+	* OleDb.idl:
+	* OleDb.rc:
+	* OleDbps.def:
+	* OleDbps.mk:
+	* Pg.rgs:
+	* PgDS.h:
+	* PgDs.cpp:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.h:
+	* StdAfx.cpp:
+	* StdAfx.h:
+	* resource.h:
+		Introduce Shachar's base version
+
+	* OleDb.dsw:
+		file OleDb.dsw was initially added on branch B_SHACHAR.
+
+	* OleDb.dsp:
+		file OleDb.dsp was initially added on branch B_SHACHAR.
+
+	* OleDb.h:
+		file OleDb.h was initially added on branch B_SHACHAR.
+
+	* OleDbps.def:
+		file OleDbps.def was initially added on branch B_SHACHAR.
+
+	* .cvsignore:
+	* AUTHORS:
+	* AdvProp.cpp:
+	* AdvProp.h:
+	* AdvProp.rgs:
+	* COPYING:
+	* ConnProp.cpp:
+	* ConnProp.h:
+	* ConnProp.rgs:
+	* INSTALL:
+	* PGOle.cpp:
+	* PGOle.def:
+	* PGOle.dsp:
+	* PGOle.dsw:
+	* PGOle.idl:
+	* PGOle.rc:
+	* PGOle.rgs:
+	* PGOleDS.h:
+	* PGOleRS.cpp:
+	* PGOleRS.h:
+	* PGOleSess.h:
+	* PGOleps.def:
+	* PGOleps.mk:
+	* README:
+	* StdAfx.cpp:
+	* StdAfx.h:
+	* Test.cpp:
+	* Test.h:
+	* Test.rgs:
+	* license:
+	* pg_props.h:
+	* resource.h:
+		Clean slate begining
+
+	* OleDb.cpp:
+		file OleDb.cpp was initially added on branch B_SHACHAR.
+
+2004-01-12  shachar
+	* AdvProp.cpp:
+	* AdvProp.h:
+	* AdvProp.rgs:
+	* ConnProp.cpp:
+	* ConnProp.h:
+	* ConnProp.rgs:
+	* PGOle.cpp:
+	* PGOle.def:
+	* PGOle.dsp:
+	* PGOle.dsw:
+	* PGOle.idl:
+	* PGOle.ncb:
+	* PGOle.rc:
+	* PGOle.rgs:
+	* PGOleDS.h:
+	* PGOleRS.cpp:
+	* PGOleRS.h:
+	* PGOleSess.h:
+	* PGOle_p.c:
+	* PGOleps.def:
+	* PGOleps.mk:
+	* README:
+	* StdAfx.cpp:
+	* StdAfx.h:
+	* Test.cpp:
+	* Test.h:
+	* Test.rgs:
+	* dlldata.c:
+	* license:
+	* pg_props.h:
+	* resource.h:
+		Source version as inherited from Marek Mosiewicz. Only removed
+		parts are those that are copies of the libpq sources from the main
+		postgresql tree
+
+	* .cvsignore:
+	* .cvsignore:
+	* AUTHORS:
+	* COPYING:
+	* INSTALL:
+	* PGOle.dsp:
+	* PGOle.dsp:
+	* PGOle.ncb:
+	* PGOle.rc:
+	* PGOle_p.c:
+	* dlldata.c:
+	* license:
+	* resource.h:
+		Some cosmetic cleanups
+
