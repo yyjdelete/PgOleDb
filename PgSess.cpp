@@ -30,19 +30,21 @@ const typeinfo CPgSession::s_cust_types_type[]={
 const unsigned long CPgSession::s_types_oids[]={
     16 /* bool */, 21 /* int2 */, 28 /* xid - transaction ID */, 26 /* oid */,
     23 /* int4 */, 20 /* int8 */, 25 /* text */,
-    19 /* name */, 1043 /* varchar */, 1009 /* text[] */, 1114 /* timestamp */ };
+    19 /* name */, 1043 /* varchar */, 1009 /* text[] */, 1114, /* timestamp */
+    1700 /* numeric */ };
 const typeinfo CPgSession::s_types_type[]={
-    typeinfo( DBTYPE_BOOL, 1 ), // bool
-    typeinfo( DBTYPE_I2, 5, typeinfo::StdC_ntoh_2 ), // int2
-    typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4 ), // xid
-    typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4 ), // oid
-    typeinfo( DBTYPE_I4, 10, typeinfo::StdC_ntoh_4 ), // int4
-    typeinfo( DBTYPE_I8, 20, typeinfo::StdC_ntoh_8 ), // int8
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, 2 ), // text - var length string, no limit
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, 2 ), // name - 63-char type for storing system identifiers
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, 2 ), // varchar
+    typeinfo( DBTYPE_BOOL, 1, typeinfo::StdC_memcpy, typeinfo::StdGW_1, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ), // bool
+    typeinfo( DBTYPE_I2, 5, typeinfo::StdC_ntoh_2, typeinfo::StdGW_2, typeinfo::StdPGC_h2n_2, typeinfo::StdPGWidth2, 2 ), // int2
+    typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // xid
+    typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // oid
+    typeinfo( DBTYPE_I4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // int4
+    typeinfo( DBTYPE_I8, 20, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // int8
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 2 ), // text - var length string, no limit
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 2 ), // name - 63-char type for storing system identifiers
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 2 ), // varchar
     typeinfo( DBTYPE_ARRAY|DBTYPE_STR, ~0 ), // text[]. XXX - Is this the right way to handle this? Should consider DBTYPE_VECTOR
-    typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, 4, GetStatus_timestamp ), // timestamp
+    typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // timestamp
+    typeinfo( DBTYPE_NUMERIC, 39, COPY_numeric, GetWidth_numeric, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_numeric ), // numeric
 };
 
 HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
@@ -88,9 +90,21 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
 
             if( PQresultStatus( res )==PGRES_TUPLES_OK && PQntuples(res)==1 ) {
                 // There is such a type. Get it's OID and put it in the map
+                unsigned int oid=
+                    ntohl(*reinterpret_cast<unsigned long *>(PQgetvalue( res, 0, 0 )));
+                m_types[oid]=s_cust_types_type[i];
 
-                m_types[ntohl(*reinterpret_cast<unsigned long *>(PQgetvalue( res, 0, 0 )))]=
-                    s_cust_types_type[i];
+                std::map<DBTYPE, unsigned int>::iterator j=m_ole_oid_map.find(s_cust_types_type[i].wType);
+
+                if( j==m_ole_oid_map.end() ) {
+                    // No mapping to this DBTYPE
+                    m_ole_oid_map[s_cust_types_type[i].wType]=oid;
+                } else {
+                    // Take the one that has a higher accuracy
+                    if( m_types[j->second].bPrecision>m_types[oid].bPrecision ) {
+                        j->second=oid;
+                    }
+                }
             }
 
             PQclear( res );
@@ -109,6 +123,19 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
             ATLASSERT(s_types_oids!=0 && s_types_type[i].wType!=DBTYPE_EMPTY);
 
             m_types[s_types_oids[i]]=s_types_type[i];
+
+            std::map<DBTYPE, unsigned int>::iterator j=
+                m_ole_oid_map.find(s_types_type[i].wType);
+            
+            if( j==m_ole_oid_map.end() ) {
+                // No mapping to this DBTYPE
+                m_ole_oid_map[s_types_type[i].wType]=s_types_oids[i];
+            } else {
+                // Take the one that has a higher accuracy
+                if( m_types[j->second].bPrecision>m_types[s_types_oids[i]].bPrecision ) {
+                    j->second=s_types_oids[i];
+                }
+            }
         }
 
         // Some information is only available through the pg_type catalog table

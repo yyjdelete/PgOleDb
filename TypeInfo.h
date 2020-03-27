@@ -35,16 +35,25 @@ struct typeinfo {
     typedef void (*STATFUNC)(const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
     STATFUNC Status;
+
+    typedef size_t (*PGWIDTHFUNC)(const typeinfo *_this, const void *data, size_t length);
+    PGWIDTHFUNC PGGetLength;
     
+    typedef HRESULT (*PGCOPYFUNC)(const typeinfo *_this, const void *data, size_t length,
+        void *dst, size_t dstlen );
+    PGCOPYFUNC PGCopyData;
+
     typeinfo() : alignment(0), wType(DBTYPE_EMPTY), bPrecision(~0), GetWidth(StdGWwidth),
-        CopyData(StdC_memcpy), Status( StdStat )
+        CopyData(StdC_memcpy), Status( StdStat ), PGGetLength(StdPGWidthInvalid),
+        PGCopyData(StdPGC_memcpy)
     {
     }
     
     typeinfo( DBTYPE type, BYTE precise, COPYFUNC copyfunc=StdC_memcpy,
-        WIDTHFUNC widthfunc=StdGWwidth, unsigned int align=0, STATFUNC statfunc=StdStat ) :
+        WIDTHFUNC widthfunc=StdGWwidth, PGCOPYFUNC pgcopyfunc=StdPGC_memcpy,
+        PGWIDTHFUNC pgwidthfunc=StdPGWidthInvalid, unsigned int align=0, STATFUNC statfunc=StdStat ) :
         alignment(align), wType(type), bPrecision(precise), GetWidth(widthfunc),
-        CopyData(copyfunc), Status( statfunc )
+        CopyData(copyfunc), Status( statfunc ), PGGetLength(pgwidthfunc), PGCopyData(pgcopyfunc)
     {
     }
     
@@ -148,6 +157,69 @@ struct typeinfo {
         colinfo->columnid.eKind=DBKIND_PROPID;
         colinfo->columnid.uName.ulPropid=PQftablecol(res, field_num);        
     }
+
+    static size_t StdPGWidthInvalid(const typeinfo *_this, const void *data, size_t length)
+    {
+        ATLASSERT(!"Invalid width function");
+        return 1;
+    }
+    static size_t StdPGWidth1(const typeinfo *_this, const void *data, size_t length)
+    {
+        return 1;
+    }
+    static size_t StdPGWidth2(const typeinfo *_this, const void *data, size_t length)
+    {
+        return 2;
+    }
+    static size_t StdPGWidth4(const typeinfo *_this, const void *data, size_t length)
+    {
+        return 4;
+    }
+    static size_t StdPGWidth8(const typeinfo *_this, const void *data, size_t length)
+    {
+        return 8;
+    }
+
+    static HRESULT StdPGC_memcpy(const typeinfo *_this, const void *data, size_t length,
+        void *dst, size_t dstlen )
+    {
+        ATLASSERT(length>=dstlen);
+
+        memcpy(dst, data, length );
+
+        return S_OK;
+    }
+
+    static HRESULT StdPGC_h2n_2(const typeinfo *_this, const void *data, size_t length,
+        void *dst, size_t dstlen )
+    {
+        ATLASSERT(length==2 && dstlen>=2);
+
+        *reinterpret_cast<unsigned short *>(dst)=
+            htons(*reinterpret_cast<const unsigned short *>(data));
+        return S_OK;
+    }
+    static HRESULT StdPGC_h2n_4(const typeinfo *_this, const void *data, size_t length,
+        void *dst, size_t dstlen )
+    {
+        ATLASSERT(length==4 && dstlen>=4);
+
+        *reinterpret_cast<unsigned int *>(dst)=
+            htonl(*reinterpret_cast<const unsigned int *>(data));
+        return S_OK;
+    }
+    static HRESULT StdPGC_h2n_8(const typeinfo *_this, const void *data, size_t length,
+        void *dst, size_t dstlen )
+    {
+        ATLASSERT(length==8 && dstlen>=8);
+
+        // XXX - This assumes little endian machine!
+        reinterpret_cast<unsigned int *>(dst)[0]=
+            htonl(reinterpret_cast<const unsigned int *>(data)[1]);
+        reinterpret_cast<unsigned int *>(dst)[1]=
+            htonl(reinterpret_cast<const unsigned int *>(data)[0]);
+        return S_OK;
+    }
 };
 
 typedef std::map<unsigned int, typeinfo> types_type;
@@ -161,5 +233,10 @@ void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresul
 int GetWidth_string( const PGresult *res, int tup_num, int field_num );
 void COPY_string( void *dst, size_t count, const PGresult *res,
                     int tup_num, int field_num);
+int GetWidth_numeric( const PGresult *res, int tup_num, int field_num );
+void COPY_numeric( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num);
+void GetStatus_numeric( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num);
 
 #endif // __type_info_H_

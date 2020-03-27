@@ -1,3 +1,72 @@
+2004-05-05  shachar
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Add support for "CommandWithParameters"
+		Add support for calling a stored procedure using the ADO "storedprocedure" method
+		Support the ADO "parameters refresh" mode, where the provider queries what parameters a stored procedure needs
+		Started adding support for binary conversions in the reverse direction.
+		
+		large patch, this time. Let's hope nothing major breaks.
+
+	* AUTHORS:
+	* OleDb.dsp:
+	* OleDb.mak:
+	* README:
+		Create a "README" file
+
+2004-04-28  shachar
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* PgSess.h:
+		Added initial ICommandWithParameters support.
+		Still not able to actually SET parameter values, but otherwise working
+
+2004-04-24  shachar
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* PgRS.cpp:
+	* PgRS.h:
+		Clean up - move all Command relatd code to seperate source files.
+		CommandWithParameters still disabled and unfinished
+
+2004-04-22  shachar
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgDS.h:
+	* PgRS.cpp:
+	* PgRS.h:
+	* StdAfx.h:
+		This commit mostly for backup purposes.
+		Codepath leading to new code is disabled, as new code does not yet work.
+		Begining of implementation of CommandWithParameter interface
+
+2004-04-21  shachar
+	* AUTHORS:
+		Give authors and historic contributers list credit
+
+2004-04-17  shachar
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Added support for the "numeric" type. For the time being, it is translated to
+		"DBTYPE_NUMERIC" rather than "DBTYPE_VARNUMERIC", until someone
+		figures out how to do the later.
+
+2004-04-13  shachar
+	* PgRS.h:
+		Enahnced debugging output on SetCmdText
+
+	* OleDb.dsp:
+	* OleDb.mak:
+		Added the Changelog into the project
+
 2004-04-12  shachar
 	* PgSess.cpp:
 	* TypeInfo.cpp:

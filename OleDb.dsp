@@ -294,6 +294,10 @@ SOURCE=.\OleDb.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\PgCommand.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PgDs.cpp
 # End Source File
 # Begin Source File
@@ -317,6 +321,10 @@ SOURCE=.\TypeInfo.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\PgCommand.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\PgDS.h
@@ -356,11 +364,23 @@ SOURCE=.\Pg.rgs
 # End Group
 # Begin Source File
 
+SOURCE=.\AUTHORS
+# End Source File
+# Begin Source File
+
+SOURCE=.\ChangeLog
+# End Source File
+# Begin Source File
+
 SOURCE=.\COPYING
 # End Source File
 # Begin Source File
 
 SOURCE=.\INSTALL
+# End Source File
+# Begin Source File
+
+SOURCE=.\README
 # End Source File
 # End Target
 # End Project

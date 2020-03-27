@@ -45,6 +45,7 @@ extern CComModule _Module;
 
 // A few STL includes
 #include <map>
+#include <vector>
 
 // Postgresql libpq includes
 #include <libpq-fe.h>

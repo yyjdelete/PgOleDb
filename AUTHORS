@@ -1,0 +1,9 @@
+The PostgreSQL OLE DB Provider code is brought to you by:
+Shachar Shemesh (for Lingnu Open Source Consulting ltd.)
+
+Certain code was taken and adapted from the PostgreSQL project. This code is Copyrighted by:
+PostgreSQL Global Development Group
+Regents of the University of California
+
+Original GBORG OLE DB provider project by Marek Mosiewicz
+PGArc OLE DB project by Christoph Spoerri (http://sourceforge.net/projects/pgarc)

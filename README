@@ -1,0 +1,22 @@
+This is the OLE DB provider for PostgreSQL.
+It is still a work in progress, and many things still don't work.
+This software is copyrighted according to the "AUTHORS" file, and distributed under the
+terms and conditions of the GNU Lesser General Public License. Please read AUTHORS and COPYING
+for more information.
+
+INSTALLATION INSTRUCTIONS
+In order to install this software, copy PGOLEDB.DLL and PQLIB.DLL into your system
+directory. Next, as administrator, run "regsvr32 PGOLEDB.DLL". You should get a dialog
+message saying "registration succeeded".
+
+USAGE
+In order to direct use to this provider, you must specify "PostgreSQL", "PostgreSQL.1" or
+"PostgreSQL OLE DB Provider" as your "provider".
+
+PgOleDb supports the following connection attributes:
+Provider - mandatory. Must be set to "PostgreSQL", "PostgreSQL.1" or "PostgreSQL OLE DB Provider"
+Data Source - server name or address
+location - database name
+User ID - PG user name to log in as 
+password - the password
+timeout - how long to wait when establishing the initial connection

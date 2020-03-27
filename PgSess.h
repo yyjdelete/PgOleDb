@@ -58,11 +58,16 @@ public:
         m_conn=NULL;
     }
 
-    PGresult *PQexec(const char *query)
+    PGresult *PQexec(const char *query) {
+        return PQexec( query, 0, NULL, NULL, NULL, NULL );
+    }
+    PGresult *PQexec(const char *query, int nParams, const unsigned int paramTypes[],
+        const char * const *paramValues, const int *paramLengths, const int *paramFormats )
     {
-        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::PQexec \"%.400s\"\n", query);
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::PQexec %d, \"%.400s\"\n", nParams, query);
 
-        PGresult *res=::PQexecParams( m_conn, query, 0, NULL, NULL, NULL, NULL, 1 );
+        PGresult *res=::PQexecParams( m_conn, query, nParams, paramTypes, paramValues,
+            paramLengths, paramFormats, 1 );
 
         return res;
     }
@@ -80,6 +85,15 @@ public:
             return NULL;
         }
     }
+    unsigned int GetOIDType( DBTYPE dbtype ) const {
+        std::map<DBTYPE, unsigned int>::const_iterator i=m_ole_oid_map.find(dbtype);
+
+        if( i!=m_ole_oid_map.end() ) {
+            return i->second;
+        } else {
+            return 0;
+        }
+    }
 private:
     // All custom types are known by name, not OID.
     // Can't use a symbolic constant due to C++ syntax.
@@ -88,12 +102,13 @@ private:
     static const typeinfo s_cust_types_type[1];
     // Can't use a symbolic constant due to C++ syntax.
     // Must be same number for following two statements - enforced using ASSERT
-    static const unsigned long s_types_oids[11];
-    static const typeinfo s_types_type[11];
+    static const unsigned long s_types_oids[12];
+    static const typeinfo s_types_type[12];
 
 public:
 private:
     types_type m_types;
+    std::map<DBTYPE, unsigned int> m_ole_oid_map;
 public:
 BEGIN_PROPSET_MAP(CPgSession)
 	BEGIN_PROPERTY_SET(DBPROPSET_SESSION)

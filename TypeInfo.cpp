@@ -138,3 +138,97 @@ void COPY_string( void *dst, size_t count, const PGresult *res,
         ATLASSERT(!"UTF8 -> UTF16 conversion failed" );
     }
 }
+
+struct numeric_transfer {
+    signed short ndigits;
+    signed short weight;
+    signed short sign;
+    signed short dscale;
+};
+// Number of decimal digits per unsigned short digit
+#define DEC_DIGITS 4
+
+template <int numshorts>
+class bignum {
+    unsigned short vals[numshorts];
+
+public:
+    bignum( unsigned long l=0 )
+    {
+        ZeroMemory( &(vals[0]), sizeof(vals) );
+        vals[0]=l&0xffff;
+        vals[1]=l>>16;
+    }
+    bignum &operator *=( unsigned short multi )
+    {
+        unsigned long carry=0;
+
+        for( int i=0; i<numshorts; ++i ) {
+            unsigned long res=vals[i];
+            res*=multi;
+            res+=carry;
+            vals[i]=res&0xffff;
+            carry=res>>16;
+        }
+        return *this;
+    }
+    bignum &operator +=( unsigned short added )
+    {
+        unsigned long carry=added;
+
+        for( int i=0; carry!=0 && i<numshorts; ++i ) {
+            carry+=vals[i];
+            vals[i]=carry&0xffff;
+            carry>>=16;
+        }
+
+        return *this;
+    }
+
+    void dump( BYTE *mem, size_t num ) {
+        int i;
+        for( i=0; i<num && i<(numshorts*2); ++i )
+            mem[i]=reinterpret_cast<const char *>(vals)[i];
+
+        while(i<num)
+            mem[i++]=0;
+    }
+};
+
+int GetWidth_numeric( const PGresult *res, int tup_num, int field_num )
+{
+    ATLTRACE2(atlTraceDBProvider, 0, "GetWidth_numeric var length %d %d %d\n",
+        PQgetlength( res, tup_num, field_num), sizeof(numeric_transfer), sizeof( DB_VARNUMERIC) );
+    return sizeof(DB_NUMERIC);
+}
+
+void COPY_numeric( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num)
+{
+    numeric_transfer *orig=reinterpret_cast<numeric_transfer *>
+        (PQgetvalue( res, tup_num, field_num ));
+    DB_NUMERIC *dbnum=reinterpret_cast<DB_NUMERIC *>(dst);
+    unsigned short *origval=reinterpret_cast<unsigned short *>
+        (reinterpret_cast<char *>(orig)+sizeof(numeric_transfer));
+
+    ZeroMemory( dbnum, count );
+    dbnum->precision=DEC_DIGITS*ntohs(orig->ndigits);
+    dbnum->scale=-(ntohs(orig->weight)-ntohs(orig->ndigits)+1)*DEC_DIGITS;
+    dbnum->sign=!ntohs(orig->sign);
+
+    int numdig=ntohs(orig->ndigits);
+    bignum<8> accumolator=0;
+    for(int i=0; i<numdig; ++i ) {
+        accumolator*=10000; // 10^DEC_DIGITS
+        accumolator+=ntohs(origval[i]);
+    }
+
+    accumolator.dump(dbnum->val, 15);
+}
+
+void GetStatus_numeric( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num)
+{
+    typeinfo::StdStat( _this, colinfo, res, field_num );
+    colinfo->bScale=0;
+}

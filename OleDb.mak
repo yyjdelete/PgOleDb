@@ -49,6 +49,8 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.pch"
 	-@erase "$(INTDIR)\OleDb.res"
 	-@erase "$(INTDIR)\OleDb.sbr"
+	-@erase "$(INTDIR)\PgCommand.obj"
+	-@erase "$(INTDIR)\PgCommand.sbr"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgDs.sbr"
 	-@erase "$(INTDIR)\PgRS.obj"
@@ -81,6 +83,7 @@ BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
 BSC32_SBRS= \
 	"$(INTDIR)\OleDb.sbr" \
+	"$(INTDIR)\PgCommand.sbr" \
 	"$(INTDIR)\PgDs.sbr" \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
@@ -98,12 +101,13 @@ DEF_FILE= \
 	".\OleDb.def"
 LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
+	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\TypeInfo.obj"
+	"$(INTDIR)\TypeInfo.obj" \
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -139,6 +143,8 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.pch"
 	-@erase "$(INTDIR)\OleDb.res"
 	-@erase "$(INTDIR)\OleDb.sbr"
+	-@erase "$(INTDIR)\PgCommand.obj"
+	-@erase "$(INTDIR)\PgCommand.sbr"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgDs.sbr"
 	-@erase "$(INTDIR)\PgRS.obj"
@@ -171,6 +177,7 @@ BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
 BSC32_SBRS= \
 	"$(INTDIR)\OleDb.sbr" \
+	"$(INTDIR)\PgCommand.sbr" \
 	"$(INTDIR)\PgDs.sbr" \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
@@ -188,12 +195,13 @@ DEF_FILE= \
 	".\OleDb.def"
 LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
+	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\TypeInfo.obj"
+	"$(INTDIR)\TypeInfo.obj" \
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -234,6 +242,7 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.obj"
 	-@erase "$(INTDIR)\OleDb.pch"
 	-@erase "$(INTDIR)\OleDb.res"
+	-@erase "$(INTDIR)\PgCommand.obj"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgSess.obj"
@@ -263,12 +272,13 @@ DEF_FILE= \
 	".\OleDb.def"
 LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
+	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\TypeInfo.obj"
+	"$(INTDIR)\TypeInfo.obj" \
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -304,6 +314,8 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.pch"
 	-@erase "$(INTDIR)\OleDb.res"
 	-@erase "$(INTDIR)\OleDb.sbr"
+	-@erase "$(INTDIR)\PgCommand.obj"
+	-@erase "$(INTDIR)\PgCommand.sbr"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgDs.sbr"
 	-@erase "$(INTDIR)\PgRS.obj"
@@ -333,6 +345,7 @@ BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
 BSC32_SBRS= \
 	"$(INTDIR)\OleDb.sbr" \
+	"$(INTDIR)\PgCommand.sbr" \
 	"$(INTDIR)\PgDs.sbr" \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
@@ -350,12 +363,13 @@ DEF_FILE= \
 	".\OleDb.def"
 LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
+	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\TypeInfo.obj"
+	"$(INTDIR)\TypeInfo.obj" \
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -390,6 +404,7 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.obj"
 	-@erase "$(INTDIR)\OleDb.pch"
 	-@erase "$(INTDIR)\OleDb.res"
+	-@erase "$(INTDIR)\PgCommand.obj"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgSess.obj"
@@ -419,12 +434,13 @@ DEF_FILE= \
 	".\OleDb.def"
 LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
+	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\TypeInfo.obj"
+	"$(INTDIR)\TypeInfo.obj" \
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -465,6 +481,7 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.obj"
 	-@erase "$(INTDIR)\OleDb.pch"
 	-@erase "$(INTDIR)\OleDb.res"
+	-@erase "$(INTDIR)\PgCommand.obj"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgSess.obj"
@@ -494,12 +511,13 @@ DEF_FILE= \
 	".\OleDb.def"
 LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
+	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\TypeInfo.obj"
+	"$(INTDIR)\TypeInfo.obj" \
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -574,7 +592,7 @@ SOURCE=.\OleDb.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\OleDb.obj"	"$(INTDIR)\OleDb.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h" ".\OleDb_i.c"
+"$(INTDIR)\OleDb.obj"	"$(INTDIR)\OleDb.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb_i.c" ".\OleDb.h"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
@@ -623,6 +641,46 @@ SOURCE=.\OleDb.rc
 "$(INTDIR)\OleDb.res" : $(SOURCE) "$(INTDIR)" ".\OleDb.tlb"
 	$(RSC) $(RSC_PROJ) $(SOURCE)
 
+
+SOURCE=.\PgCommand.cpp
+
+!IF  "$(CFG)" == "OleDb - Win32 Debug"
+
+
+"$(INTDIR)\PgCommand.obj"	"$(INTDIR)\PgCommand.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
+
+
+"$(INTDIR)\PgCommand.obj"	"$(INTDIR)\PgCommand.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
+
+
+"$(INTDIR)\PgCommand.obj" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinDependency"
+
+
+"$(INTDIR)\PgCommand.obj"	"$(INTDIR)\PgCommand.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Release MinSize"
+
+
+"$(INTDIR)\PgCommand.obj" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Release MinDependency"
+
+
+"$(INTDIR)\PgCommand.obj" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ENDIF 
 
 SOURCE=.\PgDs.cpp
 
