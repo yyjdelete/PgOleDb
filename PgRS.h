@@ -47,10 +47,7 @@ public:
     {
     }
     ~CPgVirtualArray();
-    void AttachSess( CPgSession *session )
-    {
-        m_session=session;
-    }
+    void AttachSess( CPgSession *session );
     void SetResult( PGresult *res )
     {
         RemoveAll();
@@ -79,22 +76,53 @@ public:
     }
 };
 
-class CPgRowset : public CRowsetImpl< CPgRowset, CPgRemoteStorage, CPgCommand, CPgVirtualArray >,
+// CATLCOLUMNINFO
+class CATLCOLUMNINFO : public ATLCOLUMNINFO {
+    void copy( const ATLCOLUMNINFO &rhs ) {
+        pwszName=new OLECHAR[lstrlenW(rhs.pwszName)+1];
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO copy 0x%p->0x%p\n", rhs.pwszName, pwszName );
+        lstrcpyW(pwszName, rhs.pwszName);
+    }
+public:
+    CATLCOLUMNINFO() {
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO() 0x%p\n", this);
+        pwszName=NULL;
+    }
+    ~CATLCOLUMNINFO() {
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO delete 0x%p pwszName=0x%p\n", this,
+            pwszName);
+        delete [] pwszName;
+    }
+    CATLCOLUMNINFO( const CATLCOLUMNINFO &rhs ) {
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO( const CATLCOLUMNINFO &rhs ) 0x%p\n", this);
+       *static_cast<ATLCOLUMNINFO *>(this)=rhs;
+        copy(rhs);
+    }
+    CATLCOLUMNINFO( const ATLCOLUMNINFO &rhs ) {
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO( const ATLCOLUMNINFO &rhs ) 0x%p\n", this);
+        *static_cast<ATLCOLUMNINFO *>(this)=rhs;
+        copy(rhs);
+    }
+
+    CATLCOLUMNINFO &operator=( const ATLCOLUMNINFO &rhs ) {
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO=( const ATLCOLUMNINFO &rhs ) 0x%p pwszName=0x%p\\n",
+            this, pwszName);
+        delete [] pwszName;
+        *static_cast<ATLCOLUMNINFO *>(this)=rhs;
+        copy(rhs);
+    }
+    CATLCOLUMNINFO &operator=( const CATLCOLUMNINFO &rhs ) {
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO=( const CATLCOLUMNINFO &rhs ) 0x%p\n", this);
+        *this=static_cast<const ATLCOLUMNINFO &>(rhs);
+    }
+};
+
+class CPgRowset :
+    public CRowsetImpl< CPgRowset, CPgRemoteStorage, CPgCommand, CPgVirtualArray >,
     public IPgRowset
 {
 public:
     HRESULT Execute(DBPARAMS * pParams, LONG* pcRowsAffected);
-    void SetColInfo( const CSimpleArray<CATLCOLUMNINFO> &info ) {
-        /* RANT - You would expect a well constructed class to either support deep copy
-         * via m_colInfo=info, or to disable the copy constructor. Anyone who has ever
-         * read Scott Meyers' excellent "Effective C++" should know that. I guess someone at
-         * MS didn't bother with this one. *sigh*.
-         */
-        // Traversing backwards results in a single allocation, and no copy
-        for( int i=0; i<info.GetSize(); ++i ) {
-            m_colInfo.Add(info[i]);
-        }
-    }
     static ATLCOLUMNINFO* GetColumnInfo(CPgRowset *pv, ULONG *pcCols)
 	{
         ATLCOLUMNINFO *ret;
@@ -119,6 +147,9 @@ BEGIN_COM_MAP(CPgRowset)
 	COM_INTERFACE_ENTRY(IPgRowset)
 END_COM_MAP()
 
+    HRESULT PostConstruct( CPgSession *sess, PGresult *pRes );
+
+    ~CPgRowset();
 private:
     CSimpleArray<ATLCOLUMNINFO> m_colInfo;
     friend class CPgRemoteStorage;

@@ -34,6 +34,7 @@ import "ocidl.idl";
 	interface IPgSession : IUnknown
 	{
 		[id(1), helpstring("Connect to database with connection string")] HRESULT PgConnectDB([in] BSTR connectString);
+        [id(2), helpstring("Find out whether currently inside a transaction")] HRESULT PgTransactionLevel([out] DWORD *level);
 	};
 
     [
@@ -43,6 +44,16 @@ import "ocidl.idl";
         pointer_default(unique)
     ]
     interface IPgRowset : IUnknown
+    {
+    };
+
+    [
+        object,
+        uuid(56275907-F87E-4dc0-9E48-8A5281B02778),
+        helpstring("IPgCommand Interface"),
+        pointer_default(unique)
+    ]
+    interface IPgCommand : IUnknown
     {
     };
 [

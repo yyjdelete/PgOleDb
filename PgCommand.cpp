@@ -24,6 +24,7 @@
 #include "OleDb.h"
 #include "PgCommand.h"
 #include "PgSess.h"
+#include "PgMultipleResults.h"
 
 // Static functions
 static HRESULT ParseDBBind( const DBBINDING *bindings, const void *pData, DWORD &status,
@@ -130,135 +131,207 @@ static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, const vo
 HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParams, 
 								 LONG * pcRowsAffected, IUnknown ** ppRowset)
 {
-    ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute\n");
-    HRESULT hr;
     USES_CONVERSION;
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute\n");
+    HRESULT hr=S_OK;
+    // The transaction object is not exception safe, so we need to manually release it at the end
+    // of the function. This requires that certain vars will be available outside of the "try" block
+    bool transactioninitiated=false;
+    CPgSession *pgsess=NULL;
+    CComPtr<IPgSession> isess;
 
-    if( m_parsed_command.length()==0 ) {
-        HRESULT hr=FillParams();
+    try {
+        if( m_parsed_command.length()==0 ) {
+            HRESULT hr=FillParams();
+            
+            if( FAILED(hr) )
+                throw PgOleError(hr, "FillParams failed at parsing the command");
+        }
+        
+        /* Get the session object, where our connection lies */
+        
+        hr=GetSite(IID_IPgSession, reinterpret_cast<void **>(&isess));
+        if( FAILED(hr) ) {
+            throw PgOleError(hr, "couldn't get session");
+        }
+        
+        pgsess=static_cast<CPgSession *>(static_cast<IPgSession *>(isess));
+        
+        // XXX We're not using a cursor right now.
+        //CComBSTR command=OLESTR("DECLARE oledbcursor BINARY CURSOR WITH HOLD FOR ");
+        //command+=szCommand;
+        
+        size_t num_params=m_params.size();
+        auto_array<unsigned int> paramTypes(new unsigned int [num_params]);
+        auto_array<char *> paramValues(new char *[num_params]);
+        auto_array<int> paramLengths(new int[num_params]);
+        auto_array<int> paramFormats(new int[num_params]);
+        
+        for( int i=0; i<num_params; ++i ) {
+            paramTypes[i]=m_params[i].oid;
+            paramFormats[i]=1;
+        }
+        
+        auto_array<char> databuff;
+        
+        hr=FillinValues( paramValues.get(), paramLengths.get(), num_params, pParams, pgsess,
+            databuff );
+        
+        if( FAILED(hr) ) {
+            throw PgOleError(hr, "FillinValues failed");
+        }
+        
+        // We need to be inside a transaction if we are to get MultipleResults answers
+        {
+            DWORD transactionlevel;
+            pgsess->PgTransactionLevel(&transactionlevel);
 
-        if( FAILED(hr) )
-            return hr;
-    }
-    
-    /* Get the session object, where our connection lies */
-    IPgSession *isess=NULL;
-    hr=GetSite(IID_IPgSession, reinterpret_cast<void **>(&isess));
-    if( FAILED(hr) ) {
-        ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute couldn't get session\n");
-        return hr;
-    }
-    CPgSession *pgsess=static_cast<CPgSession *>(isess);
+            if( riid==IID_IMultipleResults && transactionlevel==0 ) {
+                hr=pgsess->StartTransaction(ISOLATIONLEVEL_READCOMMITTED, 0, NULL,
+                    &transactionlevel );
+                if( FAILED(hr) )
+                    throw PgOleError( hr, "Failed creating an explicit transaction for the command" );
 
-    // XXX Wer'e not using a cursor right now.
-    //CComBSTR command=OLESTR("DECLARE oledbcursor BINARY CURSOR WITH HOLD FOR ");
-    //command+=szCommand;
-
-    size_t num_params=m_params.size();
-    unsigned int *paramTypes=new unsigned int [num_params];
-    char **paramValues=new char *[num_params];
-    int *paramLengths=new int[num_params];
-    int *paramFormats=new int[num_params];
-
-    for( int i=0; i<num_params; ++i ) {
-        paramTypes[i]=m_params[i].oid;
-        paramFormats[i]=1;
-    }
-
-    char *databuff=NULL;
-
-    hr=FillinValues( paramValues, paramLengths, num_params, pParams, pgsess, &databuff );
-
-    if( FAILED(hr) ) {
-        delete [] paramTypes;
-        delete [] paramValues;
-        delete [] paramLengths;
-        delete [] paramFormats;
-
-        isess->Release();
-
-        return hr;
-    }
-
-    PGresult *res = pgsess->PQexec(OLE2CU8(m_parsed_command),
-        num_params, paramTypes, paramValues, paramLengths, paramFormats );
-    ExecStatusType stat=PQresultStatus(res);
-
-    delete [] paramTypes;
-    delete [] paramValues;
-    delete [] paramLengths;
-    delete [] paramFormats;
-
-    AtlTrace2(atlTraceDBProvider, 0, "CPgCommand::Execute got status \"%s\" from command\n",
-        PQresStatus(stat) );
-
-    CPgRowset* pRowset;
-    hr=CreateRowset(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, pRowset);
-
-    if( FAILED(hr) ) {
-        ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute Error creating rowset\n");
-        return hr;
-    }
-
-    pRowset->m_rgRowData.SetResult(res);
-    
-    switch( stat ) {
-    case PGRES_COMMAND_OK:
-        /* Ok, but no results */
+                transactioninitiated=true;
+            }
+        }
+        PGresult *res = pgsess->PQexec(OLE2CU8(m_parsed_command),
+            num_params, paramTypes.get(), paramValues.get(), paramLengths.get(), paramFormats.get() );
+        
+        paramTypes.reset();
+        paramValues.reset();
+        paramLengths.reset();
+        paramFormats.reset();
+        
         if( pcRowsAffected!=NULL )
             *pcRowsAffected=atol(PQcmdTuples(res));
-        break;
-    case PGRES_TUPLES_OK:
-        {
-            /* Ok, results to return */
-            for( int i=0; i<PQnfields(res); ++i ) {
-                ATLCOLUMNINFO info;
-                
-                info.pwszName=A2OLE(PQfname(res, i));
-                info.iOrdinal=i+1; // XXX Only bookmark is 0
-                info.cbOffset=0;
-                        
-                unsigned long restype=PQftype(res, i);
-                const typeinfo *typinfo=pgsess->GetTypeInfo(restype);
 
-                if( typinfo!=NULL ) {
-                    typinfo->Status( typinfo, &info, res, i );
-                } else {
-                    // We are asked to work with unhandled data type
-                    ATLASSERT(!"Unhandled type in query result");
-
-                    typeinfo::StatUnknown( &info, res, i );
-                }
-
-                // Add the column to the array
-                m_colInfo.Add(CATLCOLUMNINFO(info));
-            }
-
-            pRowset->SetColInfo(m_colInfo);    
+        hr=CreateResult(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, res );
+        
+        if( FAILED(hr) ) {
+            throw PgOleError(hr, "Error creating rowset");
         }
-        break;
-    case PGRES_EMPTY_QUERY:
-        /* No command? */
-        hr=DB_E_NOCOMMAND;
-        break;
-//    case PGRES_FATAL_ERROR:
-//        hr=DB_E_ERRORSINCOMMAND;
-//        break;
-    default:
-        AtlTrace2(atlTraceDBProvider, 0, "CPgCommand::Execute unhandled status\n%s\n",
-            pgsess->PQerrorMessage() );
-        /* XXX until we return error details */
-        MessageBox(NULL, static_cast<CPgSession *>(isess)->PQerrorMessage(),
-            "CPgCommand:Execute unhandled error", MB_ICONEXCLAMATION|MB_OK );
-        ATLASSERT(FALSE);
-        hr=E_FAIL;
-        break;
+                
+    } catch( const PgOleError &err ) {
+        hr=err.hr();
+        ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute error: %s\n", err.str());
     }
-    
-    /* Clear out the no longer needed session class */
-    pgsess=NULL;
-    isess->Release();
-    isess=NULL;
+
+    if( transactioninitiated ) {
+        pgsess->Commit(FALSE, 0, 0 );
+    }
+
+    return hr;
+}
+
+HRESULT CPgCommand::CreateResult(IUnknown* pUnkOuter, REFIID riid,
+                                 DBPARAMS * pParams, LONG * pcRowsAffected,
+                                 IUnknown** ppRowset,
+                                 PGresult *pRes)
+{
+    HRESULT hr;
+
+    // XXX Need to check whether DBPROP_MULTIPLERESULTS was set on the command?
+    if( riid==IID_IMultipleResults ) {
+        hr=CreateMultiResult(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, pRes );
+    } else {
+        hr=CreateRowset(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, pRes );
+    }
+
+    return hr;
+}
+
+HRESULT CPgCommand::CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
+                                 DBPARAMS * pParams, LONG * pcRowsAffected,
+                                 IUnknown** ppRowset,
+                                 PGresult *pRes)
+{
+    HRESULT hr;
+
+    // Create an IMultipleResults object
+
+    if ((pUnkOuter != NULL) && !InlineIsEqualUnknown(riid))
+        throw PgOleError(DB_E_NOAGGREGATION, "No aggregate support" );
+
+    CComPolyObject<CPgMultipleResults> *pMultiResults;
+    hr=CComPolyObject<CPgMultipleResults>::CreateInstance(pUnkOuter, &pMultiResults);
+    if( FAILED(hr) )
+        throw PgOleError(hr, "Failed when creating IMultipleResults");
+
+	CComPtr<IUnknown> spUnk;
+	hr = pMultiResults->QueryInterface(&spUnk);
+	if (FAILED(hr))
+	{
+		delete pMultiResults; // must hand delete as it is not ref'd
+		throw PgOleError(hr, "Failed querying IMultipleResults object's IUnknown");
+	}
+
+    CComPtr<IMultipleResults> spMultiRes;
+    hr=spUnk->QueryInterface(&spMultiRes);
+    if( FAILED(hr) )
+        throw PgOleError(hr, "Internal error");
+
+    CPgMultipleResults *pgMultiRes=static_cast<CPgMultipleResults *>(
+        static_cast<IMultipleResults *>(spMultiRes));
+	pgMultiRes->SetSite(GetUnknown());
+
+	if (InlineIsEqualGUID(riid, IID_NULL) || ppRowset == NULL)
+	{
+		if (ppRowset != NULL)
+			*ppRowset = NULL;
+		return hr;
+	}
+
+    hr=pMultiResults->QueryInterface(riid, reinterpret_cast<void **>(ppRowset));
+    if( FAILED(hr) )
+        throw PgOleError(hr, "Last QueryInterface on IMultipleResults failed");
+
+    // Check whether this is a single row of type "refcursor"
+    if( PQnfields(pRes)!=1 || PQftype( pRes, 0 )!=1790 ) {
+        // A single result - create a rowset.
+        CComPtr<IPgRowset> pRowset;
+        hr=CreateRowset(pUnkOuter, IID_IPgRowset, pParams, pcRowsAffected,
+            reinterpret_cast<IUnknown **>(&pRowset), pRes );
+        if( FAILED(hr) )
+            throw( hr, "Couldn't create result rowset" );
+
+        CPgRowset *pgRow=static_cast<CPgRowset *>(static_cast<IPgRowset *>(pRowset));
+
+        pgMultiRes->AddRowset(pgRow);
+    } else {
+        // Multiple results
+        CComPtr<IPgSession> isess=NULL;
+        hr=GetDBSession(IID_IPgSession, reinterpret_cast<IUnknown **>(&isess));
+        
+        CPgSession *pgsess=static_cast<CPgSession *>(static_cast<IPgSession *>(isess));
+
+        for( int i=0; i<PQntuples(pRes); ++i ) {
+            size_t cursorlength=PQgetlength( pRes, i, 0 );
+
+            char *cursorname=PQgetvalue( pRes, i, 0 );
+
+            // Prepare a new query to fetch the results
+            _bstr_t fetchquery="fetch all from \"";
+            fetchquery+=cursorname;
+            fetchquery+="\"";
+
+            PGresult *res=pgsess->PQexec( fetchquery );
+
+            // And now create a Rowset from this newly executed query
+            CComPtr<IPgRowset> pRowset;
+            hr=CreateRowset(pUnkOuter, IID_IPgRowset, pParams, pcRowsAffected,
+                reinterpret_cast<IUnknown **>(&pRowset), res );
+            if( FAILED(hr) )
+            {
+                PQclear(res);
+                throw( hr, "Couldn't create some of the result rowsets" );
+            }
+            
+            CPgRowset *pgRow=static_cast<CPgRowset *>(static_cast<IPgRowset *>(pRowset));
+            
+            pgMultiRes->AddRowset(pgRow);
+        }
+    }
 
     return hr;
 }
@@ -266,26 +339,40 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
 HRESULT CPgCommand::CreateRowset(IUnknown* pUnkOuter, REFIID riid,
                                  DBPARAMS * pParams, LONG * pcRowsAffected,
                                  IUnknown** ppRowset,
-                                 CPgRowset*& pRowsetObj)
+                                 PGresult *pRes)
 {
-    HRESULT hr=ICommandTextImpl<CPgCommand>::CreateRowset( pUnkOuter, riid, pParams,
+    HRESULT hr;
+
+    // XXX Standard violating behaviour. If backend command returned a table of a single
+    // column of refcursors, we would normally treat it as different results for
+    // IMultipleResults. However, if IMultipleResults was not requested on the rowset,
+    // specs say we should return the first row. Instead, we are reutrning the refcursors
+    // themselves.
+    CPgRowset *pRowsetObj;
+
+    hr=ICommandTextImpl<CPgCommand>::CreateRowset( pUnkOuter, riid, pParams,
         pcRowsAffected, ppRowset, pRowsetObj );
 
     if( SUCCEEDED(hr) ) {
-        IPgRowset *object;
+        CComPtr<IUnknown> rowset;
+        rowset.Attach(*ppRowset); // Don't increment refcount, unless all tests succeed
+
+        CComPtr<IPgRowset> object;
 
         hr=(*ppRowset)->QueryInterface(&object);
         if(SUCCEEDED(hr)) {
-            IPgSession *isess=NULL;
-            hr=GetSite(IID_IPgSession, reinterpret_cast<void **>(&isess));
+            CComPtr<IPgSession> isess=NULL;
+            hr=GetDBSession(IID_IPgSession, reinterpret_cast<IUnknown **>(&isess));
 
-            static_cast<CPgRowset *>(object)->m_rgRowData.AttachSess(
-                static_cast<CPgSession *>(isess));
-            object->Release();
-            // isess is not released here. It will be released by m_rgRowData
+            CPgRowset *prs=static_cast<CPgRowset *>(static_cast<IPgRowset *>(object));
+            prs->PostConstruct( static_cast<CPgSession *>(static_cast<IPgSession *>(isess)),
+                pRes );
         } else {
-            (*ppRowset)->Release();
+            throw PgOleError( hr, "Couldn't get desired interface for created rowset");
         }
+
+        // Ok, we're sure it's a valid rowset - make sure our CComPtr doesn't release it
+        (*ppRowset)->AddRef();
     }
 
     return hr;
@@ -293,18 +380,8 @@ HRESULT CPgCommand::CreateRowset(IUnknown* pUnkOuter, REFIID riid,
 
 void CPgCommand::FinalRelease()
 {
-    PQclear(m_queryRes); // I believe this needs to go here
     ATLASSERT(m_spUnkSite != 0);
-    IPgSession *isess;
-    HRESULT hr=m_spUnkSite->QueryInterface(&isess);
-    
-    if( SUCCEEDED(hr) ) {
-        CPgSession *pSess = static_cast<CPgSession *>(isess);
-        //PGresult *res = pSess->PQexec("CLOSE oledbcursor");
-        //PQclear(res);
-        
-        isess->Release();
-    }
+
     IAccessorImpl<CPgCommand>::FinalRelease();
 }
 HRESULT CPgCommand::GetParameterInfo (
@@ -614,7 +691,7 @@ error:
 }
 
 HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_t num_params,
-                                 DBPARAMS * pParams, CPgSession *sess, char **buffer )
+                                 DBPARAMS * pParams, CPgSession *sess, auto_array<char> &buffer )
 {
     if( num_params==0 && pParams==NULL )
         return S_OK;
@@ -628,7 +705,6 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
     HRESULT hr=S_OK;
     DBBINDING *rgBindings=NULL;
 
-    *buffer=NULL;
     try {
         DBACCESSORFLAGS dwAccessorFlags;
         ULONG cBindings;
@@ -662,21 +738,20 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
             // XXX Need to handle the status
         }
 
-        *buffer=new char [buffsize];
+        buffer=auto_array<char>(new char [buffsize]);
         for( i=0; i<cBindings; ++i ) {
             const typeinfo *info=sess->GetTypeInfo(m_params[i].oid);
 
-            paramValues[i]=*buffer+offsets[i];
+            paramValues[i]=buffer.get()+offsets[i];
 
-            hr=PGCopy( info, &rgBindings[i], pParams->pData, *buffer+offsets[i],
+            hr=PGCopy( info, &rgBindings[i], pParams->pData, buffer.get()+offsets[i],
                 paramLengths[i], m_spConvert );
 
             if( FAILED(hr) )
                 throw(hr);
         }
     } catch(HRESULT res) {
-        delete [] *buffer;
-        *buffer=NULL;
+        buffer.reset();
         hr=res;
     }
 
@@ -685,3 +760,31 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
     return hr;
 }
 
+ATLCOLUMNINFO* CPgCommand::GetColumnInfo(CPgCommand* pv, ULONG* pcInfo)
+{
+    return CPgRowset::GetColumnInfo(pv->m_rowset,pcInfo);
+}
+
+HRESULT CPgCommand::GetColumnInfo ( ULONG        *pcColumns,
+                                   DBCOLUMNINFO **prgInfo,
+                                   OLECHAR      **ppStringsBuffer)
+{
+    if( m_rowset==NULL )
+        return DB_E_NOCOMMAND;
+    // XXX Strictly speaking, we are returning DB_E_NOCOMMAND even when we should have returned
+    // actual results. However, as everybody understands that we cannot return these results
+    // without further execution, they don't call us when we don't have them.
+
+    return static_cast<IColumnsInfo *>(m_rowset)->GetColumnInfo( pcColumns, prgInfo, ppStringsBuffer );
+}
+
+HRESULT CPgCommand::MapColumnIDs ( ULONG        cColumnIDs,
+                                  const DBID   rgColumnIDs[],
+                                  ULONG        rgColumns[])
+{
+    if( m_rowset==NULL )
+        return DB_E_NOCOMMAND;
+    // See XXX comment for GetColumnInfo above.
+
+    return m_rowset->MapColumnIDs (cColumnIDs, rgColumnIDs, rgColumns);
+}

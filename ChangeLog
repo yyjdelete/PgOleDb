@@ -1,3 +1,111 @@
+2004-05-15  shachar
+	* OleDb.rc:
+		Update version number for release 1.0.0.9
+
+	* autoarray.h:
+		Make sure we use "delete []" in all places in auto_array
+
+2004-05-13  shachar
+	* PgDs.cpp:
+		Slight optimization
+
+2004-05-12  shachar
+	* PgMultipleResults.h:
+		file PgMultipleResults.h was initially added on branch
+		B_ROWSET_SEP.
+
+	* OleDb.dsp:
+	* OleDb.mak:
+	* PgCommand.cpp:
+	* PgDS.h:
+	* PgMultipleResults.cpp:
+	* PgMultipleResults.h:
+	* PgRS.cpp:
+	* StdAfx.h:
+		Added "IMultiplResults" to the classes
+
+	* OleDb.dsp:
+	* OleDb.idl:
+	* OleDb.mak:
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* PgDS.h:
+	* PgMultipleResults.cpp:
+	* PgMultipleResults.h:
+	* PgRS.cpp:
+	* PgRS.h:
+	* PgSess.cpp:
+	* PgSess.h:
+	* StdAfx.h:
+		Merged B_ROWSET_SEP into main
+		Lots of code cleanups - moving the data handling code into CPgRowset
+		Implement IMultipleResults
+
+	* OleDb.idl:
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* PgMultipleResults.h:
+	* PgSess.cpp:
+	* PgSess.h:
+		IMultipleResults implemented
+
+	* PgMultipleResults.cpp:
+		file PgMultipleResults.cpp was initially added on branch
+		B_ROWSET_SEP.
+
+2004-05-11  shachar
+	* OleDb.idl:
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* PgRS.cpp:
+	* PgRS.h:
+		Working with access violation seperation of the results parsing into
+		the CPgRowset
+
+	* PgCommand.h:
+	* PgDS.h:
+	* PgRS.cpp:
+	* PgRS.h:
+		Remove unnecessary code
+
+	* PgCommand.h:
+	* PgRS.cpp:
+	* PgRS.h:
+		Fixed access violation, now merely leaking memory.
+
+2004-05-09  shachar
+	* OleDb.dsp:
+	* PgCommand.cpp:
+	* PgCommand.h:
+	* StdAfx.h:
+	* autoarray.h:
+		Some code cleanup:
+		Replace manual "new" and "delete" with wrapper calsses
+		Manage the "IPgSession" pointer with a wrapper class
+
+	* PgCommand.cpp:
+	* StdAfx.h:
+		Code cleanup:
+		Convert CPgCommand::Execute to use exceptions
+
+	* PgRS.h:
+		Remove erronous comment
+
+	* PgDS.h:
+		Add placeholder for  IMultipleResults support
+
+	* PgCommand.cpp:
+	* PgCommand.h:
+		Code cleanup:
+		Remove unnecessary variable
+
+2004-05-06  shachar
+	* README:
+		Update the readme.
+
+	* OleDb.rc:
+		Changes for 1.0.0.8
+
 2004-05-05  shachar
 	* PgCommand.cpp:
 	* PgCommand.h:

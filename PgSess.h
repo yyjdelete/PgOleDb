@@ -52,6 +52,7 @@ public:
 		return CreateRowset(pUnk, pTID, pInID, riid, cSets, rgSets, ppRowset, pRowset);
 	}
     STDMETHOD(PgConnectDB)( BSTR connectString );
+    STDMETHOD(PgTransactionLevel)( DWORD *level );
     ~CPgSession()
     {
         PQfinish(m_conn);

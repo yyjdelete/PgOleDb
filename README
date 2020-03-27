@@ -20,3 +20,10 @@ location - database name
 User ID - PG user name to log in as 
 password - the password
 timeout - how long to wait when establishing the initial connection
+
+COMPATIBILITY
+At present, PgOleDb requires a PQLib of version 7.4 or up. It also requires a backend of
+version 7.4 or up. The later requirement may be loosened in the future.
+
+Attempting to connect to a database running version 7.3.x or down will result in an error
+message saying "Couldn't query pg_type".

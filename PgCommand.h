@@ -37,38 +37,6 @@ public:
     }
 };
 
-// CATLCOLUMNINFO
-class CATLCOLUMNINFO : public ATLCOLUMNINFO {
-    void copy( const ATLCOLUMNINFO &rhs ) {
-        pwszName=new OLECHAR[lstrlenW(rhs.pwszName)+1];
-        lstrcpyW(pwszName, rhs.pwszName);
-    }
-public:
-    CATLCOLUMNINFO() {
-        pwszName=NULL;
-    }
-    ~CATLCOLUMNINFO() {
-        delete [] pwszName;
-    }
-    CATLCOLUMNINFO( const CATLCOLUMNINFO &rhs ) {
-        *static_cast<ATLCOLUMNINFO *>(this)=rhs;
-        copy(rhs);
-    }
-    CATLCOLUMNINFO( const ATLCOLUMNINFO &rhs ) {
-        *static_cast<ATLCOLUMNINFO *>(this)=rhs;
-        copy(rhs);
-    }
-
-    CATLCOLUMNINFO &operator=( const ATLCOLUMNINFO &rhs ) {
-        delete [] pwszName;
-        *static_cast<ATLCOLUMNINFO *>(this)=rhs;
-        copy(rhs);
-    }
-    CATLCOLUMNINFO &operator=( const CATLCOLUMNINFO &rhs ) {
-        *this=static_cast<const ATLCOLUMNINFO &>(rhs);
-    }
-};
-
 class CPgRowset;
 
 // CPgCommand
@@ -79,8 +47,9 @@ class ATL_NO_VTABLE CPgCommand :
 	public ICommandPropertiesImpl<CPgCommand>,
 	public IObjectWithSiteImpl<CPgCommand>,
 	public IConvertTypeImpl<CPgCommand>,
-	public IColumnsInfoImpl<CPgCommand>,
-	public ICommandWithParameters
+	public ICommandWithParameters,
+    public IPgCommand,
+	public IColumnsInfo
 {
 public:
 BEGIN_COM_MAP(CPgCommand)
@@ -92,12 +61,19 @@ BEGIN_COM_MAP(CPgCommand)
 	COM_INTERFACE_ENTRY(IColumnsInfo)
 	COM_INTERFACE_ENTRY(IConvertType)
 	COM_INTERFACE_ENTRY(ICommandWithParameters)
+    COM_INTERFACE_ENTRY(IPgCommand)
 END_COM_MAP()
 // ICommand
 public:
-    CPgCommand() : m_queryRes(NULL)
+    CPgCommand() : m_rowset(NULL)
     {
     }
+    ~CPgCommand()
+    {
+        // Make sure that the rowset has already been freed when we are freed
+        ATLASSERT(m_rowset==NULL);
+    }
+
 	HRESULT FinalConstruct()
 	{
 		HRESULT hr = CConvertHelper::FinalConstruct();
@@ -112,10 +88,7 @@ public:
 	void FinalRelease();
 	HRESULT WINAPI Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParams, 
 						  LONG * pcRowsAffected, IUnknown ** ppRowset);
-	static ATLCOLUMNINFO* GetColumnInfo(CPgCommand* pv, ULONG* pcInfo)
-	{
-        return CPgRemoteStorage::GetColumnInfo(pv,pcInfo);
-	}
+	static ATLCOLUMNINFO* GetColumnInfo(CPgCommand* pv, ULONG* pcInfo);
     STDMETHOD(SetCommandText)(REFGUID rguidDialect,LPCOLESTR pwszCommand)
 	{
         USES_CONVERSION;
@@ -141,6 +114,16 @@ public:
         ULONG                   cParams,
         const ULONG __RPC_FAR   rgParamOrdinals[],
         const DBPARAMBINDINFO   rgParamBindInfo[]);
+
+    // IColumnsInfo
+    STDMETHOD(GetColumnInfo) (
+        ULONG        *pcColumns,
+        DBCOLUMNINFO **prgInfo,
+        OLECHAR      **ppStringsBuffer);
+    STDMETHOD(MapColumnIDs) (
+        ULONG        cColumnIDs,
+        const DBID   rgColumnIDs[],
+        ULONG        rgColumns[]);
 BEGIN_PROPSET_MAP(CPgCommand)
 	BEGIN_PROPERTY_SET(DBPROPSET_ROWSET)
 		PROPERTY_INFO_ENTRY(IAccessor)
@@ -161,13 +144,18 @@ BEGIN_PROPSET_MAP(CPgCommand)
 	END_PROPERTY_SET(DBPROPSET_ROWSET)
 END_PROPSET_MAP()
 private:
-	PGresult *m_queryRes;  // Query results
-    CSimpleArray<CATLCOLUMNINFO> m_colInfo;
+    HRESULT CreateResult(IUnknown* pUnkOuter, REFIID riid,
+        DBPARAMS * pParams, LONG * pcRowsAffected,
+        IUnknown** ppRowset,
+        PGresult *pRes);
+    HRESULT CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
+        DBPARAMS * pParams, LONG * pcRowsAffected,
+        IUnknown** ppRowset,
+        PGresult *pRes);
     HRESULT CreateRowset(IUnknown* pUnkOuter, REFIID riid,
         DBPARAMS * pParams, LONG * pcRowsAffected,
         IUnknown** ppRowset,
-        CPgRowset*& pRowsetObj);
-    friend class CPgRemoteStorage;
+        PGresult *pRes);
 
     // CommandWithParameters related data
     struct param_info {
@@ -184,8 +172,16 @@ private:
     std::vector<param_info> m_params;
 	HRESULT FillParams();
     HRESULT FillinValues( char *paramValues[], int paramLengths[], size_t num_params,
-        DBPARAMS * pParams, class CPgSession *session, char **buffer );
+        DBPARAMS * pParams, class CPgSession *session, auto_array<char> &buffer );
     _bstr_t m_parsed_command; // The command text after parsing
+
+    CPgRowset *m_rowset;
+public:
+    // A function for CPgRowset to notify us that it's dieing
+    void ClearRowset( const CPgRowset *rs ) {
+        if( m_rowset==rs )
+            m_rowset=NULL;
+    }
 };
 
 #endif //__CPgRowset_H_

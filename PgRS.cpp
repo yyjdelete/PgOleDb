@@ -29,7 +29,8 @@ HRESULT CPgRowset::Execute(DBPARAMS * pParams, LONG* pcRowsAffected)
 
 CPgVirtualArray::~CPgVirtualArray()
 {
-    PQclear(m_res);
+    if( m_res!=NULL )
+        PQclear(m_res);
     m_session->Release();
     m_session=NULL;
 }
@@ -87,3 +88,84 @@ DBSTATUS CPgVirtualArray::GetDBStatus(CSimpleRow *pRow, ATLCOLUMNINFO *pColInfo)
         return DBSTATUS_S_OK;
 }
 
+void CPgVirtualArray::AttachSess( CPgSession *session )
+{
+    m_session=session;
+    m_session->AddRef();
+}
+
+HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
+{
+    USES_CONVERSION;
+    m_rgRowData.AttachSess( sess );
+    m_rgRowData.SetResult( pRes );
+
+    ExecStatusType stat=PQresultStatus(pRes);
+
+    AtlTrace2(atlTraceDBProvider, 0, "CPgRowset::PostConstruct got status \"%s\" from command\n",
+        PQresStatus(stat) );
+        
+    switch( stat ) {
+    case PGRES_COMMAND_OK:
+        /* Ok, but no results */
+        break;
+    case PGRES_TUPLES_OK:
+        {
+            /* Ok, results to return */
+            for( int i=0; i<PQnfields(pRes); ++i ) {
+                ATLCOLUMNINFO info;
+                
+                OLECHAR *colname=U82W(PQfname(pRes, i));
+                info.pwszName=new OLECHAR[lstrlenW(colname)+1];
+                lstrcpyW(info.pwszName, colname );
+                //info.pwszName=U82W(PQfname(pRes, i));
+                info.iOrdinal=i+1; // XXX Only bookmark is 0. We don't support bookmarks.
+                info.cbOffset=0;
+                
+                unsigned long pRestype=PQftype(pRes, i);
+                const typeinfo *typinfo=sess->GetTypeInfo(pRestype);
+                
+                if( typinfo!=NULL ) {
+                    typinfo->Status( typinfo, &info, pRes, i );
+                } else {
+                    // We are asked to work with unhandled data type
+                    ATLASSERT(!"Unhandled type in query pResult");
+                    
+                    typeinfo::StatUnknown( &info, pRes, i );
+                }
+                
+                // Add the column to the array
+                m_colInfo.Add(info);
+            }
+        }
+        break;
+    case PGRES_EMPTY_QUERY:
+        /* No command? */
+        throw PgOleError(DB_E_NOCOMMAND, "Backend returned \"no command\"");
+        break;
+        //    case PGpRes_FATAL_ERROR:
+        //        hr=DB_E_ERRORSINCOMMAND;
+        //        break;
+    default:
+        AtlTrace2(atlTraceDBProvider, 0, "CPgCommand::Execute unhandled status\n%s\n",
+            sess->PQerrorMessage() );
+        /* XXX until we return error details */
+        MessageBox(NULL, sess->PQerrorMessage(),
+            "CPgCommand:Execute unhandled error", MB_ICONEXCLAMATION|MB_OK );
+        ATLASSERT(FALSE);
+        throw PgOleError(E_FAIL, sess->PQerrorMessage());
+        break;
+    }
+
+    return S_OK;
+}
+
+CPgRowset::~CPgRowset()
+{
+    CComPtr<IPgCommand> cmd;
+
+    // Find out whether we were derived from a CPgCommand, and if so, notify it that we are dead.
+    if( SUCCEEDED(GetSite(IID_IPgCommand, reinterpret_cast<void **>(&cmd)))) {
+        static_cast<CPgCommand *>(static_cast<IPgCommand *>(cmd))->ClearRowset(this);
+    }
+}

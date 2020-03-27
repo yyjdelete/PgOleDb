@@ -85,7 +85,8 @@ HRESULT CPgSource::RefreshConnectString()
                 _bstr_t param;
 
                 FormatParameter( param, results[0].rgProperties[i].vValue );
-                m_strConnect+=param+OLESTR(" ");
+                m_strConnect+=param;
+                m_strConnect+=OLESTR(" ");
             }
         }
 

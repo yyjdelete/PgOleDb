@@ -53,6 +53,8 @@ CLEAN :
 	-@erase "$(INTDIR)\PgCommand.sbr"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgDs.sbr"
+	-@erase "$(INTDIR)\PgMultipleResults.obj"
+	-@erase "$(INTDIR)\PgMultipleResults.sbr"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgRS.sbr"
 	-@erase "$(INTDIR)\PgSess.obj"
@@ -88,7 +90,8 @@ BSC32_SBRS= \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
 	"$(INTDIR)\StdAfx.sbr" \
-	"$(INTDIR)\TypeInfo.sbr"
+	"$(INTDIR)\TypeInfo.sbr" \
+	"$(INTDIR)\PgMultipleResults.sbr"
 
 "$(OUTDIR)\OleDb.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -107,7 +110,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res"
+	"$(INTDIR)\OleDb.res" \
+	"$(INTDIR)\PgMultipleResults.obj"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -147,6 +151,8 @@ CLEAN :
 	-@erase "$(INTDIR)\PgCommand.sbr"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgDs.sbr"
+	-@erase "$(INTDIR)\PgMultipleResults.obj"
+	-@erase "$(INTDIR)\PgMultipleResults.sbr"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgRS.sbr"
 	-@erase "$(INTDIR)\PgSess.obj"
@@ -182,7 +188,8 @@ BSC32_SBRS= \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
 	"$(INTDIR)\StdAfx.sbr" \
-	"$(INTDIR)\TypeInfo.sbr"
+	"$(INTDIR)\TypeInfo.sbr" \
+	"$(INTDIR)\PgMultipleResults.sbr"
 
 "$(OUTDIR)\OleDb.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -201,7 +208,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res"
+	"$(INTDIR)\OleDb.res" \
+	"$(INTDIR)\PgMultipleResults.obj"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -244,6 +252,7 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.res"
 	-@erase "$(INTDIR)\PgCommand.obj"
 	-@erase "$(INTDIR)\PgDs.obj"
+	-@erase "$(INTDIR)\PgMultipleResults.obj"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgSess.obj"
 	-@erase "$(INTDIR)\StdAfx.obj"
@@ -278,7 +287,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res"
+	"$(INTDIR)\OleDb.res" \
+	"$(INTDIR)\PgMultipleResults.obj"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -318,6 +328,8 @@ CLEAN :
 	-@erase "$(INTDIR)\PgCommand.sbr"
 	-@erase "$(INTDIR)\PgDs.obj"
 	-@erase "$(INTDIR)\PgDs.sbr"
+	-@erase "$(INTDIR)\PgMultipleResults.obj"
+	-@erase "$(INTDIR)\PgMultipleResults.sbr"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgRS.sbr"
 	-@erase "$(INTDIR)\PgSess.obj"
@@ -350,7 +362,8 @@ BSC32_SBRS= \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
 	"$(INTDIR)\StdAfx.sbr" \
-	"$(INTDIR)\TypeInfo.sbr"
+	"$(INTDIR)\TypeInfo.sbr" \
+	"$(INTDIR)\PgMultipleResults.sbr"
 
 "$(OUTDIR)\OleDb.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -369,7 +382,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res"
+	"$(INTDIR)\OleDb.res" \
+	"$(INTDIR)\PgMultipleResults.obj"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -406,6 +420,7 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.res"
 	-@erase "$(INTDIR)\PgCommand.obj"
 	-@erase "$(INTDIR)\PgDs.obj"
+	-@erase "$(INTDIR)\PgMultipleResults.obj"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgSess.obj"
 	-@erase "$(INTDIR)\StdAfx.obj"
@@ -440,7 +455,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res"
+	"$(INTDIR)\OleDb.res" \
+	"$(INTDIR)\PgMultipleResults.obj"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -483,6 +499,7 @@ CLEAN :
 	-@erase "$(INTDIR)\OleDb.res"
 	-@erase "$(INTDIR)\PgCommand.obj"
 	-@erase "$(INTDIR)\PgDs.obj"
+	-@erase "$(INTDIR)\PgMultipleResults.obj"
 	-@erase "$(INTDIR)\PgRS.obj"
 	-@erase "$(INTDIR)\PgSess.obj"
 	-@erase "$(INTDIR)\StdAfx.obj"
@@ -517,7 +534,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res"
+	"$(INTDIR)\OleDb.res" \
+	"$(INTDIR)\PgMultipleResults.obj"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -718,6 +736,46 @@ SOURCE=.\PgDs.cpp
 
 
 "$(INTDIR)\PgDs.obj" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ENDIF 
+
+SOURCE=.\PgMultipleResults.cpp
+
+!IF  "$(CFG)" == "OleDb - Win32 Debug"
+
+
+"$(INTDIR)\PgMultipleResults.obj"	"$(INTDIR)\PgMultipleResults.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
+
+
+"$(INTDIR)\PgMultipleResults.obj"	"$(INTDIR)\PgMultipleResults.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
+
+
+"$(INTDIR)\PgMultipleResults.obj" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinDependency"
+
+
+"$(INTDIR)\PgMultipleResults.obj"	"$(INTDIR)\PgMultipleResults.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Release MinSize"
+
+
+"$(INTDIR)\PgMultipleResults.obj" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
+
+
+!ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Release MinDependency"
+
+
+"$(INTDIR)\PgMultipleResults.obj" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
 
 
 !ENDIF 

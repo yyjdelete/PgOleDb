@@ -46,6 +46,7 @@ extern CComModule _Module;
 // A few STL includes
 #include <map>
 #include <vector>
+#include <list>
 
 // Postgresql libpq includes
 #include <libpq-fe.h>
@@ -55,8 +56,25 @@ extern CComModule _Module;
 #endif
 
 #include "Unicode.h"
+#include "autoarray.h"
 
 // catalog/pg_type.h holds the type information
+
+// Class used to report error conditions using exceptions
+class PgOleError {
+    HRESULT m_hr;
+    _bstr_t m_message;
+public:
+    explicit PgOleError( HRESULT hr, const char *message="" ) : m_hr(hr), m_message(message)
+    {
+    }
+    HRESULT hr() const {
+        return m_hr;
+    }
+    const char *str() const {
+        return m_message;
+    }
+};
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

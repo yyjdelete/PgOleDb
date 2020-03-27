@@ -179,6 +179,12 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
 
     return hr;
 }
+HRESULT CPgSession::PgTransactionLevel( DWORD *level )
+{
+    *level=m_transaction?1:0;
+
+    return S_OK;
+}
 
 HRESULT STDMETHODCALLTYPE CPgSession::GetOptionsObject( 
         /* [out] */ ITransactionOptions __RPC_FAR *__RPC_FAR *ppOptions)

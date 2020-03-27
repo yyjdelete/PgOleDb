@@ -302,6 +302,10 @@ SOURCE=.\PgDs.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\PgMultipleResults.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PgRS.cpp
 # End Source File
 # Begin Source File
@@ -323,11 +327,19 @@ SOURCE=.\TypeInfo.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\autoarray.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\PgCommand.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\PgDS.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PgMultipleResults.h
 # End Source File
 # Begin Source File
 
@@ -362,6 +374,10 @@ SOURCE=.\Unicode.h
 SOURCE=.\Pg.rgs
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\.cvsignore
+# End Source File
 # Begin Source File
 
 SOURCE=.\AUTHORS
