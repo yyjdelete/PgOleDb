@@ -104,7 +104,6 @@ void CPgVirtualArray::AttachSess( CPgSession *session )
 
 HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
 {
-    CErrorLookupService::ClearError();
     ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::PostConstruct\n");
     USES_CONVERSION;
     m_rgRowData.AttachSess( sess );

@@ -22,13 +22,26 @@
 #include "stdafx.h"
 #include "typeinfo.h"
 
+// XXX Postgres may send timestamps either as INT64 or as double. There does not appear to be
+// a way to distinguish between the two on the client side.
+#if HAVE_INT64_TIMESTAMP
+typedef __int64 Timestamp;
+#else
+typedef double Timestamp;
+#endif
+
 #define POSTGRES_EPOCH_JDATE 2451545 // date2j(2000,1,1)
 
-static inline void time_modulo( __int64 &t, int &q, const __int64 u )
+static inline void time_modulo( Timestamp &t, int &q, const __int64 u )
 {
     q=(t/u);
     if( q!=0 )
         t-= (q*u);
+
+    if( t<0 ) {
+        t+=u;
+        q-=1;
+    }
 }
 
 static void j2date(int jd, short *year, unsigned short *month, unsigned short *day)
@@ -57,7 +70,7 @@ static void j2date(int jd, short *year, unsigned short *month, unsigned short *d
 	return;
 }	/* j2date() */
 
-static void dt2time(__int64 jd, unsigned short *hour, unsigned short *min, unsigned short *sec,
+static void dt2time(Timestamp jd, unsigned short *hour, unsigned short *min, unsigned short *sec,
                     ULONG *fsec)
 {
 	__int64		time;
@@ -87,19 +100,97 @@ void COPY_timestamp( void *dst, size_t count, const PGresult *res,
     ATLASSERT( count==sizeof(DBTIMESTAMP) );
 
     // Adapted from the Postgresql "timestamp2tm" function
-    int date, date0;
-    __int64 time;
-    const __int64 YEAR=86400000000i64;
-
-    date0=POSTGRES_EPOCH_JDATE;
+    int date;
+    static const int date0=POSTGRES_EPOCH_JDATE;
+    Timestamp time;
+    static const __int64 YEAR=86400000000i64;
 
     typeinfo::StdC_ntoh_8( &time, sizeof(time), res, tup_num, field_num );
+#if !HAVE_INT64_TIMESTAMP
+    time*=1000000;
+#endif
     time_modulo( time, date, YEAR );
 
     date+=date0;
 
     j2date( date, &(ts->year), &(ts->month), &(ts->day) );
     dt2time( time, &(ts->hour), &(ts->minute), &(ts->second), &(ts->fraction) );
+}
+
+void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num)
+{
+    typeinfo::StdStat( _this, colinfo, res, field_num );
+
+    colinfo->bScale=6; // 6 digits of scale
+    colinfo->ulColumnSize=sizeof( DBTIMESTAMP );
+}
+
+int GetWidth_time( const PGresult *res, int tup_num, int field_num )
+{
+    return sizeof( DBTIME ); 
+}
+
+void COPY_time( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num)
+{
+    DBTIME * const ts=reinterpret_cast<DBTIME *>(dst);
+
+    ATLASSERT( count==sizeof(DBTIME) );
+
+    // Adapted from the Postgresql "timestamp2tm" function
+    Timestamp time;
+
+    typeinfo::StdC_ntoh_8( &time, sizeof(time), res, tup_num, field_num );
+#if !HAVE_INT64_TIMESTAMP
+    time*=1000000;
+#endif
+
+    ULONG dummy;
+    dt2time( time, &(ts->hour), &(ts->minute), &(ts->second), &dummy );
+}
+
+void GetStatus_time( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num)
+{
+    typeinfo::StdStat( _this, colinfo, res, field_num );
+
+    colinfo->bScale=~0;
+    colinfo->ulColumnSize=sizeof( DBTIME );
+}
+
+int GetWidth_date( const PGresult *res, int tup_num, int field_num )
+{
+    return sizeof( DBDATE ); 
+}
+
+void COPY_date( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num)
+{
+    DBDATE * const ret=static_cast<DBDATE *>(dst);
+
+    ATLASSERT( count==sizeof(DBDATE) );
+
+    // Adapted from the Postgresql "timestamp2tm" function
+    int date, date0;
+    const __int64 YEAR=86400000000i64;
+
+    date0=POSTGRES_EPOCH_JDATE;
+
+    typeinfo::StdC_ntoh_4( &date, sizeof(date), res, tup_num, field_num );
+
+    date+=date0;
+
+    j2date( date, &(ret->year), &(ret->month), &(ret->day) );
+}
+
+void GetStatus_date( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num)
+{
+    typeinfo::StdStat( _this, colinfo, res, field_num );
+
+    colinfo->bScale=~0;
+    colinfo->ulColumnSize=sizeof( DBDATE );
 }
 
 void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
@@ -127,15 +218,6 @@ void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
         ts->minute=local.wMinute;
         ts->second=local.wSecond;
     }
-}
-
-void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
-        int field_num)
-{
-    typeinfo::StdStat( _this, colinfo, res, field_num );
-
-    colinfo->bScale=6; // 6 digits of scale
-    colinfo->ulColumnSize=sizeof( DBTIMESTAMP );
 }
 
 int GetWidth_string( const PGresult *res, int tup_num, int field_num )
@@ -281,4 +363,81 @@ void GetStatus_numeric( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult 
 {
     typeinfo::StdStat( _this, colinfo, res, field_num );
     colinfo->bScale=0;
+}
+
+static const int DBTYPE_DECIMAL_SHIFT=4;
+
+void COPY_money( void *dst, size_t count, const PGresult *res, int tup_num, int field_num )
+{
+    LARGE_INTEGER * const ret=reinterpret_cast<LARGE_INTEGER *>(dst);
+
+    LONG pgmoney;
+    typeinfo::StdC_ntoh_4( &pgmoney, sizeof(pgmoney), res, tup_num, field_num );
+
+    ATLASSERT( count==sizeof(LARGE_INTEGER) );
+
+    TCHAR IDigits[15];
+    if( GetLocaleInfo( LOCALE_USER_DEFAULT, LOCALE_IDIGITS, IDigits,
+        sizeof(IDigits)/sizeof(TCHAR) )==0 ) {
+        // Couldn't get the locale's currency decimal value.
+        ATLTRACE2(atlTraceDBProvider, 0, "COPY_money: Failed to get locale currency definition: %08h\n",
+            GetLastError());
+        _tcscpy(IDigits, _T("2"));
+    }
+
+    int numdecimal=_ttoi(IDigits);
+
+    // Number is already shifted numdecimal places. Needs to be shifted 4.
+    if( numdecimal>DBTYPE_DECIMAL_SHIFT ) {
+        ATLTRACE2(atlTraceDBProvider, 0, "COPY_money: DBTYPE_CY is defined as maximal 4 decimal places. Current locale requires %d\n",
+            numdecimal );
+        while( numdecimal>DBTYPE_DECIMAL_SHIFT ) {
+            pgmoney/=10;
+            numdecimal--;
+        }
+    }
+
+    ret->QuadPart=pgmoney;
+    while( numdecimal<DBTYPE_DECIMAL_SHIFT ) {
+        ret->QuadPart*=10;
+        numdecimal++;
+    }
+}
+
+void GetStatus_money( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num)
+{
+    typeinfo::StdStat( _this, colinfo, res, field_num );
+    colinfo->ulColumnSize=sizeof(LARGE_INTEGER);
+}
+
+HRESULT PGC_money(const typeinfo *_this, const void *data, size_t length, void *dst,
+                   size_t dstlen )
+{
+    LONGLONG src=static_cast<const LARGE_INTEGER *>(data)->QuadPart;
+
+    TCHAR IDigits[15];
+    if( GetLocaleInfo( LOCALE_USER_DEFAULT, LOCALE_IDIGITS, IDigits,
+        sizeof(IDigits)/sizeof(TCHAR) )==0 ) {
+        // Couldn't get the locale's currency decimal value.
+        ATLTRACE2(atlTraceDBProvider, 0, "COPY_money: Failed to get locale currency definition: %08h\n",
+            GetLastError());
+        _tcscpy(IDigits, _T("2"));
+    }
+
+    int numdecimal=_ttoi(IDigits);
+    
+    while( numdecimal<DBTYPE_DECIMAL_SHIFT ) {
+        numdecimal++;
+        src/=10;
+    }
+
+    while( numdecimal>DBTYPE_DECIMAL_SHIFT ) {
+        numdecimal--;
+        src*=10;
+    }
+
+    LONG pgsrc=src;
+
+    return typeinfo::StdPGC_h2n_4( _this, &pgsrc, sizeof(pgsrc), dst, dstlen );
 }

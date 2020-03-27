@@ -1,6 +1,54 @@
+2005-03-18  shachar
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Add support for the "time" type (oid 1083)
+
+	* TypeInfo.cpp:
+		Timestamp now working with postgres 8 backend, but not 7.4
+
+	* PgSess.cpp:
+	* PgSess.h:
+		Add support for the "unknown" type (oid 705)
+
+	* TypeInfo.cpp:
+		Allow timestamps to work with both possible server side
+		configurations. Sadly, not simultaneously. Compile time option
+		"HAVE_INT64_TIMESTAMP" controls whether timestamps are int64 or
+		double.
+
+	* PgSess.cpp:
+		OID order the structure for easier tracking of unimplemented types
+
+2005-03-17  shachar
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Add support for the "money" type (oid 790)
+
+	* PgSess.cpp:
+	* PgSess.h:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Add support for the "date" type (oid 1082)
+
+	* ErrorLookupService.h:
+	* OleDb.idl:
+	* PgCommand.cpp:
+	* PgRS.cpp:
+	* PgSess.cpp:
+	* PgSess.h:
+		Some more error code cleanup
+		Resolve problem where error info for select was cleared by a later "Commit" operation we perform
+
 2005-03-16  shachar
 	* PgDBSchemaRowsetImpl.h:
 		Implement GetSchemas
+
+	* OleDb.rc:
+		Prepare release 1.0.0.17
 
 2005-03-03  shachar
 	* PgDBSchemaRowsetImpl.h:

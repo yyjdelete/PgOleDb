@@ -1,0 +1,24 @@
+Notes:
+
+The "OpenRowset" implementation is completely untested. As ADO doesn't call OpenRowset,
+this won't affect too many people.
+
+The exact same goes to "GetSchemas" implementation.
+
+The "time", "timestamp" and "timestamptz" types depend on the way the server was compiled.
+PgOleDb can support one or the other representation, but not both. As a result, these types
+may return illegal or incorrect values when certain servers are queried.
+
+New to version 1.0.0.18:
+- Lots of new types supported. Currently supported types are:
+	bool, name, int8, int2, int4, text, oid, xid, float4, float8, unknown, money, text[],
+	bpchar, varchar, date, time, timestamp, timestamptz and numeric, as well as non-builtin
+	types varcharci and utinyint.
+
+
+New to Version 1.0.0.17:
+- Schema support. Only "TABLES" at this point.
+
+New to Version 1.0.0.16:
+- Greatly improve the error reporting
+- Fix the "no error checking on IID_NULL" bug.

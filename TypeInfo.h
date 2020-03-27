@@ -232,6 +232,17 @@ void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
                     int tup_num, int field_num);
 void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
+int GetWidth_date( const PGresult *res, int tup_num, int field_num );
+void COPY_date( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num);
+void GetStatus_date( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num);
+int GetWidth_time( const PGresult *res, int tup_num, int field_num );
+void COPY_time( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num);
+void GetStatus_time( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num);
+
 int GetWidth_string( const PGresult *res, int tup_num, int field_num );
 void COPY_string( void *dst, size_t count, const PGresult *res,
                     int tup_num, int field_num);
@@ -243,5 +254,11 @@ void COPY_numeric( void *dst, size_t count, const PGresult *res,
                     int tup_num, int field_num);
 void GetStatus_numeric( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
+
+void COPY_money( void *dst, size_t count, const PGresult *res, int tup_num, int field_num );
+void GetStatus_money( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num);
+HRESULT PGC_money(const typeinfo *_this, const void *data, size_t length, void *dst,
+                   size_t dstlen );
 
 #endif // __type_info_H_

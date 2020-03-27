@@ -60,6 +60,7 @@ public:
     STDMETHOD(ReleaseErrors)(const DWORD dwDynamicErrorID);
 
     static void ClearError() {
+        ATLTRACE2(atlTraceDBProvider, 0, "CErrorLookupService::ClearError" );
         SetErrorInfo(0, NULL);
     }
     static void ReportError(HRESULT hres, const IID &Interface);

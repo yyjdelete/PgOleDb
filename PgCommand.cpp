@@ -216,6 +216,7 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
 {
     USES_CONVERSION;
     ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute\n");
+    CErrorLookupService::ClearError();
     HRESULT hr=S_OK;
     // The transaction object is not exception safe, so we need to manually release it at the end
     // of the function. This requires that certain vars will be available outside of the "try" block
@@ -314,7 +315,8 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
     }
 
     if( transactioninitiated ) {
-        pgsess->Commit(FALSE, 0, 0 );
+        // Call a version of "Commit" that will not clear our previous error information
+        pgsess->ErroredCommit(FALSE, 0, 0 );
     }
 
     return hr;

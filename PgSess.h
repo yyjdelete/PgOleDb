@@ -64,7 +64,6 @@ public:
     PGresult *PQexec(const char *query, int nParams, const unsigned int paramTypes[],
         const char * const *paramValues, const int *paramLengths, const int *paramFormats )
     {
-        CErrorLookupService::ClearError();
         ATLTRACE2(atlTraceDBProvider, 1, "CPgSession::PQexec %d, \"%.400s\"\n", nParams, query);
 
         PGresult *res=::PQexecParams( m_conn, query, nParams, paramTypes, paramValues,
@@ -75,7 +74,8 @@ public:
         case PGRES_TUPLES_OK:
             break;
         default:
-            CErrorLookupService::ReportCustomError(PQerrorMessage(), E_FAIL, IID_IPgSession);
+            ATLTRACE2(atlTraceDBProvider, 2, "CPgSession::PQexec error %s.400s\n",
+                PQerrorMessage());
         }
         return res;
     }
@@ -112,8 +112,8 @@ private:
     static const typeinfo s_cust_types_type[2];
     // Can't use a symbolic constant due to C++ syntax.
     // Must be same number for following two statements - enforced using ASSERT
-    static const unsigned long s_types_oids[15];
-    static const typeinfo s_types_type[15];
+    static const unsigned long s_types_oids[20];
+    static const typeinfo s_types_type[20];
 
 public:
 private:
@@ -164,6 +164,7 @@ private:
     XACTTRANSINFO m_transactioninfo;
     unsigned long m_transid;
 public:
+	STDMETHOD(ErroredCommit)(/*[in]*/ BOOL fRetaining, /*[in]*/ DWORD grfTC, /*[in]*/ DWORD grfRM);
     static const PGSCHEMA_INFO s_schema_queries[3];
 };
 

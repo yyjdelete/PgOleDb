@@ -327,6 +327,10 @@ SOURCE=.\INSTALL
 
 SOURCE=.\README
 # End Source File
+# Begin Source File
+
+SOURCE=.\ReleaseNotes.txt
+# End Source File
 # End Target
 # End Project
 # Section OleDb : {00000000-0000-0000-0000-800000800000}

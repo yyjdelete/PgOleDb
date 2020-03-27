@@ -458,7 +458,7 @@ SOURCE=.\ErrorLookupService.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\ErrorLookupService.obj"	"$(INTDIR)\ErrorLookupService.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\ErrorLookupService.obj"	"$(INTDIR)\ErrorLookupService.sbr" : $(SOURCE) "$(INTDIR)" ".\OleDb.h" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
@@ -486,7 +486,7 @@ SOURCE=.\OleDb.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\OleDb.obj"	"$(INTDIR)\OleDb.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h" ".\OleDb_i.c"
+"$(INTDIR)\OleDb.obj"	"$(INTDIR)\OleDb.sbr" : $(SOURCE) "$(INTDIR)" ".\OleDb.h" ".\OleDb_i.c" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
@@ -529,7 +529,7 @@ SOURCE=.\PgCommand.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgCommand.obj"	"$(INTDIR)\PgCommand.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgCommand.obj"	"$(INTDIR)\PgCommand.sbr" : $(SOURCE) "$(INTDIR)" ".\OleDb.h" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
@@ -557,7 +557,7 @@ SOURCE=.\PgDs.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgDs.obj"	"$(INTDIR)\PgDs.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgDs.obj"	"$(INTDIR)\PgDs.sbr" : $(SOURCE) "$(INTDIR)" ".\OleDb.h" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
@@ -585,7 +585,7 @@ SOURCE=.\PgMultipleResults.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgMultipleResults.obj"	"$(INTDIR)\PgMultipleResults.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgMultipleResults.obj"	"$(INTDIR)\PgMultipleResults.sbr" : $(SOURCE) "$(INTDIR)" ".\OleDb.h" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
@@ -613,7 +613,7 @@ SOURCE=.\PgRS.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgRS.obj"	"$(INTDIR)\PgRS.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgRS.obj"	"$(INTDIR)\PgRS.sbr" : $(SOURCE) "$(INTDIR)" ".\OleDb.h" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
@@ -641,7 +641,7 @@ SOURCE=.\PgSess.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgSess.obj"	"$(INTDIR)\PgSess.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgSess.obj"	"$(INTDIR)\PgSess.sbr" : $(SOURCE) "$(INTDIR)" ".\OleDb.h" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"

@@ -30,27 +30,48 @@ const typeinfo CPgSession::s_cust_types_type[]={
     typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ) // varcharci
 };
 const unsigned long CPgSession::s_types_oids[]={
-    16 /* bool */, 21 /* int2 */, 28 /* xid - transaction ID */, 26 /* oid */,
-    23 /* int4 */, 20 /* int8 */, 25 /* text */,
-    19 /* name */, 1043 /* varchar */, 1009 /* text[] */, 701 /* float8 */,
-    1114 /* timestamp */, 1184 /* timestamptz */, 1700 /* numeric */,
-    1042 /* bpchar */ };
+    16 /* bool */,
+    19 /* name */,
+    20 /* int8 */,
+    21 /* int2 */,
+    23 /* int4 */,
+    25 /* text */,
+    26 /* oid */,
+    28 /* xid - transaction ID */,
+    700 /* float4 */,
+    701 /* float8 */,
+    705 /* unknown */,
+    790 /* money */,
+    1009 /* text[] */,
+    1042 /* bpchar */,
+    1043 /* varchar */,
+    1082 /* date */,
+    1083 /* time */,
+    1114 /* timestamp */,
+    1184 /* timestamptz */,
+    1700 /* numeric */
+};
 const typeinfo CPgSession::s_types_type[]={
-    typeinfo( DBTYPE_BOOL, 1, typeinfo::StdC_memcpy, typeinfo::StdGW_1, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ), // bool
-    typeinfo( DBTYPE_I2, 5, typeinfo::StdC_ntoh_2, typeinfo::StdGW_2, typeinfo::StdPGC_h2n_2, typeinfo::StdPGWidth2, 2 ), // int2
-    typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // xid
-    typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // oid
-    typeinfo( DBTYPE_I4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // int4
-    typeinfo( DBTYPE_I8, 20, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // int8
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // text - var length string, no limit
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // name - 63-char type for storing system identifiers
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // varchar
-    typeinfo( DBTYPE_ARRAY|DBTYPE_STR, ~0 ), // text[]. XXX - Is this the right way to handle this? Should consider DBTYPE_VECTOR
-    typeinfo( DBTYPE_R8, 15, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // float8
-    typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // timestamp
-    typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestampTZ, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // timestamptz
-    typeinfo( DBTYPE_NUMERIC, 39, COPY_numeric, GetWidth_numeric, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_numeric ), // numeric
-    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // bpchar
+    /* 16 */ typeinfo( DBTYPE_BOOL, 1, typeinfo::StdC_memcpy, typeinfo::StdGW_1, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ), // 16 - bool
+    /* 19 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 19 - name - 63-char type for storing system identifiers
+    /* 20 */ typeinfo( DBTYPE_I8, 20, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // 20 - int8
+    /* 21 */ typeinfo( DBTYPE_I2, 5, typeinfo::StdC_ntoh_2, typeinfo::StdGW_2, typeinfo::StdPGC_h2n_2, typeinfo::StdPGWidth2, 2 ), // 21 - int2
+    /* 23 */ typeinfo( DBTYPE_I4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // 23 - int4
+    /* 25 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 25 - text - var length string, no limit
+    /* 26 */ typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // 26 - oid
+    /* 28 */ typeinfo( DBTYPE_UI4, 10, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // 28 - xid
+    /* 700 */ typeinfo( DBTYPE_R4, 7, typeinfo::StdC_ntoh_4, typeinfo::StdGW_4, typeinfo::StdPGC_h2n_4, typeinfo::StdPGWidth4, 4 ), // 700 - float4
+    /* 701 */ typeinfo( DBTYPE_R8, 15, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // 701 - float8
+    /* 705 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 705 - unknown
+    /* 790 */ typeinfo( DBTYPE_CY, 10, COPY_money, typeinfo::StdGW_8, PGC_money, typeinfo::StdPGWidth4, 8, GetStatus_money ), // 790 - money
+    /* 1009 */ typeinfo( DBTYPE_ARRAY|DBTYPE_STR, ~0 ), // 1009 - text[]. XXX - Is this the right way to handle this? Should consider DBTYPE_VECTOR
+    /* 1042 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 1042 - bpchar
+    /* 1043 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 1043 - varchar
+    /* 1082 */ typeinfo( DBTYPE_DBDATE, ~0, COPY_date, GetWidth_date, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_date ), // 1082 - date
+    /* 1083 */ typeinfo( DBTYPE_DBTIME, ~0, COPY_time, GetWidth_time, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_time ), // 1083 - time
+    /* 1114 */ typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // 1114 - timestamp
+    /* 1184 */ typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestampTZ, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // 1184 - timestamptz
+    /* 1700 */ typeinfo( DBTYPE_NUMERIC, 39, COPY_numeric, GetWidth_numeric, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_numeric ), // 1700 - numeric
 };
 
 const CPgSession::PGSCHEMA_INFO CPgSession::s_schema_queries[]={
@@ -303,13 +324,22 @@ HRESULT STDMETHODCALLTYPE CPgSession::Commit( /* [in] */ BOOL fRetaining, /* [in
         /* [in] */ DWORD grfRM)
 {
     CErrorLookupService::ClearError();
+
+    return ErroredCommit( fRetaining, grfTC, grfRM );
+}
+
+HRESULT STDMETHODCALLTYPE CPgSession::ErroredCommit( /* [in] */ BOOL fRetaining, /* [in] */ DWORD grfTC,
+        /* [in] */ DWORD grfRM)
+{
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::ErroredCommit\n");
+
     if( !m_transaction ) {
-        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Commit called not inside a transaction\n");
+        ATLTRACE2(atlTraceDBProvider, 2, "CPgSession::Commit called not inside a transaction\n");
         return XACT_E_NOTRANSACTION;
     }
 
     if( grfTC!=0 || grfRM!=0 ) {
-        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::Commit called with unsupported flags\n");
+        ATLTRACE2(atlTraceDBProvider, 2, "CPgSession::Commit called with unsupported flags\n");
         return XACT_E_NOTSUPPORTED;
     }
 

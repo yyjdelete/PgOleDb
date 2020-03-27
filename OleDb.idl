@@ -35,6 +35,7 @@ import "ocidl.idl";
 	{
 		[id(1), helpstring("Connect to database with connection string")] HRESULT PgConnectDB([in] BSTR connectString);
         [id(2), helpstring("Find out whether currently inside a transaction")] HRESULT PgTransactionLevel([out] DWORD *level);
+		[helpstring("Commit transaction after error already happened in it.")] HRESULT ErroredCommit([in] BOOL fRetaining, [in] DWORD grfTC, [in] DWORD grfRM);
 	};
 
     [
