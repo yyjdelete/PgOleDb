@@ -41,7 +41,7 @@ INTDIR=.\Debug
 OutDir=.\Debug
 # End Custom Macros
 
-ALL : "$(OUTDIR)\PgOleDb.dll" "$(OUTDIR)\OleDb.bsc" ".\Debug\regsvr32.trg"
+ALL : "$(OUTDIR)\PgOleDb.dll" ".\OleDb.tlb" ".\OleDb.h" ".\OleDb_i.c" "$(OUTDIR)\OleDb.bsc" ".\Debug\regsvr32.trg"
 
 
 CLEAN :
@@ -87,11 +87,11 @@ BSC32_SBRS= \
 	"$(INTDIR)\OleDb.sbr" \
 	"$(INTDIR)\PgCommand.sbr" \
 	"$(INTDIR)\PgDs.sbr" \
+	"$(INTDIR)\PgMultipleResults.sbr" \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
 	"$(INTDIR)\StdAfx.sbr" \
-	"$(INTDIR)\TypeInfo.sbr" \
-	"$(INTDIR)\PgMultipleResults.sbr"
+	"$(INTDIR)\TypeInfo.sbr"
 
 "$(OUTDIR)\OleDb.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -106,12 +106,12 @@ LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
 	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
+	"$(INTDIR)\PgMultipleResults.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\PgMultipleResults.obj"
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -177,7 +177,7 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /MTd /W3 /Gm /ZI /Od /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
+CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\OleDb.res" /d "_DEBUG" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
@@ -185,11 +185,11 @@ BSC32_SBRS= \
 	"$(INTDIR)\OleDb.sbr" \
 	"$(INTDIR)\PgCommand.sbr" \
 	"$(INTDIR)\PgDs.sbr" \
+	"$(INTDIR)\PgMultipleResults.sbr" \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
 	"$(INTDIR)\StdAfx.sbr" \
-	"$(INTDIR)\TypeInfo.sbr" \
-	"$(INTDIR)\PgMultipleResults.sbr"
+	"$(INTDIR)\TypeInfo.sbr"
 
 "$(OUTDIR)\OleDb.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -204,12 +204,12 @@ LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
 	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
+	"$(INTDIR)\PgMultipleResults.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\PgMultipleResults.obj"
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -269,7 +269,7 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "_ATL_DLL" /D "_ATL_MIN_CRT" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_MBCS" /D "_ATL_DLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\OleDb.res" /d "NDEBUG" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
@@ -283,12 +283,12 @@ LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
 	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
+	"$(INTDIR)\PgMultipleResults.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\PgMultipleResults.obj"
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -351,7 +351,7 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "_ATL_STATIC_REGISTRY" /D "_ATL_MIN_CRT" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_MBCS" /D "_ATL_STATIC_REGISTRY" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\OleDb.res" /d "NDEBUG" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
@@ -359,11 +359,11 @@ BSC32_SBRS= \
 	"$(INTDIR)\OleDb.sbr" \
 	"$(INTDIR)\PgCommand.sbr" \
 	"$(INTDIR)\PgDs.sbr" \
+	"$(INTDIR)\PgMultipleResults.sbr" \
 	"$(INTDIR)\PgRS.sbr" \
 	"$(INTDIR)\PgSess.sbr" \
 	"$(INTDIR)\StdAfx.sbr" \
-	"$(INTDIR)\TypeInfo.sbr" \
-	"$(INTDIR)\PgMultipleResults.sbr"
+	"$(INTDIR)\TypeInfo.sbr"
 
 "$(OUTDIR)\OleDb.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -378,12 +378,12 @@ LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
 	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
+	"$(INTDIR)\PgMultipleResults.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\PgMultipleResults.obj"
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -437,7 +437,7 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /D "_ATL_DLL" /D "_ATL_MIN_CRT" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_UNICODE" /D "_ATL_DLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\OleDb.res" /d "NDEBUG" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
@@ -451,12 +451,12 @@ LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
 	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
+	"$(INTDIR)\PgMultipleResults.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\PgMultipleResults.obj"
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -516,7 +516,7 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /D "_ATL_STATIC_REGISTRY" /D "_ATL_MIN_CRT" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_UNICODE" /D "_ATL_STATIC_REGISTRY" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /Fp"$(INTDIR)\OleDb.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\OleDb.res" /d "NDEBUG" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\OleDb.bsc" 
@@ -530,12 +530,12 @@ LINK32_OBJS= \
 	"$(INTDIR)\OleDb.obj" \
 	"$(INTDIR)\PgCommand.obj" \
 	"$(INTDIR)\PgDs.obj" \
+	"$(INTDIR)\PgMultipleResults.obj" \
 	"$(INTDIR)\PgRS.obj" \
 	"$(INTDIR)\PgSess.obj" \
 	"$(INTDIR)\StdAfx.obj" \
 	"$(INTDIR)\TypeInfo.obj" \
-	"$(INTDIR)\OleDb.res" \
-	"$(INTDIR)\PgMultipleResults.obj"
+	"$(INTDIR)\OleDb.res"
 
 "$(OUTDIR)\PgOleDb.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -610,7 +610,7 @@ SOURCE=.\OleDb.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\OleDb.obj"	"$(INTDIR)\OleDb.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb_i.c" ".\OleDb.h"
+"$(INTDIR)\OleDb.obj"	"$(INTDIR)\OleDb.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
@@ -656,7 +656,7 @@ MTL_SWITCHES=/tlb ".\OleDb.tlb" /h "OleDb.h" /iid "OleDb_i.c" /Oicf
 
 SOURCE=.\OleDb.rc
 
-"$(INTDIR)\OleDb.res" : $(SOURCE) "$(INTDIR)" ".\OleDb.tlb"
+"$(INTDIR)\OleDb.res" : $(SOURCE) "$(INTDIR)"
 	$(RSC) $(RSC_PROJ) $(SOURCE)
 
 
@@ -665,7 +665,7 @@ SOURCE=.\PgCommand.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgCommand.obj"	"$(INTDIR)\PgCommand.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgCommand.obj"	"$(INTDIR)\PgCommand.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
@@ -705,7 +705,7 @@ SOURCE=.\PgDs.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgDs.obj"	"$(INTDIR)\PgDs.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgDs.obj"	"$(INTDIR)\PgDs.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
@@ -785,7 +785,7 @@ SOURCE=.\PgRS.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgRS.obj"	"$(INTDIR)\PgRS.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgRS.obj"	"$(INTDIR)\PgRS.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
@@ -825,7 +825,7 @@ SOURCE=.\PgSess.cpp
 !IF  "$(CFG)" == "OleDb - Win32 Debug"
 
 
-"$(INTDIR)\PgSess.obj"	"$(INTDIR)\PgSess.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch" ".\OleDb.h"
+"$(INTDIR)\PgSess.obj"	"$(INTDIR)\PgSess.sbr" : $(SOURCE) "$(INTDIR)" "$(INTDIR)\OleDb.pch"
 
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
@@ -874,7 +874,7 @@ CPP_SWITCHES=/nologo /MTd /W3 /Gm /GR /GX /ZI /Od /I "$(PSQLSRC)\src\include" /I
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Debug"
 
-CPP_SWITCHES=/nologo /MTd /W3 /Gm /ZI /Od /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
+CPP_SWITCHES=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
 
 "$(INTDIR)\StdAfx.obj"	"$(INTDIR)\StdAfx.sbr"	"$(INTDIR)\OleDb.pch" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
@@ -884,7 +884,7 @@ CPP_SWITCHES=/nologo /MTd /W3 /Gm /ZI /Od /I "$(PSQLSRC)\src\include" /I "$(PSQL
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinSize"
 
-CPP_SWITCHES=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "_ATL_DLL" /D "_ATL_MIN_CRT" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_MBCS" /D "_ATL_DLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\StdAfx.obj"	"$(INTDIR)\OleDb.pch" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
@@ -894,7 +894,7 @@ CPP_SWITCHES=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Release MinDependency"
 
-CPP_SWITCHES=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "_ATL_STATIC_REGISTRY" /D "_ATL_MIN_CRT" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_MBCS" /D "_ATL_STATIC_REGISTRY" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\StdAfx.obj"	"$(INTDIR)\StdAfx.sbr"	"$(INTDIR)\OleDb.pch" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
@@ -904,7 +904,7 @@ CPP_SWITCHES=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Release MinSize"
 
-CPP_SWITCHES=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /D "_ATL_DLL" /D "_ATL_MIN_CRT" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_UNICODE" /D "_ATL_DLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\StdAfx.obj"	"$(INTDIR)\OleDb.pch" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
@@ -914,7 +914,7 @@ CPP_SWITCHES=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\
 
 !ELSEIF  "$(CFG)" == "OleDb - Win32 Unicode Release MinDependency"
 
-CPP_SWITCHES=/nologo /MT /W3 /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "_UNICODE" /D "_ATL_STATIC_REGISTRY" /D "_ATL_MIN_CRT" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MT /W3 /GX /O1 /I "$(PSQLSRC)\src\include" /I "$(PSQLSRC)\src\interfaces\libpq" /D "_UNICODE" /D "_ATL_STATIC_REGISTRY" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /Fp"$(INTDIR)\OleDb.pch" /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\StdAfx.obj"	"$(INTDIR)\OleDb.pch" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<

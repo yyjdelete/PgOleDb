@@ -1,0 +1,59 @@
+Quick developers guide:
+
+-INTRODUCTION
+
+Welcome to the developers guide for the PostgreSQL OLE DB provider. This provider is based on the
+ATL provider template, so some knowledge of ATL and OLE DB is required for hacking this software.
+The OLE DB provider documentation can be found in MSDN, or online at
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/oledb/htm/dasdkoledboverview.asp
+
+Some of the ATL classes are also documented online at
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/vcrefOverviewOfProviderClasses.asp
+However, be warned that more often then not it is easier to read the source than to understand
+what's what from the documentation.
+
+OLE DB has a rather small set of distinct classes. However, each class has a very large number
+of potential interfaces implemented. Many functions are implemented by ATL, but not all. Most
+functions implemented in the "CPg*" classes are just functions defined by the interface
+implemented at the time. The best place to look for what the said function is supposed to do
+and return is the OLE DB document in MSDN.
+
+There are also exceptions. Some functions are "hooks" into the ATL infrastructure. These are
+virtual functions defined by an ATL class we inherit from, and which we override to change the
+final behaviour. Documentation on what exactly the semantics are for those functions is usually
+scarce. Your best bet is to turn on symbol cross-reference, and look for where this method is
+used.
+
+Finally, there are program constructs almost totally unrelated to either ATL or OLE DB. These are
+there as helper to the main thing. This document will try to list them all. If you find an
+ommision, please let the development mailing list know about it, and we'll try to remedy it.
+
+
+-THE TYPE SYSTEM
+
+PostgreSQL uses data types managed through a table called "pg_type". OLE DB has a list of supported
+types. In PostgreSQL, a type is identified by its oid in the "pg_type" table. In OLE DB it is
+identified sometimes as an integer labled "DBTYPE_something", andsometimes as a similar text. Also,
+since OLE DB expects the type to be sent around in binary format, all communication with
+PostgreSQL is also performed in binary.
+
+This, however, leads to trouble where the binary format for a certain type in OLE DB and in
+PostgreSQL is not the same. The most simple and obivous example are integers. PostgreSQL sends them
+in "network byte order", or "big endian", while OLE DB sends them in Intel byte order, AKA "host
+byte order", or "little endian". This means that numbers have to be byte swapped when passed
+between server and client and vice versa.
+
+In order to solve the translation and identification problems, OLE DB has it's own type system.
+This is a system to tables mapping PostgreSQL representations into OLE DB's and vice versa. The
+first direction is necessary for passing query results to the consumer, while the second is
+necessary for commands with parameters, as well as for the not yet implemented write support.
+
+--BUILTIN vs. CUSTOM TYPES
+The OLE DB distinguishes between builtin and custom PostgreSQL types. This is not really a
+distinction carried by PostgreSQL itself. Builtin types are defined as types that are:
+A. Guarenteed to be available.
+B. Have an OID known at compile time.
+Builtin types are therefor identified by oid, and assumed to be present. Custom types, on the other
+hand, are looked up each time a new session is being opened in the pg_type table, and their oid
+is stored then. In other words, builtin types are identified on startup by oid, while custom types
+are identified by name.

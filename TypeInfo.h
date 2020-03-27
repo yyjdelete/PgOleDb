@@ -228,6 +228,8 @@ typedef std::map<unsigned int, typeinfo> types_type;
 int GetWidth_timestamp( const PGresult *res, int tup_num, int field_num );
 void COPY_timestamp( void *dst, size_t count, const PGresult *res,
                     int tup_num, int field_num);
+void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num);
 void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
 int GetWidth_string( const PGresult *res, int tup_num, int field_num );

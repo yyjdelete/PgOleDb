@@ -102,6 +102,33 @@ void COPY_timestamp( void *dst, size_t count, const PGresult *res,
     dt2time( time, &(ts->hour), &(ts->minute), &(ts->second), &(ts->fraction) );
 }
 
+void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
+                    int tup_num, int field_num)
+{
+    COPY_timestamp( dst, count, res, tup_num, field_num );
+
+    DBTIMESTAMP * const ts=reinterpret_cast<DBTIMESTAMP *>(dst);
+    SYSTEMTIME utc, local;
+
+    utc.wDayOfWeek=0;
+    utc.wYear=ts->year;
+    utc.wMonth=ts->month;
+    utc.wDay=ts->day;
+    utc.wHour=ts->hour;
+    utc.wMinute=ts->minute;
+    utc.wSecond=ts->second;
+    utc.wMilliseconds=0;
+
+    if( SystemTimeToTzSpecificLocalTime( NULL, &utc, &local ) ) {
+        ts->year=local.wYear;
+        ts->month=local.wMonth;
+        ts->day=local.wDay;
+        ts->hour=local.wHour;
+        ts->minute=local.wMinute;
+        ts->second=local.wSecond;
+    }
+}
+
 void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num)
 {
@@ -142,17 +169,22 @@ void COPY_string( void *dst, size_t count, const PGresult *res,
 size_t PGWidthString(const typeinfo *_this, const void *data, size_t length)
 {
     // Can't guesstimate this one. Must return precise length.
-    // XXX Do we need to return the terminating NULL?
-    return WideCharToMultiByte( CP_UTF8, 0, static_cast<const WCHAR *>(data), -1, NULL, 0,
+    int size=WideCharToMultiByte( CP_UTF8, 0, static_cast<const WCHAR *>(data), -1, NULL, 0,
         NULL, NULL );
+
+    return size!=0 ? size-1 : 0;
 }
 
 HRESULT PGC_string(const typeinfo *_this, const void *data, size_t length, void *dst,
                    size_t dstlen )
 {
+    auto_array<char> buffer(new char[dstlen+1]);
+
     if( WideCharToMultiByte( CP_UTF8, 0, static_cast<const WCHAR *>(data), -1,
-            static_cast<char *>(dst), dstlen, NULL, NULL )!=dstlen )
+            buffer.get(), dstlen+1, NULL, NULL )!=dstlen+1 )
         return E_FAIL;
+
+    memcpy(dst, buffer.get(), dstlen);
 
     return S_OK;
 }

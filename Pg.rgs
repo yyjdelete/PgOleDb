@@ -25,3 +25,17 @@ HKCR
 		}
 	}
 }
+HKLM
+{
+	NoRemove Software
+	{
+		PostgreSQL
+		{
+			ForceRemove 'OLE DB Provider'
+			{
+				val LogFile = s ''
+				val LogLevel = d '2'
+			}
+		}
+	}
+}

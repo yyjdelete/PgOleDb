@@ -1,6 +1,73 @@
+2004-09-21  shachar
+	* PgSess.cpp:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Provide proper support for the timestampTZ type.
+
+	* PgRS.cpp:
+	* PgSess.h:
+	* StdAfx.h:
+		Increase trace verbosity and organize trace levels
+
+	* PgCommand.cpp:
+		Increase trace verbosity and organize trace levels
+		Fix bug in CPgCommand::Execute, where requesting recordset of type IID_NULL resulted in access violations.
+
+2004-09-20  shachar
+	* PgCommand.cpp:
+	* PgDS.h:
+		Add proper support for Command::SetParameterInfo when not
+		guessing the parameter types for a stored procedure.
+
+	* TypeInfo.cpp:
+		Binary text sends should be sent without the terminating NULL
+
+	* PgCommand.cpp:
+		Only open a transaction during command execution if it's a "Select".
+		The transaction is only necessary for obtaining multiple results, which is only possible if it's a select to begin with.
+		This also solves a bug where the "Create Database" command cannot be run inside a transaction, and could therefor not run through us at all.
+
+	* Pg.rgs:
+		Add the registry entries that will, hopefully one day, be used
+		to save logs of activity.
+
+	* Developers:
+	* OleDb.dsp:
+	* OleDb.mak:
+		Add a developers guide. At this stage - incomplete
+
+2004-07-27  shachar
+	* PgRS.cpp:
+		Fix the memory leak in m_colInfo
+
+2004-06-21  shachar
+	* PgSess.cpp:
+	* PgSess.h:
+		Add support for varcharci user defined datatype
+		Add support for bpchar datatype - the way table columns defined as "char" are exported.
+
+	* OleDb.rc:
+		Prepare release 1.0.0.13
+
+2004-06-02  shachar
+	* PgRS.cpp:
+		Report the unhandled type when unhandled type is encountered
+
+	* OleDb.dsp:
+	* OleDb.mak:
+		Fix the project so that Release compiles will work
+
+	* PgSess.cpp:
+	* PgSess.h:
+		Add support for float8 datatype
+		Add partial support for timestamptz type - will report times in GMT.
+
 2004-05-26  shachar
 	* PgCommand.cpp:
 		Close the cursors used for returning the multiple rowsets.
+
+	* OleDb.rc:
+		Prepare release 1.0.0.12
 
 2004-05-18  shachar
 	* OleDb.rc:

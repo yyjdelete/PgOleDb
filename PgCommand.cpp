@@ -26,6 +26,90 @@
 #include "PgSess.h"
 #include "PgMultipleResults.h"
 
+using namespace std;
+class stringci : public string
+{
+public:
+    stringci()
+    {
+    }
+    stringci( const stringci &rhs ) : string( rhs )
+    {
+    }
+    stringci( const std::string &str ) : string( str )
+    {
+    }
+    stringci( const char *str ) : string( str )
+    {
+    }
+    bool operator< ( const stringci &rhs ) const {
+        return stricmp( c_str(), rhs.c_str() )<0;
+    }
+    bool operator<= ( const stringci &rhs ) const {
+        return stricmp( c_str(), rhs.c_str() )<=0;
+    }
+    bool operator== ( const stringci &rhs ) const {
+        return stricmp( c_str(), rhs.c_str() )==0;
+    }
+    bool operator!= ( const stringci &rhs ) const {
+        return stricmp( c_str(), rhs.c_str() )!=0;
+    }
+    bool operator> ( const stringci &rhs ) const {
+        return stricmp( c_str(), rhs.c_str() )>0;
+    }
+    bool operator>= ( const stringci &rhs ) const {
+        return stricmp( c_str(), rhs.c_str() )>=0;
+    }
+};
+
+// This map is used to map the string names used by such functions as "SetParameterInfo"
+// into types understood by OleDB
+// Yes, it's a singleton
+class name_dbtype_map : public std::map<stringci,DBTYPE>
+{
+public:
+    name_dbtype_map()
+    {
+        //insert(value_type("DBTYPE_I1", DBTYPE_I1 ));
+        insert(value_type("DBTYPE_I2", DBTYPE_I2 ));
+        insert(value_type("DBTYPE_I4", DBTYPE_I4 ));
+        insert(value_type("DBTYPE_I8", DBTYPE_I8 ));
+        insert(value_type("DBTYPE_UI1", DBTYPE_UI1 ));
+        //insert(value_type("DBTYPE_UI2", DBTYPE_UI2 ));
+        //insert(value_type("DBTYPE_UI4", DBTYPE_UI4 ));
+        //insert(value_type("DBTYPE_UI8", DBTYPE_UI8 ));
+        insert(value_type("DBTYPE_R4", DBTYPE_R4 ));
+        insert(value_type("DBTYPE_R8", DBTYPE_R8 ));
+        insert(value_type("DBTYPE_CY", DBTYPE_CY ));
+        insert(value_type("DBTYPE_DECIMAL", DBTYPE_DECIMAL ));
+        insert(value_type("DBTYPE_NUMERIC", DBTYPE_NUMERIC ));
+        insert(value_type("DBTYPE_BOOL", DBTYPE_BOOL ));
+        //insert(value_type("DBTYPE_ERROR", DBTYPE_ERROR ));
+        //insert(value_type("DBTYPE_UDT", DBTYPE_UDT ));
+        insert(value_type("DBTYPE_VARIANT", DBTYPE_VARIANT ));
+        //insert(value_type("DBTYPE_IDISPATCH", DBTYPE_IDISPATCH ));
+        //insert(value_type("DBTYPE_IUNKNOWN", DBTYPE_IUNKNOWN ));
+        //insert(value_type("DBTYPE_GUID", DBTYPE_GUID ));
+        insert(value_type("DBTYPE_DATE", DBTYPE_DATE ));
+        insert(value_type("DBTYPE_DBDATE", DBTYPE_DBDATE ));
+        insert(value_type("DBTYPE_DBTIME", DBTYPE_DBTIME ));
+        insert(value_type("DBTYPE_DBTIMESTAMP", DBTYPE_DBTIMESTAMP ));
+        insert(value_type("DBTYPE_BSTR", DBTYPE_WSTR ));
+        insert(value_type("DBTYPE_CHAR", DBTYPE_WSTR ));
+        insert(value_type("DBTYPE_VARCHAR", DBTYPE_WSTR ));
+        insert(value_type("DBTYPE_LONGVARCHAR", DBTYPE_WSTR ));
+        insert(value_type("DBTYPE_WCHAR", DBTYPE_WSTR ));
+        insert(value_type("DBTYPE_WVARCHAR", DBTYPE_WSTR ));
+        insert(value_type("DBTYPE_WLONGVARCHAR", DBTYPE_WSTR ));
+        //insert(value_type("DBTYPE_BINARY", DBTYPE_BYTES ));
+        //insert(value_type("DBTYPE_VARBINARY", DBTYPE_BYTES ));
+        //insert(value_type("DBTYPE_LONGVARBINARY", DBTYPE_BYTES ));
+        insert(value_type("DBTYPE_FILETIME", DBTYPE_FILETIME ));
+        insert(value_type("DBTYPE_VARNUMERIC", DBTYPE_VARNUMERIC ));
+        //insert(value_type("DBTYPE_PROPVARIANT", DBTYPE_PROPVARIANT ));
+    }
+} const name_dbtype_map;
+
 // Static functions
 static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &status,
                            DWORD &dst_length, auto_array<char> &dst_data,
@@ -180,6 +264,16 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
         }
         
         // We need to be inside a transaction if we are to get MultipleResults answers
+        // Since only "select" will ever return MultipleResults, and as "Create table" will
+        // fail if executed inside a transaction, make sure this is a select
+        /* XXX Horrible kludge - just check minimum required to distinguish select from all other
+         *     LEGAL commands. This means that we check that the length is at least 7, the first
+         *     letter is "s" and the third is "l" (to distinguish from "set").
+         *     This still errounously catches "select into", but so be it for the time being.
+         */
+        if( m_parsed_command.length()>7 &&
+            towlower(static_cast<WCHAR *>(m_parsed_command)[0])==L's' &&
+            towlower(static_cast<WCHAR *>(m_parsed_command)[2])==L'l' )
         {
             DWORD transactionlevel;
             pgsess->PgTransactionLevel(&transactionlevel);
@@ -204,7 +298,11 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
         if( pcRowsAffected!=NULL )
             *pcRowsAffected=atol(PQcmdTuples(res));
 
-        hr=CreateResult(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, res );
+        if( riid!=IID_NULL )
+            hr=CreateResult(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, res );
+        else {
+            PQclear(res);
+        }
         
         if( FAILED(hr) ) {
             throw PgOleError(hr, "Error creating rowset");
@@ -347,6 +445,7 @@ HRESULT CPgCommand::CreateRowset(IUnknown* pUnkOuter, REFIID riid,
                                  IUnknown** ppRowset,
                                  PGresult *pRes)
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::CreateRowset\n");
     HRESULT hr;
 
     // XXX Standard violating behaviour. If backend command returned a table of a single
@@ -437,13 +536,64 @@ HRESULT CPgCommand::SetParameterInfo (
         const ULONG __RPC_FAR   rgParamOrdinals[],
         const DBPARAMBINDINFO   rgParamBindInfo[])
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::SetParameterInfo\n");
+
     if( cParams==0 ) {
         m_params.clear();
 
         return S_OK;
     }
 
-    return E_FAIL;
+    // XXX - We need to never fail inside this loop. Specs say that if we fail, no change is
+    // done at all.
+    for( int i=0; i<cParams; ++i ) {
+        // Make sure we support the types
+        if( (rgParamBindInfo[i].dwFlags&~(DBPARAMFLAGS_ISINPUT|DBPARAMFLAGS_ISNULLABLE))!=0 ) {
+            ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::SetParameterInfo error: Not supported parameter flag %08x\n",
+                rgParamBindInfo[i].dwFlags);
+            return E_INVALIDARG;
+        }
+
+        if( rgParamOrdinals[i]==0 )
+            return E_INVALIDARG;
+        
+        if( m_params.size()<rgParamOrdinals[i] )
+            m_params.resize(rgParamOrdinals[i]);
+
+        int ordinal=rgParamOrdinals[i]-1;
+        CComPtr<IPgSession> isess;
+
+        HRESULT hr=GetSite(IID_IPgSession, reinterpret_cast<void **>(&isess));
+        if( FAILED(hr) ) {
+            throw PgOleError(hr, "couldn't get session");
+        }
+        const CPgSession *pgsess=static_cast<CPgSession *>(static_cast<IPgSession *>(isess));
+
+        if( rgParamBindInfo[i].pwszDataSourceType!=NULL ) {
+            USES_CONVERSION;
+            name_dbtype_map::const_iterator type=
+                name_dbtype_map.find(stringci(OLE2CU8(rgParamBindInfo[i].pwszDataSourceType)));
+            if( type!=name_dbtype_map.end() ) {
+                m_params[ordinal].wType=type->second;
+            } else {
+                ATLTRACE2(atlTraceDBProvider, 3, "CPgCommand::SetParameterInfo DBTYPE name lookup failed\n");
+                return DB_E_BADTYPENAME;
+            }
+
+            m_params[ordinal].oid=pgsess->GetOIDType(m_params[ordinal].wType);
+            if( m_params[ordinal].oid==0 ) {
+                ATLTRACE2(atlTraceDBProvider, 3, "CPgCommand::SetParameterInfo DBTYPE oid lookup failed\n");
+                return DB_E_BADTYPENAME;
+            }
+
+            m_params[ordinal].ulParamSize=rgParamBindInfo[i].ulParamSize;
+            m_params[ordinal].bPrecision=rgParamBindInfo[i].bPrecision;
+            m_params[ordinal].bScale=rgParamBindInfo[i].bScale;
+        }
+    }
+
+    // XXX Need to return DB_S_TYPEINFOOVERRIDDEN where appropriate
+    return S_OK;
 }
 HRESULT CPgCommand::MapParameterNames (
         ULONG            cParamNames,
@@ -457,6 +607,8 @@ HRESULT CPgCommand::MapParameterNames (
 
 HRESULT CPgCommand::FillParams()
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::FillParams\n");
+
     /* Parse the command line, looking for question marks and such.
      * If the command format is "{ call procname(foo) }", translate to
      * "select * from procname(foo)".

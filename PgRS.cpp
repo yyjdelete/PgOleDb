@@ -24,18 +24,22 @@
 
 HRESULT CPgRowset::Execute(DBPARAMS * pParams, LONG* pcRowsAffected)
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgRowset::Execute\n");
     return S_OK;
 }
 
 CPgVirtualArray::~CPgVirtualArray()
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::~CPgVirtualArray\n");
     if( m_res!=NULL )
         PQclear(m_res);
+    ATLASSERT(m_session!=NULL);
     m_session->Release();
     m_session=NULL;
 }
 BYTE& CPgVirtualArray::operator[] (int nIndex) const
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::operator[]\n");
     const int nfields=PQnfields(m_res);
     
     size_t offset=0;
@@ -82,6 +86,7 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
 
 DBSTATUS CPgVirtualArray::GetDBStatus(CSimpleRow *pRow, ATLCOLUMNINFO *pColInfo)
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::GetDBStatus\n");
     if( PQgetisnull(m_res, pRow->m_iRowset, pColInfo->iOrdinal-1) )
         return DBSTATUS_S_ISNULL;
     else
@@ -90,12 +95,14 @@ DBSTATUS CPgVirtualArray::GetDBStatus(CSimpleRow *pRow, ATLCOLUMNINFO *pColInfo)
 
 void CPgVirtualArray::AttachSess( CPgSession *session )
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::AttachSess\n");
     m_session=session;
     m_session->AddRef();
 }
 
 HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::PostConstruct\n");
     USES_CONVERSION;
     m_rgRowData.AttachSess( sess );
     m_rgRowData.SetResult( pRes );
@@ -129,6 +136,13 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
                     typinfo->Status( typinfo, &info, pRes, i );
                 } else {
                     // We are asked to work with unhandled data type
+                    _bstr_t message;
+                    CHAR number[13];
+                    message="Query returned unhandled type ";
+                    _ltot( pRestype, number, 10 );
+                    message+=number;
+                    MessageBox( NULL, message, "Error", MB_ICONEXCLAMATION );
+
                     ATLASSERT(!"Unhandled type in query pResult");
                     
                     typeinfo::StatUnknown( &info, pRes, i );
@@ -162,10 +176,16 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
 
 CPgRowset::~CPgRowset()
 {
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgRowset::~CPgRowset\n");
     CComPtr<IPgCommand> cmd;
 
     // Find out whether we were derived from a CPgCommand, and if so, notify it that we are dead.
     if( SUCCEEDED(GetSite(IID_IPgCommand, reinterpret_cast<void **>(&cmd)))) {
         static_cast<CPgCommand *>(static_cast<IPgCommand *>(cmd))->ClearRowset(this);
+    }
+
+    // Manually release the m_colInfo member
+    for( int i=0; i!=m_colInfo.GetSize(); ++i ) {
+        delete [] m_colInfo[i].pwszName;
     }
 }

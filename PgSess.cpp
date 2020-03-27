@@ -23,15 +23,17 @@
 #include "PgSess.h"
 
 // When changing, please make sure that the definition here is the same as when declared
-const char *CPgSession::s_typenames[]={"utinyint"};
+const char *CPgSession::s_typenames[]={"utinyint", "varcharci"};
 const typeinfo CPgSession::s_cust_types_type[]={
-    typeinfo( DBTYPE_UI1, 3, typeinfo::StdC_memcpy, typeinfo::StdGWwidth, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ) // utinyint
+    typeinfo( DBTYPE_UI1, 3, typeinfo::StdC_memcpy, typeinfo::StdGWwidth, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ), // utinyint
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ) // varcharci
 };
 const unsigned long CPgSession::s_types_oids[]={
     16 /* bool */, 21 /* int2 */, 28 /* xid - transaction ID */, 26 /* oid */,
     23 /* int4 */, 20 /* int8 */, 25 /* text */,
-    19 /* name */, 1043 /* varchar */, 1009 /* text[] */, 1114, /* timestamp */
-    1700 /* numeric */ };
+    19 /* name */, 1043 /* varchar */, 1009 /* text[] */, 701 /* float8 */,
+    1114 /* timestamp */, 1184 /* timestamptz */, 1700 /* numeric */,
+    1042 /* bpchar */ };
 const typeinfo CPgSession::s_types_type[]={
     typeinfo( DBTYPE_BOOL, 1, typeinfo::StdC_memcpy, typeinfo::StdGW_1, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ), // bool
     typeinfo( DBTYPE_I2, 5, typeinfo::StdC_ntoh_2, typeinfo::StdGW_2, typeinfo::StdPGC_h2n_2, typeinfo::StdPGWidth2, 2 ), // int2
@@ -43,8 +45,11 @@ const typeinfo CPgSession::s_types_type[]={
     typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // name - 63-char type for storing system identifiers
     typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // varchar
     typeinfo( DBTYPE_ARRAY|DBTYPE_STR, ~0 ), // text[]. XXX - Is this the right way to handle this? Should consider DBTYPE_VECTOR
+    typeinfo( DBTYPE_R8, 15, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // float8
     typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // timestamp
+    typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestampTZ, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // timestamptz
     typeinfo( DBTYPE_NUMERIC, 39, COPY_numeric, GetWidth_numeric, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_numeric ), // numeric
+    typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // bpchar
 };
 
 HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )

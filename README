@@ -5,7 +5,7 @@ terms and conditions of the GNU Lesser General Public License. Please read AUTHO
 for more information.
 
 INSTALLATION INSTRUCTIONS
-In order to install this software, copy PGOLEDB.DLL and PQLIB.DLL into your system
+In order to install this software, copy PGOLEDB.DLL and LIBPQ.DLL into your system
 directory. Next, as administrator, run "regsvr32 PGOLEDB.DLL". You should get a dialog
 message saying "registration succeeded".
 

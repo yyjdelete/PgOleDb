@@ -33,6 +33,7 @@
 #define _WIN32_WINNT 0x0400
 #endif
 #define _ATL_APARTMENT_THREADED
+#define ATL_TRACE_LEVEL 3
 
 #include <atlbase.h>
 //You may derive a class from CComModule and use it if you want to override

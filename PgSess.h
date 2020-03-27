@@ -65,7 +65,7 @@ public:
     PGresult *PQexec(const char *query, int nParams, const unsigned int paramTypes[],
         const char * const *paramValues, const int *paramLengths, const int *paramFormats )
     {
-        ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::PQexec %d, \"%.400s\"\n", nParams, query);
+        ATLTRACE2(atlTraceDBProvider, 1, "CPgSession::PQexec %d, \"%.400s\"\n", nParams, query);
 
         PGresult *res=::PQexecParams( m_conn, query, nParams, paramTypes, paramValues,
             paramLengths, paramFormats, 1 );
@@ -74,7 +74,9 @@ public:
     }
     char *PQerrorMessage()
     {
-        return ::PQerrorMessage( m_conn );
+        char *msg=::PQerrorMessage( m_conn );
+        ATLTRACE2(atlTraceDBProvider, 2, "CPgSession::PQerrorMessage %s", msg);
+        return msg;
     }
 
     const typeinfo *GetTypeInfo( unsigned int oid ) const {
@@ -99,12 +101,12 @@ private:
     // All custom types are known by name, not OID.
     // Can't use a symbolic constant due to C++ syntax.
     // Must be same number for following two statements - enforced using ASSERT
-    static const char *s_typenames[1];
-    static const typeinfo s_cust_types_type[1];
+    static const char *s_typenames[2];
+    static const typeinfo s_cust_types_type[2];
     // Can't use a symbolic constant due to C++ syntax.
     // Must be same number for following two statements - enforced using ASSERT
-    static const unsigned long s_types_oids[12];
-    static const typeinfo s_types_type[12];
+    static const unsigned long s_types_oids[15];
+    static const typeinfo s_types_type[15];
 
 public:
 private:
