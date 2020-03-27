@@ -444,3 +444,14 @@ HRESULT STDMETHODCALLTYPE CPgSession::OpenRowset(IUnknown *pUnk, DBID *pTID, DBI
 
     return hr;
 }
+
+STDMETHODIMP CPgSession::GetPgStatus(BSTR * result, BSTR param)
+{
+    USES_CONVERSION;
+
+    const char *answer=PQparameterStatus( m_conn, OLE2CA(param) );
+	m_last_status=answer;
+    *result=m_last_status;
+
+	return S_OK;
+}

@@ -52,7 +52,7 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
             const typeinfo *info=m_session->GetTypeInfo(PQftype(m_res, i));
 
             if( info!=NULL ) {
-                colsize=info->GetWidth(m_res, nIndex, i);
+                colsize=info->GetWidth(m_session, m_res, nIndex, i);
                 // Make sure alignment is ok
                 offset+=info->alignment-1;
                 offset-=offset%info->alignment;
@@ -77,9 +77,9 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
             ATLASSERT(m_offsets[i]<offset);
             size_t colwidth=(i==nfields-1?offset:m_offsets[i+1])-m_offsets[i];
             const typeinfo *info=m_session->GetTypeInfo(PQftype(m_res, i));
-            int colsize=info->GetWidth(m_res, nIndex, i);
+            int colsize=info->GetWidth(m_session, m_res, nIndex, i);
 
-            info->CopyData( m_buff+m_offsets[i], colsize, m_res, nIndex, i );
+            info->CopyData( m_buff+m_offsets[i], colsize, m_session, m_res, nIndex, i );
         }
     }
     

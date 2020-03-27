@@ -168,7 +168,7 @@ static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &statu
 }
 
 static size_t GetPGWidth( const typeinfo *info, const DBBINDING *bindings, void *pData,
-                         DWORD *status, IDataConvert *idataconv )
+                         DWORD *status, IDataConvert *idataconv, IPgSession *sess )
 {
     DWORD stat;
     DWORD dst_length;
@@ -182,14 +182,14 @@ static size_t GetPGWidth( const typeinfo *info, const DBBINDING *bindings, void 
     if( FAILED(hr) || *status!=DBSTATUS_S_OK )
         return 0;
 
-    return info->PGGetLength( info, dst_data.get(), dst_length );
+    return info->PGGetLength( info, dst_data.get(), dst_length, sess );
 }
 
 /* PGCopy wraps the actual parameter copy. It handles the NULL cases.
  * It must be passed the exact same type as it expects.
  */
 static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, void *pData,
-                      void *buffer, size_t buflen, IDataConvert *idataconv )
+                      void *buffer, size_t buflen, IDataConvert *idataconv, IPgSession *sess )
 {
     HRESULT hr=S_OK;
     try {
@@ -200,7 +200,8 @@ static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, void *pD
         hr=ParseDBBind( bindings, pData, status, dst_length, dst_data, idataconv, info->wType );
 
         if( SUCCEEDED(hr) && status==DBSTATUS_S_OK )
-            hr=info->PGCopyData( info, dst_data.get(), dst_length, buffer, buflen );
+            hr=info->PGCopyData( info, dst_data.get(), dst_length, buffer, buflen,
+                sess );
     } catch( const PgOleError &err ) {
         hr=err.hr();
         ATLTRACE2(atlTraceDBProvider, 0, "PGCopy: %s\n", err.str());
@@ -937,7 +938,7 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
 
             offsets[i]=buffsize;
             paramLengths[i]=GetPGWidth( info, &rgBindings[i], pParams->pData, &(statuses[i]),
-                m_spConvert );
+                m_spConvert, sess );
             buffsize+=paramLengths[i];
 
             if( statuses[i]==DBSTATUS_S_IGNORE ) {
@@ -955,7 +956,7 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
                 paramValues[i]=buffer.get()+offsets[i];
                 
                 hr=PGCopy( info, &rgBindings[i], pParams->pData, buffer.get()+offsets[i],
-                    paramLengths[i], m_spConvert );
+                    paramLengths[i], m_spConvert, sess );
                 
                 if( FAILED(hr) )
                     throw(hr);

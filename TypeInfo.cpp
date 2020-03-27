@@ -20,15 +20,10 @@
  */
 
 #include "stdafx.h"
+#include "OleDb.h"
 #include "typeinfo.h"
 
-// XXX Postgres may send timestamps either as INT64 or as double. There does not appear to be
-// a way to distinguish between the two on the client side.
-#if HAVE_INT64_TIMESTAMP
 typedef __int64 Timestamp;
-#else
-typedef double Timestamp;
-#endif
 
 #define POSTGRES_EPOCH_JDATE 2451545 // date2j(2000,1,1)
 
@@ -87,12 +82,12 @@ static void dt2time(Timestamp jd, unsigned short *hour, unsigned short *min, uns
 	return;
 }	/* dt2time() */
 
-int GetWidth_timestamp( const PGresult *res, int tup_num, int field_num )
+int GetWidth_timestamp( IPgSession *sess, const PGresult *res, int tup_num, int field_num )
 {
     return sizeof( DBTIMESTAMP ); 
 }
 
-void COPY_timestamp( void *dst, size_t count, const PGresult *res,
+void COPY_timestamp( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num)
 {
     DBTIMESTAMP * const ts=reinterpret_cast<DBTIMESTAMP *>(dst);
@@ -101,14 +96,21 @@ void COPY_timestamp( void *dst, size_t count, const PGresult *res,
 
     // Adapted from the Postgresql "timestamp2tm" function
     int date;
-    static const int date0=POSTGRES_EPOCH_JDATE;
     Timestamp time;
+    static const int date0=POSTGRES_EPOCH_JDATE;
     static const __int64 YEAR=86400000000i64;
+    static const _bstr_t ON_STR("on");
 
-    typeinfo::StdC_ntoh_8( &time, sizeof(time), res, tup_num, field_num );
-#if !HAVE_INT64_TIMESTAMP
-    time*=1000000;
-#endif
+    BSTR stat;
+    sess->GetPgStatus(&stat, _bstr_t("integer_datetimes") );
+    if( _bstr_t(stat)==ON_STR ) {
+        typeinfo::StdC_ntoh_8( &time, sizeof(time), sess, res, tup_num, field_num );
+    } else {
+        double tmp_time;
+        typeinfo::StdC_ntoh_8( &tmp_time, sizeof(tmp_time), sess, res, tup_num, field_num );
+        tmp_time*=1000000;
+        time=tmp_time;
+    }
     time_modulo( time, date, YEAR );
 
     date+=date0;
@@ -126,25 +128,32 @@ void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresul
     colinfo->ulColumnSize=sizeof( DBTIMESTAMP );
 }
 
-int GetWidth_time( const PGresult *res, int tup_num, int field_num )
+int GetWidth_time( IPgSession *sess, const PGresult *res, int tup_num, int field_num )
 {
     return sizeof( DBTIME ); 
 }
 
-void COPY_time( void *dst, size_t count, const PGresult *res,
+void COPY_time( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num)
 {
     DBTIME * const ts=reinterpret_cast<DBTIME *>(dst);
+    static const _bstr_t ON_STR("on");
 
     ATLASSERT( count==sizeof(DBTIME) );
 
     // Adapted from the Postgresql "timestamp2tm" function
     Timestamp time;
 
-    typeinfo::StdC_ntoh_8( &time, sizeof(time), res, tup_num, field_num );
-#if !HAVE_INT64_TIMESTAMP
-    time*=1000000;
-#endif
+    BSTR stat;
+    sess->GetPgStatus(&stat, _bstr_t("integer_datetimes") );
+    if( _bstr_t(stat)==ON_STR ) {
+        typeinfo::StdC_ntoh_8( &time, sizeof(time), sess, res, tup_num, field_num );
+    } else {
+        double tmp_time;
+        typeinfo::StdC_ntoh_8( &tmp_time, sizeof(tmp_time), sess, res, tup_num, field_num );
+        tmp_time*=1000000;
+        time=tmp_time;
+    }
 
     ULONG dummy;
     dt2time( time, &(ts->hour), &(ts->minute), &(ts->second), &dummy );
@@ -159,12 +168,12 @@ void GetStatus_time( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *re
     colinfo->ulColumnSize=sizeof( DBTIME );
 }
 
-int GetWidth_date( const PGresult *res, int tup_num, int field_num )
+int GetWidth_date( IPgSession *sess, const PGresult *res, int tup_num, int field_num )
 {
     return sizeof( DBDATE ); 
 }
 
-void COPY_date( void *dst, size_t count, const PGresult *res,
+void COPY_date( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num)
 {
     DBDATE * const ret=static_cast<DBDATE *>(dst);
@@ -177,7 +186,7 @@ void COPY_date( void *dst, size_t count, const PGresult *res,
 
     date0=POSTGRES_EPOCH_JDATE;
 
-    typeinfo::StdC_ntoh_4( &date, sizeof(date), res, tup_num, field_num );
+    typeinfo::StdC_ntoh_4( &date, sizeof(date), sess, res, tup_num, field_num );
 
     date+=date0;
 
@@ -193,10 +202,10 @@ void GetStatus_date( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *re
     colinfo->ulColumnSize=sizeof( DBDATE );
 }
 
-void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
+void COPY_timestampTZ( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num)
 {
-    COPY_timestamp( dst, count, res, tup_num, field_num );
+    COPY_timestamp( dst, count, sess, res, tup_num, field_num );
 
     DBTIMESTAMP * const ts=reinterpret_cast<DBTIMESTAMP *>(dst);
     SYSTEMTIME utc, local;
@@ -220,16 +229,16 @@ void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
     }
 }
 
-int GetWidth_string( const PGresult *res, int tup_num, int field_num )
+int GetWidth_string( IPgSession *sess, const PGresult *res, int tup_num, int field_num )
 {
     // Assume all characters are going to turn into two
     return (PQgetlength( res, tup_num, field_num )+1)*2; 
 }
 
-void COPY_string( void *dst, size_t count, const PGresult *res,
+void COPY_string( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num)
 {
-    ATLASSERT(count>=GetWidth_string( res, tup_num, field_num ));
+    ATLASSERT(count>=GetWidth_string( sess, res, tup_num, field_num ));
     int reslen=PQgetlength( res, tup_num, field_num );
     WCHAR *dst_str=reinterpret_cast<WCHAR *>(dst);
 
@@ -239,7 +248,7 @@ void COPY_string( void *dst, size_t count, const PGresult *res,
 
     if( newlen!=0 || reslen==0 ) {
         // Make sure we did not, in retrospect, overwrite the buffer.
-        ATLASSERT( GetWidth_string( res, tup_num, field_num )>=(newlen+1)*2 );
+        ATLASSERT( GetWidth_string( sess, res, tup_num, field_num )>=(newlen+1)*2 );
         // Success
         dst_str[newlen]=L'\0';
     } else {
@@ -248,7 +257,7 @@ void COPY_string( void *dst, size_t count, const PGresult *res,
     }
 }
 
-size_t PGWidthString(const typeinfo *_this, const void *data, size_t length)
+size_t PGWidthString(const typeinfo *_this, const void *data, size_t length, IPgSession *sess)
 {
     // Can't guesstimate this one. Must return precise length.
     int size=WideCharToMultiByte( CP_UTF8, 0, static_cast<const WCHAR *>(data), -1, NULL, 0,
@@ -258,7 +267,7 @@ size_t PGWidthString(const typeinfo *_this, const void *data, size_t length)
 }
 
 HRESULT PGC_string(const typeinfo *_this, const void *data, size_t length, void *dst,
-                   size_t dstlen )
+                   size_t dstlen, IPgSession *sess )
 {
     auto_array<char> buffer(new char[dstlen+1]);
 
@@ -327,14 +336,14 @@ public:
     }
 };
 
-int GetWidth_numeric( const PGresult *res, int tup_num, int field_num )
+int GetWidth_numeric( IPgSession *sess, const PGresult *res, int tup_num, int field_num )
 {
     ATLTRACE2(atlTraceDBProvider, 0, "GetWidth_numeric var length %d %d %d\n",
         PQgetlength( res, tup_num, field_num), sizeof(numeric_transfer), sizeof( DB_VARNUMERIC) );
     return sizeof(DB_NUMERIC);
 }
 
-void COPY_numeric( void *dst, size_t count, const PGresult *res,
+void COPY_numeric( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num)
 {
     numeric_transfer *orig=reinterpret_cast<numeric_transfer *>
@@ -367,12 +376,13 @@ void GetStatus_numeric( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult 
 
 static const int DBTYPE_DECIMAL_SHIFT=4;
 
-void COPY_money( void *dst, size_t count, const PGresult *res, int tup_num, int field_num )
+void COPY_money( void *dst, size_t count, IPgSession *sess, const PGresult *res, int tup_num,
+                int field_num )
 {
     LARGE_INTEGER * const ret=reinterpret_cast<LARGE_INTEGER *>(dst);
 
     LONG pgmoney;
-    typeinfo::StdC_ntoh_4( &pgmoney, sizeof(pgmoney), res, tup_num, field_num );
+    typeinfo::StdC_ntoh_4( &pgmoney, sizeof(pgmoney), sess, res, tup_num, field_num );
 
     ATLASSERT( count==sizeof(LARGE_INTEGER) );
 
@@ -412,7 +422,7 @@ void GetStatus_money( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *r
 }
 
 HRESULT PGC_money(const typeinfo *_this, const void *data, size_t length, void *dst,
-                   size_t dstlen )
+                   size_t dstlen, IPgSession *sess )
 {
     LONGLONG src=static_cast<const LARGE_INTEGER *>(data)->QuadPart;
 
@@ -439,5 +449,5 @@ HRESULT PGC_money(const typeinfo *_this, const void *data, size_t length, void *
 
     LONG pgsrc=src;
 
-    return typeinfo::StdPGC_h2n_4( _this, &pgsrc, sizeof(pgsrc), dst, dstlen );
+    return typeinfo::StdPGC_h2n_4( _this, &pgsrc, sizeof(pgsrc), dst, dstlen, sess );
 }

@@ -163,7 +163,11 @@ private:
     bool m_transaction; // Whether there is a transaction in progress.
     XACTTRANSINFO m_transactioninfo;
     unsigned long m_transid;
+
+    // Store the last GetPgStatus result here
+    _bstr_t m_last_status;
 public:
+	STDMETHOD(GetPgStatus)(/*[out]*/ BSTR *result, /*[in]*/ BSTR param);
 	STDMETHOD(ErroredCommit)(/*[in]*/ BOOL fRetaining, /*[in]*/ DWORD grfTC, /*[in]*/ DWORD grfRM);
     static const PGSCHEMA_INFO s_schema_queries[3];
 };

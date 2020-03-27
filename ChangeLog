@@ -1,9 +1,31 @@
+2005-03-22  shachar
+	* OleDb.idl:
+	* PgSess.cpp:
+	* PgSess.h:
+	* ReleaseNotes.txt:
+	* TypeInfo.cpp:
+		Detect proper time and timestamp encoding at runtime. Does not
+		work with 7.4 backends.
+
+2005-03-19  shachar
+	* PgCommand.cpp:
+	* PgRS.cpp:
+	* TypeInfo.cpp:
+	* TypeInfo.h:
+		Change interface so that type handlers can query the session.
+
 2005-03-18  shachar
 	* PgSess.cpp:
 	* PgSess.h:
 	* TypeInfo.cpp:
 	* TypeInfo.h:
 		Add support for the "time" type (oid 1083)
+
+	* OleDb.dsp:
+	* OleDb.mak:
+	* OleDb.rc:
+	* ReleaseNotes.txt:
+		Prepare release 1.0.0.18
 
 	* TypeInfo.cpp:
 		Timestamp now working with postgres 8 backend, but not 7.4
@@ -20,6 +42,9 @@
 
 	* PgSess.cpp:
 		OID order the structure for easier tracking of unimplemented types
+
+	* TypeInfo.cpp:
+		Fix compilation problem
 
 2005-03-17  shachar
 	* PgSess.cpp:

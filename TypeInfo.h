@@ -25,10 +25,10 @@ struct typeinfo {
     DBTYPE wType;
     BYTE bPrecision;
     // Callback functions
-    typedef int (*WIDTHFUNC)(const PGresult *res, int tup_num, int field_num);
+    typedef int (*WIDTHFUNC)(IPgSession *sess, const PGresult *res, int tup_num, int field_num);
     WIDTHFUNC GetWidth;
 
-    typedef void (*COPYFUNC)(void *dst, size_t count, const PGresult *res,
+    typedef void (*COPYFUNC)(void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num);
     COPYFUNC CopyData;
 
@@ -36,11 +36,12 @@ struct typeinfo {
         int field_num);
     STATFUNC Status;
 
-    typedef size_t (*PGWIDTHFUNC)(const typeinfo *_this, const void *data, size_t length);
+    typedef size_t (*PGWIDTHFUNC)(const typeinfo *_this, const void *data, size_t length,
+        IPgSession *sess );
     PGWIDTHFUNC PGGetLength;
     
     typedef HRESULT (*PGCOPYFUNC)(const typeinfo *_this, const void *data, size_t length,
-        void *dst, size_t dstlen );
+        void *dst, size_t dstlen, IPgSession *sess );
     PGCOPYFUNC PGCopyData;
 
     typeinfo() : alignment(0), wType(DBTYPE_EMPTY), bPrecision(~0), GetWidth(StdGWwidth),
@@ -58,46 +59,46 @@ struct typeinfo {
     }
     
     // Standard callback functions - GetWidth
-    static int StdGWwidth(const PGresult *res, int tup_num, int field_num)
+    static int StdGWwidth( IPgSession *sess, const PGresult *res, int tup_num, int field_num )
     {
         return PQgetlength(res, tup_num, field_num);
     }
     
-    static int StdGWwidth_1(const PGresult *res, int tup_num, int field_num)
+    static int StdGWwidth_1(IPgSession *sess, const PGresult *res, int tup_num, int field_num)
     {
         // When one extra byte is needed
-        return StdGWwidth( res, tup_num, field_num )+1;
+        return StdGWwidth( sess, res, tup_num, field_num )+1;
     }
     
-    static int StdGW_1(const PGresult *, int, int )
+    static int StdGW_1(IPgSession *, const PGresult *, int, int )
     {
         return 1;
     }
     
-    static int StdGW_2(const PGresult *, int, int )
+    static int StdGW_2(IPgSession *, const PGresult *, int, int )
     {
         return 2;
     }
     
-    static int StdGW_4(const PGresult *, int, int )
+    static int StdGW_4(IPgSession *, const PGresult *, int, int )
     {
         return 4;
     }
     
-    static int StdGW_8(const PGresult *, int, int )
+    static int StdGW_8(IPgSession *, const PGresult *, int, int )
     {
         return 8;
     }
 
     // Standard callback functions - Copy
-    static void StdC_memcpy( void *dst, size_t count, const PGresult *res,
+    static void StdC_memcpy( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
         ATLASSERT(count>=PQgetlength(res, tup_num, field_num));
         memcpy(dst, PQgetvalue( res, tup_num, field_num ), count);
     }
 
-    static void StdC_ntoh_2( void *dst, size_t count, const PGresult *res,
+    static void StdC_ntoh_2( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
         ATLASSERT(count==2);
@@ -105,7 +106,7 @@ struct typeinfo {
             *reinterpret_cast<short *>(PQgetvalue( res, tup_num, field_num )));
     }
 
-    static void StdC_ntoh_4( void *dst, size_t count, const PGresult *res,
+    static void StdC_ntoh_4( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
         ATLASSERT(count==4);
@@ -113,7 +114,7 @@ struct typeinfo {
             *reinterpret_cast<int *>(PQgetvalue( res, tup_num, field_num )));
     }
 
-    static void StdC_ntoh_8( void *dst, size_t count, const PGresult *res,
+    static void StdC_ntoh_8( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
         ATLASSERT(count==8);
@@ -124,11 +125,11 @@ struct typeinfo {
         reinterpret_cast<int *>(dst)[1]=ntohl(data[0]);
     }
 
-    static void StdC_nullterm( void *dst, size_t count, const PGresult *res,
+    static void StdC_nullterm( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
         ATLASSERT(count>=(PQgetlength(res, tup_num, field_num)+1));
-        StdC_memcpy( dst, count, res, tup_num, field_num );
+        StdC_memcpy( dst, count, sess, res, tup_num, field_num );
         static_cast<char *>(dst)[PQgetlength(res, tup_num, field_num)]='\0';
     }
 
@@ -158,30 +159,35 @@ struct typeinfo {
         colinfo->columnid.uName.ulPropid=PQftablecol(res, field_num);        
     }
 
-    static size_t StdPGWidthInvalid(const typeinfo *_this, const void *data, size_t length)
+    static size_t StdPGWidthInvalid(const typeinfo *_this, const void *data, size_t length,
+        IPgSession *sess )
     {
         ATLASSERT(!"Invalid width function");
         return 1;
     }
-    static size_t StdPGWidth1(const typeinfo *_this, const void *data, size_t length)
+    static size_t StdPGWidth1(const typeinfo *_this, const void *data, size_t length,
+        IPgSession *sess)
     {
         return 1;
     }
-    static size_t StdPGWidth2(const typeinfo *_this, const void *data, size_t length)
+    static size_t StdPGWidth2(const typeinfo *_this, const void *data, size_t length,
+        IPgSession *sess)
     {
         return 2;
     }
-    static size_t StdPGWidth4(const typeinfo *_this, const void *data, size_t length)
+    static size_t StdPGWidth4(const typeinfo *_this, const void *data, size_t length,
+        IPgSession *sess)
     {
         return 4;
     }
-    static size_t StdPGWidth8(const typeinfo *_this, const void *data, size_t length)
+    static size_t StdPGWidth8(const typeinfo *_this, const void *data, size_t length,
+        IPgSession *sess)
     {
         return 8;
     }
 
     static HRESULT StdPGC_memcpy(const typeinfo *_this, const void *data, size_t length,
-        void *dst, size_t dstlen )
+        void *dst, size_t dstlen, IPgSession *sess )
     {
         ATLASSERT(length>=dstlen);
 
@@ -191,7 +197,7 @@ struct typeinfo {
     }
 
     static HRESULT StdPGC_h2n_2(const typeinfo *_this, const void *data, size_t length,
-        void *dst, size_t dstlen )
+        void *dst, size_t dstlen, IPgSession *sess )
     {
         ATLASSERT(length==2 && dstlen>=2);
 
@@ -200,7 +206,7 @@ struct typeinfo {
         return S_OK;
     }
     static HRESULT StdPGC_h2n_4(const typeinfo *_this, const void *data, size_t length,
-        void *dst, size_t dstlen )
+        void *dst, size_t dstlen, IPgSession *sess )
     {
         ATLASSERT(length==4 && dstlen>=4);
 
@@ -209,7 +215,7 @@ struct typeinfo {
         return S_OK;
     }
     static HRESULT StdPGC_h2n_8(const typeinfo *_this, const void *data, size_t length,
-        void *dst, size_t dstlen )
+        void *dst, size_t dstlen, IPgSession *sess )
     {
         ATLASSERT(length==8 && dstlen>=8);
 
@@ -225,40 +231,40 @@ struct typeinfo {
 typedef std::map<unsigned int, typeinfo> types_type;
 
 // Other types, not standard enough to be put inside the struct above
-int GetWidth_timestamp( const PGresult *res, int tup_num, int field_num );
-void COPY_timestamp( void *dst, size_t count, const PGresult *res,
+int GetWidth_timestamp( IPgSession *sess, const PGresult *res, int tup_num, int field_num );
+void COPY_timestamp( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num);
-void COPY_timestampTZ( void *dst, size_t count, const PGresult *res,
+void COPY_timestampTZ( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num);
 void GetStatus_timestamp( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
-int GetWidth_date( const PGresult *res, int tup_num, int field_num );
-void COPY_date( void *dst, size_t count, const PGresult *res,
+int GetWidth_date( IPgSession *sess, const PGresult *res, int tup_num, int field_num );
+void COPY_date( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num);
 void GetStatus_date( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
-int GetWidth_time( const PGresult *res, int tup_num, int field_num );
-void COPY_time( void *dst, size_t count, const PGresult *res,
+int GetWidth_time( IPgSession *sess, const PGresult *res, int tup_num, int field_num );
+void COPY_time( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num);
 void GetStatus_time( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
 
-int GetWidth_string( const PGresult *res, int tup_num, int field_num );
-void COPY_string( void *dst, size_t count, const PGresult *res,
+int GetWidth_string( IPgSession *sess, const PGresult *res, int tup_num, int field_num );
+void COPY_string( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num);
-size_t PGWidthString(const typeinfo *_this, const void *data, size_t length);
+size_t PGWidthString(const typeinfo *_this, const void *data, size_t length, IPgSession *sess);
 HRESULT PGC_string(const typeinfo *_this, const void *data, size_t length, void *dst,
-                   size_t dstlen );
-int GetWidth_numeric( const PGresult *res, int tup_num, int field_num );
-void COPY_numeric( void *dst, size_t count, const PGresult *res,
+                   size_t dstlen, IPgSession *sess );
+int GetWidth_numeric( IPgSession *sess, const PGresult *res, int tup_num, int field_num );
+void COPY_numeric( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num);
 void GetStatus_numeric( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
 
-void COPY_money( void *dst, size_t count, const PGresult *res, int tup_num, int field_num );
+void COPY_money( void *dst, size_t count, IPgSession *sess, const PGresult *res, int tup_num, int field_num );
 void GetStatus_money( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
 HRESULT PGC_money(const typeinfo *_this, const void *data, size_t length, void *dst,
-                   size_t dstlen );
+                   size_t dstlen, IPgSession *sess );
 
 #endif // __type_info_H_
