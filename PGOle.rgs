@@ -1,0 +1,27 @@
+HKCR
+{
+	PGOle.PGOle.1 = s 'PostgreSQL OLE DB Provider'
+	{
+		CLSID = s '{A6FB38B9-4B5C-4409-AEA5-CBBEA6557C62}'
+	}
+	PGOle.PGOle = s 'PostgreSQL OLE DB Provider'
+	{
+		CLSID = s '{A6FB38B9-4B5C-4409-AEA5-CBBEA6557C62}'
+		CurVer = s 'PGOle.PGOle.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {A6FB38B9-4B5C-4409-AEA5-CBBEA6557C62} = s 'PostgreSQL OLE DB Provider'
+		{
+			ProgID = s 'PGOle.PGOle.1'
+			VersionIndependentProgID = s 'PGOle.PGOle'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'OLE DB Provider' = s 'PostgreSQL OLE DB Provider'
+			OLEDB_SERVICES = d '4294967295'
+			'TypeLib' = s '{240B83A6-C22D-4DF9-BF01-0F8F641100C8}'
+		}
+	}
+}

@@ -1,0 +1,23 @@
+HKCR
+{
+	PGOle.ConnProp.1 = s 'ConnProp Class'
+	{
+		CLSID = s '{9A3F6292-0700-44A0-8982-0BB9AB27E53A}'
+	}
+	PGOle.ConnProp = s 'ConnProp Class'
+	{
+		CLSID = s '{9A3F6292-0700-44A0-8982-0BB9AB27E53A}'
+		CurVer = s 'PGOle.ConnProp.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {9A3F6292-0700-44A0-8982-0BB9AB27E53A} = s 'ConnProp Class'
+		{
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+		}
+	}
+}

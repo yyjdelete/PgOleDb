@@ -1,0 +1,3 @@
+This project is LGPL licensed.
+It uses Microsoft ATL templates which are not GPL, so You cant staticlly link to them. ATL.dll can be distributed by You if you have 
+licensed VS. Most Windows installation have it already.

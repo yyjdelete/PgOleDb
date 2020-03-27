@@ -1,0 +1,26 @@
+This is PostgreSQL OLE DB provider. I started work on it some time ago and forget about it.
+For few months time I have no access to Visula Studio so I can't finish this work :-(
+If some body think that it would be useful to have native OLE DB Provider please give me information.
+
+You can build project and provider will register or You can do it manually : regsvr32 pgole.dll
+It uses libpq.dll and it must be in the same directory where pgole.dll is.
+
+If You have VS and want to help in this project you can contact me via mail 
+
+marekmosiewicz@poczta.onet.pl 
+
+This provider uses internally libpq to handle communication. You can see MSDN for OLE DB Provider interfaces.
+Find "OLE DB Provider Templates",The OLE DB Provider Template Architecture
+ topics in MSDN
+
+First You must start work in PGOleSession.cpp Now it makes connection to PostgreSQL, can make simple query, but ignores
+results. Next thing to do is conversion between PG types and OLE DB types. Then it will be possible to return rowset to client.
+Next thing is to implemetnt metadata information. It should be not very difficult. You should drop exisitnig implementation
+and create new basing on RowSet (metadata is also rowset)
+Next it would be nice to create parametrized queries.
+
+Thread safety must be rethink. Now there is temporary one connection per session (IPGOpenConnection) on which RowSet can execute
+query. Problem is that is not thread safety. It is also necessery to get rowset from server before client can open many rowsets at once
+but postrgresql cant fetch parto of query and switch to another
+It would be necassery to lock Session for rowset retrival , get full rowset (not scalable) or run each query on new connection.
+

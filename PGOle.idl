@@ -1,0 +1,95 @@
+// PGOle.idl : IDL source for PGOle.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (PGOle.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+[
+	object,
+	uuid(40F64D42-1809-4C53-8CE4-81695FD461B5),
+	dual,
+	helpstring("IPGConnProp Interface"),
+	pointer_default(unique)
+] 
+// Connection properties interface
+interface IPGConnProp : IDispatch {
+	[propget,id(1),helpstring("property datasource")] HRESULT  datasource([out,retval] BSTR *pVal );
+	[propput,id(1),helpstring("property datasource")] HRESULT  datasource([in] BSTR newVal);
+	[propget,id(2),helpstring("property server")] HRESULT  server([out,retval] BSTR *pVal );
+	[propput,id(2),helpstring("property server")] HRESULT  server([in] BSTR newVal);
+	[propget,id(3),helpstring("property password")] HRESULT  password([out,retval] BSTR *pVal );
+	[propput,id(3),helpstring("property password")] HRESULT  password([in] BSTR newVal);
+	[propget,id(4),helpstring("property user")] HRESULT  user([out,retval] BSTR *pVal );
+	[propput,id(4),helpstring("property user")] HRESULT  user([in] BSTR newVal);
+	[propget,id(5),helpstring("property database")] HRESULT  database([out,retval] BSTR *pVal );
+	[propput,id(5),helpstring("property database")] HRESULT  database([in] BSTR newVal);
+};
+[
+	object,
+	uuid(31A2F8B1-E5F9-4064-8B3A-FC5ED3F55284),
+	dual,
+	pointer_default(unique)
+] 
+interface IPGOpenConnection: IUnknown{
+	HRESULT  Init();
+	HRESULT  Execute([in] BSTR query);
+};
+	[
+		object,
+		uuid(56631CBD-67B9-4E8D-8E3B-65906C664F0D),
+		dual,
+		helpstring("ITest Interface"),
+		pointer_default(unique)
+	]
+	interface ITest : IDispatch
+	{
+	};
+
+[
+	uuid(240B83A6-C22D-4DF9-BF01-0F8F641100C8),
+	version(1.0),
+	helpstring("PGOle 1.0 Type Library")
+]
+library PGOLELib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(A6FB38B9-4B5C-4409-AEA5-CBBEA6557C62),
+		helpstring("PGOle OLE DB Provider")
+	]
+	coclass PGOle
+	{
+		interface IUnknown;
+	};
+
+	[
+		uuid(9A3F6292-0700-44A0-8982-0BB9AB27E53A),
+		helpstring("ConnProp Class")
+	]
+	coclass ConnProp
+	{
+		interface IPGConnProp;
+
+	};
+
+	[
+		uuid(02C9EA86-6C9F-43B2-9DB3-B914705CE5ED),
+		helpstring("AdvProp Class")
+	]
+	coclass AdvProp
+	{
+		interface IUnknown;
+	};
+	[
+		uuid(A5455662-5CCD-49B7-ADE1-8EDED02AF8A1),
+		helpstring("Test Class")
+	]
+	coclass Test
+	{
+		[default] interface ITest;
+	};
+};
