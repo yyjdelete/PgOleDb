@@ -114,7 +114,7 @@ static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, void *pD
 
         hr=ParseDBBind( bindings, pData, status, dst_length, dst_data, idataconv, info->wType );
 
-        if( SUCCEEDED(hr) && status!=DBSTATUS_S_ISNULL )
+        if( SUCCEEDED(hr) && status==DBSTATUS_S_OK )
             hr=info->PGCopyData( info, dst_data.get(), dst_length, buffer, buflen );
     } catch( const PgOleError &err ) {
         hr=err.hr();
@@ -319,6 +319,14 @@ HRESULT CPgCommand::CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
             CComPtr<IPgRowset> pRowset;
             hr=CreateRowset(pUnkOuter, IID_IPgRowset, pParams, pcRowsAffected,
                 reinterpret_cast<IUnknown **>(&pRowset), res );
+
+            fetchquery="close \"";
+            fetchquery+=cursorname;
+            fetchquery+="\"";
+
+            PGresult *res2=pgsess->PQexec( fetchquery );
+            PQclear(res2);
+
             if( FAILED(hr) )
             {
                 PQclear(res);
@@ -722,7 +730,9 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
         
         size_t buffsize=0;
         std::vector<size_t> offsets;
+        std::vector<DWORD> statuses;
         offsets.resize(cBindings);
+        statuses.resize(cBindings);
 
         for( int i=0; i<cBindings; ++i ) {
             ATLASSERT((i+1)==rgBindings[i].iOrdinal);
@@ -735,24 +745,34 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
             }
 
             offsets[i]=buffsize;
-            DWORD status;
-            paramLengths[i]=GetPGWidth( info, &rgBindings[i], pParams->pData, &status,
+            paramLengths[i]=GetPGWidth( info, &rgBindings[i], pParams->pData, &(statuses[i]),
                 m_spConvert );
             buffsize+=paramLengths[i];
-            // XXX Need to handle the status
+
+            if( statuses[i]==DBSTATUS_S_IGNORE ) {
+                // Status is not valid for parameters
+                // XXX Need to set the status to DBSTATUS_E_BADSTATUS
+                throw PgOleError( DB_S_ERRORSOCCURRED, "DBSTATUS_S_IGNORE used for command parameter" );
+            }
         }
 
         buffer=auto_array<char>(new char [buffsize]);
         for( i=0; i<cBindings; ++i ) {
-            const typeinfo *info=sess->GetTypeInfo(m_params[i].oid);
-
-            paramValues[i]=buffer.get()+offsets[i];
-
-            hr=PGCopy( info, &rgBindings[i], pParams->pData, buffer.get()+offsets[i],
-                paramLengths[i], m_spConvert );
-
-            if( FAILED(hr) )
-                throw(hr);
+            if( statuses[i]==DBSTATUS_S_OK ) {
+                const typeinfo *info=sess->GetTypeInfo(m_params[i].oid);
+                
+                paramValues[i]=buffer.get()+offsets[i];
+                
+                hr=PGCopy( info, &rgBindings[i], pParams->pData, buffer.get()+offsets[i],
+                    paramLengths[i], m_spConvert );
+                
+                if( FAILED(hr) )
+                    throw(hr);
+            } else {
+                // If the status is non-fatal (or an exception would be raised at the getwidth
+                // stage), but also not ok. Pass a NULL as parameter.
+                paramValues[i]=NULL;
+            }
         }
     } catch(HRESULT res) {
         buffer.reset();

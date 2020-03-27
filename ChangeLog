@@ -1,6 +1,21 @@
+2004-05-26  shachar
+	* PgCommand.cpp:
+		Close the cursors used for returning the multiple rowsets.
+
+2004-05-18  shachar
+	* OleDb.rc:
+		Prepare release 1.0.0.11
+
+	* PgCommand.cpp:
+		Properly handle the case of non-regular statuses (default and
+		null, for example) in parameters
+
 2004-05-17  shachar
 	* PgCommand.cpp:
 		Report status of type post-conversion
+
+	* OleDb.rc:
+		Prepare release 1.0.0.10
 
 	* PgCommand.cpp:
 		Cleanup of type conversion code
