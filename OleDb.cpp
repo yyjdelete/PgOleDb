@@ -151,7 +151,7 @@ static void TraceDestroy()
 
 void _cdecl PgAtlTrace2(DWORD category, UINT level, LPCTSTR lpszFormat, ...)
 {
-	if (category & ATL_TRACE_CATEGORY && level <= ATL_TRACE_LEVEL)
+	if (level <= ATL_TRACE_LEVEL)
 	{
 		va_list args;
 		va_start(args, lpszFormat);

@@ -35,9 +35,10 @@ CPgVirtualArray::~CPgVirtualArray()
     ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::~CPgVirtualArray\n");
     if( m_res!=NULL )
         PQclear(m_res);
-    ATLASSERT(m_session!=NULL);
-    m_session->Release();
-    m_session=NULL;
+    if( m_session!=NULL ) {
+        m_session->Release();
+        m_session=NULL;
+    }
 }
 BYTE& CPgVirtualArray::operator[] (int nIndex) const
 {
@@ -47,15 +48,24 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
     size_t offset=0;
     for( int i=0; i<nfields; ++i ) {
         int colsize=0;
+        int datasize=0;
         
         if( !PQgetisnull(m_res, nIndex, i) ) {
             const typeinfo *info=m_session->GetTypeInfo(PQftype(m_res, i));
 
             if( info!=NULL ) {
-                colsize=info->GetWidth(m_session, m_res, nIndex, i);
-                // Make sure alignment is ok
-                offset+=info->alignment-1;
-                offset-=offset%info->alignment;
+                datasize=info->GetWidth(m_session, m_res, nIndex, i);
+                if( (info->wType&DBTYPE_BYREF)==0 ) {
+                    colsize=datasize;
+                    // Make sure alignment is ok
+                    offset+=info->alignment-1;
+                    offset-=offset%info->alignment;
+                } else {
+                    colsize=sizeof(void *);
+                    // Make sure alignment is ok
+                    offset+=sizeof(void*)-1;
+                    offset-=offset%sizeof(void*);
+                }
             } else {
                 ATLASSERT(info!=NULL);
                 ATLTRACE2(atlTraceDBProvider, 0, "CPgVirtualArray::operator[] Query resulted in "
@@ -65,6 +75,7 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
         }
 
         m_offsets[i]=offset;
+        m_sizes[i]=datasize;
         offset+=colsize;
     }
     
@@ -77,9 +88,15 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
             ATLASSERT(m_offsets[i]<offset);
             size_t colwidth=(i==nfields-1?offset:m_offsets[i+1])-m_offsets[i];
             const typeinfo *info=m_session->GetTypeInfo(PQftype(m_res, i));
-            int colsize=info->GetWidth(m_session, m_res, nIndex, i);
 
-            info->CopyData( m_buff+m_offsets[i], colsize, m_session, m_res, nIndex, i );
+            if( (info->wType&DBTYPE_BYREF)==0 ) {
+                int colsize=info->GetWidth(m_session, m_res, nIndex, i);
+                
+                info->CopyData( m_buff+m_offsets[i], colsize, m_session, m_res, nIndex, i );
+            } else {
+                info->CopyData( m_buff+m_offsets[i], sizeof(void *), m_session, m_res, nIndex,
+                    i );
+            }
         }
     }
     

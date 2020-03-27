@@ -22,6 +22,7 @@
 #include "OleDb.h"
 #include "PgSess.h"
 #include "ErrorLookupService.h"
+#include "PgDS.h"
 
 // When changing, please make sure that the definition here is the same as when declared
 const char *CPgSession::s_typenames[]={"utinyint", "varcharci"};
@@ -30,6 +31,7 @@ const typeinfo CPgSession::s_cust_types_type[]={
     typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ) // varcharci
 };
 const unsigned long CPgSession::s_types_oids[]={
+    17 /* bytea */, // Type to be handled in lieu of other match must be first
     16 /* bool */,
     19 /* name */,
     20 /* int8 */,
@@ -52,7 +54,8 @@ const unsigned long CPgSession::s_types_oids[]={
     1700 /* numeric */
 };
 const typeinfo CPgSession::s_types_type[]={
-    /* 16 */ typeinfo( DBTYPE_BOOL, 1, typeinfo::StdC_memcpy, typeinfo::StdGW_1, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth1, 1 ), // 16 - bool
+    /* 17 */ typeinfo( DBTYPE_BYTES|DBTYPE_BYREF, ~0, COPY_binray, typeinfo::StdGWwidth, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidth, 1 ), // 17 - bytea
+    /* 16 */ typeinfo( DBTYPE_BOOL, 1, COPY_bool, typeinfo::StdGW_2, PGC_bool, typeinfo::StdPGWidth1, 1 ), // 16 - bool
     /* 19 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 19 - name - 63-char type for storing system identifiers
     /* 20 */ typeinfo( DBTYPE_I8, 20, typeinfo::StdC_ntoh_8, typeinfo::StdGW_8, typeinfo::StdPGC_h2n_8, typeinfo::StdPGWidth8, 8 ), // 20 - int8
     /* 21 */ typeinfo( DBTYPE_I2, 5, typeinfo::StdC_ntoh_2, typeinfo::StdGW_2, typeinfo::StdPGC_h2n_2, typeinfo::StdPGWidth2, 2 ), // 21 - int2
@@ -65,8 +68,8 @@ const typeinfo CPgSession::s_types_type[]={
     /* 705 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 705 - unknown
     /* 790 */ typeinfo( DBTYPE_CY, 10, COPY_money, typeinfo::StdGW_8, PGC_money, typeinfo::StdPGWidth4, 8, GetStatus_money ), // 790 - money
     /* 1009 */ typeinfo( DBTYPE_ARRAY|DBTYPE_STR, ~0 ), // 1009 - text[]. XXX - Is this the right way to handle this? Should consider DBTYPE_VECTOR
-    /* 1042 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 1042 - bpchar
-    /* 1043 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2 ), // 1043 - varchar
+    /* 1042 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2, GetStatus_string ), // 1042 - bpchar
+    /* 1043 */ typeinfo( DBTYPE_WSTR, ~0, COPY_string, GetWidth_string, PGC_string, PGWidthString, 2, GetStatus_string ), // 1043 - varchar
     /* 1082 */ typeinfo( DBTYPE_DBDATE, ~0, COPY_date, GetWidth_date, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_date ), // 1082 - date
     /* 1083 */ typeinfo( DBTYPE_DBTIME, ~0, COPY_time, GetWidth_time, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_time ), // 1083 - time
     /* 1114 */ typeinfo( DBTYPE_DBTIMESTAMP, ~0, COPY_timestamp, GetWidth_timestamp, typeinfo::StdPGC_memcpy, typeinfo::StdPGWidthInvalid, 4, GetStatus_timestamp ), // 1114 - timestamp
@@ -416,30 +419,27 @@ HRESULT STDMETHODCALLTYPE CPgSession::OpenRowset(IUnknown *pUnk, DBID *pTID, DBI
 {
     ATLTRACE2(atlTraceDBProvider, 0, "CPgSession::OpenRowset\n");
     CErrorLookupService::ClearError();
+    HRESULT hr=E_FAIL;
 
-    if( pInID!=NULL ) {
-        CErrorLookupService::ReportError(DB_E_NOINDEX, IID_IOpenRowset);
-    }
+    try {
+        if( pInID!=NULL ) {
+            CErrorLookupService::ReportError(DB_E_NOINDEX, IID_IOpenRowset);
+        }
 
-    CPgRowset* pRowset;
-    HRESULT hr=CreateRowset(pUnk, pTID, pInID, riid, cSets, rgSets, ppRowset, pRowset);
+        CPgRowset* pRowset;
+        hr=CreateRowset(pUnk, pTID, pInID, riid, cSets, rgSets, ppRowset, pRowset);
 
-    if( SUCCEEDED(hr) ) {
-        static const int NUM_PARAMS=1;
-        unsigned int paramTypes[NUM_PARAMS];
-        const char * paramValues[NUM_PARAMS];
-        int paramLengths[NUM_PARAMS];
-        int paramFormats[NUM_PARAMS];
+        if( SUCCEEDED(hr) ) {
+            _bstr_t query="SELECT * FROM ";
+            query+=CPgSource::EscapeID(pTID->uName.pwszName);
 
-        paramTypes[0]=0; // Untyped
-        paramValues[0]=_bstr_t(pTID->uName.pwszName);
-        paramLengths[0]=0;
-        paramFormats[0]=0;
+            PGresult *res=PQexec(query);
 
-        PGresult *res=PQexec("SELECT * FROM $1", 1, paramTypes, paramValues, paramLengths,
-            paramFormats);
-
-        pRowset->PostConstruct(this, res);
+            pRowset->PostConstruct(this, res);
+        }
+    } catch( const PgOleError &err ) {
+        hr=err.hr();
+        ATLTRACE2(atlTraceDBProvider, 0, "OpenRowset: %s\n", err.str());
     }
 
     return hr;

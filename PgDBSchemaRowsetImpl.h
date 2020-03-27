@@ -49,7 +49,7 @@ protected:
         GUID guid;
         const WCHAR *basic_query; // Basic SQL query
         struct { DBTYPE type; const WCHAR *column; } constraints[MAX_SCHEMA_CONSTRAINTS];
-        int num_constraints;
+        unsigned int num_constraints;
 
         PGSCHEMA_INFO( const GUID &_guid, const WCHAR *_query ) : guid(_guid), basic_query(_query),
             num_constraints(0)
@@ -102,7 +102,7 @@ protected:
         }
         void ZeroFillArray( )
         {
-            for( int i=num_constraints; i<MAX_SCHEMA_CONSTRAINTS; ++i ) {
+            for( unsigned int i=num_constraints; i<MAX_SCHEMA_CONSTRAINTS; ++i ) {
                 constraints[i].type=DBTYPE_EMPTY;
                 constraints[i].column=NULL;
             }
@@ -143,7 +143,7 @@ public:
         CPgCommand *pgCommand=static_cast<CPgCommand *>(static_cast<IPgCommand *>(cmd));
 
         const PGSCHEMA_INFO *schema=FindSchema(rguidSchema);
-        if( schema==NULL || InlineIsEqualGUID(rguidSchema, IID_NULL) ) {
+        if( schema==NULL || ::InlineIsEqualGUID(rguidSchema, IID_NULL) ) {
             // We don't support the requested interface
             CErrorLookupService::ReportCustomError("GetRowset: Requested schema not supported", E_INVALIDARG, IID_IDBSchemaRowset);
             return E_INVALIDARG;
@@ -170,7 +170,7 @@ public:
 
         int max_actual_restriction=0; // Maximal number of actual (non-empty) restriction
 
-        for( int i=0; i<cRestrictions; ++i ) {
+        for( unsigned int i=0; i<cRestrictions; ++i ) {
             if( rgRestrictions[i].vt!=VT_EMPTY ) {
                 uparams[max_actual_restriction]=max_actual_restriction+1;
                 
@@ -238,7 +238,7 @@ public:
             }
 
             max_actual_restriction=0;
-            for( int i=0; i<cRestrictions; ++i ) {
+            for( unsigned int i=0; i<cRestrictions; ++i ) {
                 if( rgRestrictions[i].vt!=VT_EMPTY ) {
                     if( where_sql.length()==0 )
                         where_sql=" WHERE ";
@@ -369,7 +369,7 @@ public:
                     if( prgRestrictionSupport!=NULL ) {
                         ULONG filter_mask=0;
 
-                        for( int j=0; j<schema->num_constraints; ++j ) {
+                        for( unsigned int j=0; j<schema->num_constraints; ++j ) {
                             if( schema->constraints[j].column!=NULL )
                                 filter_mask|=1ul<<j;
                         }

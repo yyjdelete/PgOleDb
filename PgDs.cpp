@@ -155,3 +155,49 @@ HRESULT CPgSource::CreateSession(IUnknown *pUnkOuter,
     
     return hr;
 }
+
+_bstr_t CPgSource::EscapeString( const WCHAR *str ) // Escape a string inclusion in a string
+{
+    USES_CONVERSION;
+    _bstr_t ret;
+    size_t strl=wcslen(str);
+    auto_array<char> to(new char[strl*4+1]);
+    const char *src_str=W2U8(str);
+
+    PQescapeString(to.get(), src_str, strlen(src_str) );
+
+    ret=to.get();
+
+    return ret;
+}
+
+_bstr_t CPgSource::EscapeID( const WCHAR *str ) // Escape an identifier
+{
+    _bstr_t ret;
+
+    // Doesn't need quote if all characters are lowercase ASCII english, digits or '_'.
+    // Will also need quote if first character is a digit
+    bool need_quote=(iswdigit(str[0])!=false);
+
+    // Use array to construct NULL terminated string
+    WCHAR charr[2];
+    charr[1]=L'\0';
+
+    for( const WCHAR *ch=str; *ch!=L'\0'; ++ch ) {
+        if( !iswdigit(*ch) && *ch!=L'_' && !iswlower(*ch) )
+            need_quote=true;
+        charr[0]=*ch;
+
+        if( *ch==L'"' )
+            // Double the quote so it won't break the identifier
+            ret+=charr;
+
+        ret+=charr;
+    }
+
+    if( need_quote ) {
+        ret=L"\""+ret+L"\"";
+    }
+
+    return ret;
+}

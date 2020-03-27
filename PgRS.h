@@ -32,6 +32,7 @@ class CPgVirtualArray
     PGresult *m_res;
     mutable BYTE *m_buff; // We allocate the buffer regardless of whether the class instance is a const
     size_t *m_offsets;
+    mutable auto_array<size_t> m_sizes;
     CPgSession *m_session;
 
     void ClearInternal()
@@ -53,7 +54,9 @@ public:
         RemoveAll();
         m_res=res;
 
-        m_offsets=new size_t[PQnfields(m_res)];
+        unsigned int numcols=PQnfields(m_res);
+        m_offsets=new size_t[numcols];
+        m_sizes=auto_array<size_t>(new size_t[numcols]);
     }
 	void RemoveAll()
 	{
@@ -62,10 +65,15 @@ public:
             PQclear(m_res);
         m_res=NULL;
 	}
+    // Some versions of ATL use GetSize, others use GetCount
 	int GetSize() const
 	{
         return PQntuples(m_res);
 	}
+    int GetCount() const
+    {
+        return GetSize();
+    }
     BYTE& operator[] (int nIndex) const;
     // Fill in the field offsets for the last retrieved row
     void FillDataOffsets( ATLCOLUMNINFO *&rpInfo )

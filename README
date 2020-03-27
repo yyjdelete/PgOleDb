@@ -23,7 +23,8 @@ timeout - how long to wait when establishing the initial connection
 
 COMPATIBILITY
 At present, PgOleDb requires a PQLib of version 7.4 or up. It also requires a backend of
-version 7.4 or up. The later requirement may be loosened in the future.
+version 7.4 or up. Timestamps are only guarenteed to work with backends of version 8.0 and
+above.
 
 Attempting to connect to a database running version 7.3.x or down will result in an error
 message saying "Couldn't query pg_type".

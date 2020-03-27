@@ -1,10 +1,78 @@
-2005-03-22  shachar
-	* OleDb.idl:
-	* PgSess.cpp:
-	* PgSess.h:
-	* ReleaseNotes.txt:
-	* TypeInfo.cpp:
-		Detect proper time and timestamp encoding at runtime. Does not
+2006-04-15	shachar
+	* PgSess.cpp 1.38:
+	* TypeInfo.cpp 1.18:
+	* TypeInfo.h 1.19:
+		DBTYPE_BOOL is actually a two word value, and requires special 
+		handling beyond copying the Postgresql return.
+
+2006-04-14	shachar
+	* PgRS.h 1.27:
+		Revert misplaced initialization of ulColumnSize
+
+2006-04-09	shachar
+	* PgCommand.cpp 1.24:
+	* PgDBSchemaRowsetImpl.h 1.6:
+	* TypeInfo.h 1.18:
+		Fix compilation errors and warnings on VS 2002
+
+2006-04-08	shachar
+	* OleDb.cpp 1.5:
+	* PgRS.h 1.26:
+		Some changes required for compiling on newer compilers (ATL 
+		changes)
+
+	* INSTALL 1.7:
+	* PgCommand.cpp 1.23:
+	* PgDBSchemaRowsetImpl.h 1.5:
+		Fix compilation errors when upgrading the Platform SDK with 
+		Visual Studio 6
+
+2005-04-25	shachar
+	* PgRS.cpp 1.39:
+	* PgRS.h 1.25:
+	* PgSess.cpp 1.37:
+	* PgSess.h 1.36:
+	* TypeInfo.cpp 1.17:
+	* TypeInfo.h 1.17:
+		Added experimental support for "bytea".
+
+2005-04-22	shachar
+	* PgSess.cpp 1.35:
+	* TypeInfo.cpp 1.16:
+	* TypeInfo.h 1.16:
+		First attempt to solve the varchar length report bug (#1000286)
+
+	* PgSess.cpp 1.36:
+		Report length of "char" fields as well.
+
+2005-04-20	shachar
+	* PgDS.h 1.7:
+	* PgDs.cpp 1.5:
+		Support functions for quoting identifiers and strings
+
+	* PgRS.cpp 1.38:
+		Remove extra zealous assert
+
+	* PgDs.cpp 1.6:
+	* PgSess.cpp 1.34:
+		Finally found out how to test "OpenRowset". Fixed 
+		implementation.
+
+2005-04-04	shachar
+	* INSTALL 1.6:
+		Update the document about the new project home site
+
+2005-03-22	shachar
+	* OleDb.rc 1.21:
+	* ReleaseNotes.txt 1.3:
+		Prepare release 1.0.0.19
+
+	* OleDb.idl 1.8:
+	* PgSess.cpp 1.33:
+	* PgSess.h 1.35:
+	* ReleaseNotes.txt 1.2:
+	* TypeInfo.cpp 1.15:
+		Detect proper time and timestamp encoding at runtime. Does not 
 		work with 7.4 backends.
 
 2005-03-19  shachar

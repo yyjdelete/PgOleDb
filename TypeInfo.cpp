@@ -280,6 +280,18 @@ HRESULT PGC_string(const typeinfo *_this, const void *data, size_t length, void 
     return S_OK;
 }
 
+void GetStatus_string( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+        int field_num)
+{
+    typeinfo::StdStat( _this, colinfo, res, field_num );
+
+    int size=PQfmod( res, field_num );
+
+    if( size!=-1 )
+        size-=4;
+    colinfo->ulColumnSize=size;
+}
+
 struct numeric_transfer {
     signed short ndigits;
     signed short weight;
@@ -450,4 +462,38 @@ HRESULT PGC_money(const typeinfo *_this, const void *data, size_t length, void *
     LONG pgsrc=src;
 
     return typeinfo::StdPGC_h2n_4( _this, &pgsrc, sizeof(pgsrc), dst, dstlen, sess );
+}
+
+
+void COPY_binray( void *dst, size_t count, IPgSession *sess, const PGresult *res,
+                    int tup_num, int field_num)
+{
+    ATLASSERT(count>=sizeof(void *));
+
+    *static_cast<const char **>(dst)=PQgetvalue( res, tup_num, field_num );
+}
+
+void COPY_bool( void *dst, size_t count, IPgSession *sess, const PGresult *res,
+                    int tup_num, int field_num)
+{
+    ATLASSERT(count>=sizeof(VARIANT_BOOL));
+    VARIANT_BOOL *ret=reinterpret_cast<VARIANT_BOOL *>(dst);
+
+    const char *pgval=PQgetvalue( res, tup_num, field_num );
+
+    *ret=(*pgval)==0 ? 0 : ~0;
+}
+
+HRESULT PGC_bool(const typeinfo *_this, const void *data, size_t length, void *dst,
+                   size_t dstlen, IPgSession *sess )
+{
+    char *_dst=static_cast<char *>(dst);
+
+    if( *static_cast<const VARIANT_BOOL *>(data) ) {
+        *_dst=1;
+    } else {
+        *_dst=0;
+    }
+
+    return S_OK;
 }

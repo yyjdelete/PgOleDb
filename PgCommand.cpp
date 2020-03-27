@@ -252,7 +252,7 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
         auto_array<int> paramLengths(new int[num_params]);
         auto_array<int> paramFormats(new int[num_params]);
         
-        for( int i=0; i<num_params; ++i ) {
+        for( unsigned int i=0; i<num_params; ++i ) {
             paramTypes[i]=m_params[i].oid;
             paramFormats[i]=1;
         }
@@ -374,7 +374,7 @@ HRESULT CPgCommand::CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
         static_cast<IMultipleResults *>(spMultiRes));
 	pgMultiRes->SetSite(GetUnknown());
 
-	if (InlineIsEqualGUID(riid, IID_NULL) || ppRowset == NULL)
+    if (::InlineIsEqualGUID(riid, IID_NULL) || ppRowset == NULL)
 	{
 		if (ppRowset != NULL)
 			*ppRowset = NULL;
@@ -534,7 +534,7 @@ HRESULT CPgCommand::GetParameterInfo (
         return E_OUTOFMEMORY;
     }
 
-    for( int i=0; i<*pcParams; ++i ) {
+    for( unsigned int i=0; i<*pcParams; ++i ) {
         (*prgParamInfo)[i].dwFlags=DBPARAMFLAGS_ISINPUT|DBPARAMFLAGS_ISNULLABLE;
         (*prgParamInfo)[i].iOrdinal=i+1;
         (*prgParamInfo)[i].pwszName=NULL;
@@ -563,7 +563,7 @@ HRESULT CPgCommand::SetParameterInfo (
 
     // XXX - We need to never fail inside this loop. Specs say that if we fail, no change is
     // done at all.
-    for( int i=0; i<cParams; ++i ) {
+    for( unsigned int i=0; i<cParams; ++i ) {
         // Make sure we support the types
         if( (rgParamBindInfo[i].dwFlags&~(DBPARAMFLAGS_ISINPUT|DBPARAMFLAGS_ISNULLABLE))!=0 ) {
             ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::SetParameterInfo error: Not supported parameter flag %08x\n",
@@ -921,7 +921,7 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
         offsets.resize(cBindings);
         statuses.resize(cBindings);
 
-        for( int i=0; i<cBindings; ++i ) {
+        for( unsigned int i=0; i<cBindings; ++i ) {
             ATLASSERT((i+1)==rgBindings[i].iOrdinal);
 
             const typeinfo *info=sess->GetTypeInfo(m_params[i].oid);

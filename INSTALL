@@ -4,17 +4,19 @@ a little more than just double clicking the dsw file and choosing "compile" to s
 Digest of the steps required:
 * Get the PostgreSQL sources of at least 7.4 http://www.postgresql.org/mirrors-ftp.html
 * Either compile the sources for windows, or download a precompiled version from
-  http://gborg.postgresql.org/project/oledb/download/download.php. Place the binary in
-  your System32 directory.
+  http://pgfoundry.org/projects/oledb/. Place the binary in your System32 directory.
 * Set a global environment variable PSQLSRC to where the sources reside
 * Double click the OleDb dsw and starting coding as usual.
+
+If you are using Visual Studio 6, read towards the end of this file for more steps you will
+need.
 
 Long description
 
 The project itself no longer carries the header files for libpq. In order to compile this
 project, you will first need to compile libpq as a native Win32 DLL, or get the precompiled
-version from http://gborg.postgresql.org/project/oledb/download/download.php. Please note that
-you will need to download the PostgreSQL sources whether you compile libpq yourself or not.
+version from http://pgfoundry.org/projects/oledb/. Please note that you will need to
+download the PostgreSQL sources whether you compile libpq yourself or not.
 
 Libpq is part of the PostgreSQL sources. The instructions for compiling libpq for Windows
 are available in the documentation for PostgreSQL. This driver requires, at the very least,
@@ -40,3 +42,24 @@ group, the registration takes place as part of the build process.
 
 Distributing the resulting DLL requires PgOleDb.dll and libpq.dll. You will need to run
 "regsvr32 PgOleDb.dll" on each machine where the provider needs to be installed.
+
+Visual Studio 6 Users
+Last time checked, PgOleDb compiled fine with the built-in libraries that came with VS6.
+If you have upgraded the Platform SDK to a newer version from Microsoft, the following
+additional steps may be required in order to compile PgOleDb:
+
+- Compiling the libpq libraries
+In the updated Platform SDK files, one of the include files depend on a file only available in
+the Internet SDK. Make sure to install that SDK as well, or you will get a missing include
+error.
+
+- Compiling the actual provider:
+If you get compilation errors inside "oledb.h", be sure to install the Microsoft Data Access
+SDK. Go to http://msdn.microsoft.com, click "downloads", and type "Microsoft Data Access SDK"
+in the search box. Be sure to add both the "inc" and the "idl" directories to the compiler's
+search path.
+
+- Compilatin errors on "InlineIsEqualGUID"
+See http://support.microsoft.com/default.aspx?scid=kb;EN-US;q243298 for explanation of what
+needs to be done in order to solve this one. Note that this means editing the actual system
+header file. Yikes, I know.

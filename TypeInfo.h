@@ -94,7 +94,7 @@ struct typeinfo {
     static void StdC_memcpy( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
-        ATLASSERT(count>=PQgetlength(res, tup_num, field_num));
+        ATLASSERT(count>=static_cast<size_t>(PQgetlength(res, tup_num, field_num)));
         memcpy(dst, PQgetvalue( res, tup_num, field_num ), count);
     }
 
@@ -128,7 +128,7 @@ struct typeinfo {
     static void StdC_nullterm( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
-        ATLASSERT(count>=(PQgetlength(res, tup_num, field_num)+1));
+        ATLASSERT(count>=static_cast<size_t>(PQgetlength(res, tup_num, field_num)+1));
         StdC_memcpy( dst, count, sess, res, tup_num, field_num );
         static_cast<char *>(dst)[PQgetlength(res, tup_num, field_num)]='\0';
     }
@@ -145,7 +145,7 @@ struct typeinfo {
     static void StatUnknown(ATLCOLUMNINFO *colinfo, PGresult *res, int field_num)
     {
         colinfo->pTypeInfo=NULL;
-        colinfo->ulColumnSize=PQfsize( res, field_num );
+        colinfo->ulColumnSize=~0;
         if( colinfo->ulColumnSize<0 )
             colinfo->ulColumnSize=~0;
         colinfo->dwFlags=DBCOLUMNFLAGS_MAYBENULL|
@@ -164,6 +164,11 @@ struct typeinfo {
     {
         ATLASSERT(!"Invalid width function");
         return 1;
+    }
+    static size_t StdPGWidth(const typeinfo *_this, const void *data, size_t length,
+        IPgSession *sess )
+    {
+        return length;
     }
     static size_t StdPGWidth1(const typeinfo *_this, const void *data, size_t length,
         IPgSession *sess)
@@ -255,6 +260,8 @@ void COPY_string( void *dst, size_t count, IPgSession *sess, const PGresult *res
 size_t PGWidthString(const typeinfo *_this, const void *data, size_t length, IPgSession *sess);
 HRESULT PGC_string(const typeinfo *_this, const void *data, size_t length, void *dst,
                    size_t dstlen, IPgSession *sess );
+void GetStatus_string( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
+                      int field_num);
 int GetWidth_numeric( IPgSession *sess, const PGresult *res, int tup_num, int field_num );
 void COPY_numeric( void *dst, size_t count, IPgSession *sess, const PGresult *res,
                     int tup_num, int field_num);
@@ -265,6 +272,12 @@ void COPY_money( void *dst, size_t count, IPgSession *sess, const PGresult *res,
 void GetStatus_money( const typeinfo *_this, ATLCOLUMNINFO *colinfo, PGresult *res,
         int field_num);
 HRESULT PGC_money(const typeinfo *_this, const void *data, size_t length, void *dst,
+                   size_t dstlen, IPgSession *sess );
+void COPY_binray( void *dst, size_t count, IPgSession *sess, const PGresult *res,
+                    int tup_num, int field_num);
+void COPY_bool( void *dst, size_t count, IPgSession *sess, const PGresult *res,
+                    int tup_num, int field_num);
+HRESULT PGC_bool(const typeinfo *_this, const void *data, size_t length, void *dst,
                    size_t dstlen, IPgSession *sess );
 
 #endif // __type_info_H_

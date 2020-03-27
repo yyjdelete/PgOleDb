@@ -112,8 +112,8 @@ private:
     static const typeinfo s_cust_types_type[2];
     // Can't use a symbolic constant due to C++ syntax.
     // Must be same number for following two statements - enforced using ASSERT
-    static const unsigned long s_types_oids[20];
-    static const typeinfo s_types_type[20];
+    static const unsigned long s_types_oids[21];
+    static const typeinfo s_types_type[21];
 
 public:
 private:
