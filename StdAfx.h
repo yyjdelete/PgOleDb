@@ -38,7 +38,8 @@
 
 #include <windows.h>
 
-#define _ATL_APARTMENT_THREADED
+//#define _ATL_FREE_THREADED//by default
+//#define _ATL_APARTMENT_THREADED
 #define ATL_TRACE_LEVEL 3
 
 #ifdef TRACEOVERRIDE

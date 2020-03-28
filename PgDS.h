@@ -26,7 +26,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CDataSource
 class ATL_NO_VTABLE CPgSource : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CPgSource, &CLSID_Pg>,
 	public IDBCreateSessionImpl<CPgSource, CPgSession>,
 	public IDBInitializeImpl<CPgSource>,

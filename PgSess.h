@@ -29,7 +29,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CPgSession
 class ATL_NO_VTABLE CPgSession : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComGlobalsThreadModel>,
 	public IGetDataSourceImpl<CPgSession>,
 	public IOpenRowsetImpl<CPgSession>,
 	public ISessionPropertiesImpl<CPgSession>,

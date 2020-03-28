@@ -18,7 +18,7 @@
 class CErrorLookupService : 
 	public IPgErrorLookup,
     public IErrorLookup,
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComGlobalsThreadModel>,
 	public CComCoClass<CErrorLookupService,&CLSID_ErrorLookupService>
 {
 private:

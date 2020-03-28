@@ -41,7 +41,7 @@ class CPgRowset;
 
 // CPgCommand
 class ATL_NO_VTABLE CPgCommand : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public IAccessorImpl<CPgCommand>,
 	public ICommandTextImpl<CPgCommand>,
 	public ICommandPropertiesImpl<CPgCommand>,
