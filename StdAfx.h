@@ -32,9 +32,9 @@
 #define _CRT_NONSTDC_NO_WARNINGS//stricmp=>_stricmp
 
 #define STRICT
-//#ifndef _WIN32_WINNT
-//#define _WIN32_WINNT 0x0400
-//#endif
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT _WIN32_WINNT_WIN7
+#endif
 
 #include <windows.h>
 

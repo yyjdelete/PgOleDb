@@ -279,7 +279,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(PgRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;WINVER=0x0500;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\ReleaseMinSize\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\ReleaseMinSize\OleDb.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -325,7 +325,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(PgRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;WINVER=0x0500;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\ReleaseMinSize64\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\ReleaseMinSize64\OleDb.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -515,7 +515,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(PgRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;_WIN32_WINNT=0x0500;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\ReleaseMinDependency64\</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
       <PrecompiledHeaderOutputFile>.\ReleaseMinDependency64\OleDb.pch</PrecompiledHeaderOutputFile>
