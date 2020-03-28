@@ -9,3 +9,5 @@ Release*
 Debug*
 OleDb.h
 dlldata.c
+.vs/
+*.user
