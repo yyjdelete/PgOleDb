@@ -43,9 +43,16 @@
 
 #ifdef TRACEOVERRIDE
 //PgAtlTrace
-#define ATLTRACE __noop
+#define ATLTRACE PgAtlTrace2
 #define ATLTRACE2 PgAtlTrace2
-void _cdecl PgAtlTrace2(DWORD category, UINT level, LPCTSTR lpszFormat, ...);
+void _cdecl PgAtlTrace2(int category, UINT level, LPCTSTR lpszFormat, ...);
+void _cdecl PgAtlTrace2(LPCTSTR lpszFormat, ...)
+{
+    va_list args;
+    va_start(args, lpszFormat);
+    PgAtlTrace2(0, 0, lpszFormat, args);
+    va_end(args);
+}
 #endif
 
 extern int gLogLevel;

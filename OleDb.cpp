@@ -149,7 +149,7 @@ static void TraceDestroy()
     }
 }
 
-void _cdecl PgAtlTrace2(DWORD category, UINT level, LPCTSTR lpszFormat, ...)
+void _cdecl PgAtlTrace2(int category, UINT level, LPCTSTR lpszFormat, ...)
 {
 	if (level <= ATL_TRACE_LEVEL)
 	{
