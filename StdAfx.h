@@ -67,10 +67,11 @@ extern CComModule _Module;
 
 // Postgresql libpq includes
 #include <libpq-fe.h>
-// Allow the debugger to see into the conn abstraction
-#ifdef _DEBUG
-#include <libpq-int.h>
-#endif
+//XXX: Disable due to too many confict
+//// Allow the debugger to see into the conn abstraction
+//#ifdef _DEBUG
+//#include <libpq-int.h>
+//#endif
 
 #include "Unicode.h"
 #include "autoarray.h"
