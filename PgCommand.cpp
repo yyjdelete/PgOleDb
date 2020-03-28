@@ -930,7 +930,7 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
             if( info==NULL ) {
                 char error_msg[250];
                 _snprintf(error_msg, sizeof(error_msg),
-                    "Cannot convert type from PostgreSQL oid type %d to DBTYPE.", m_params[i].oid );
+                    "Cannot convert type from PostgreSQL oid type %d to DBTYPE.\n", m_params[i].oid );
                 ATLTRACE2(atlTraceDBProvider, 0, error_msg);
 
                 // Major oops - we are asked to handle a type we don't know how

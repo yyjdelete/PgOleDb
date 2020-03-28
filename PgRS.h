@@ -115,7 +115,7 @@ public:
     }
 
     CATLCOLUMNINFO &operator=( const ATLCOLUMNINFO &rhs ) {
-        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO=( const ATLCOLUMNINFO &rhs ) 0x%p pwszName=0x%p\\n",
+        ATLTRACE2(atlTraceDBProvider, 0, "CATLCOLUMNINFO=( const ATLCOLUMNINFO &rhs ) 0x%p pwszName=0x%p\n",
             this, pwszName);
         delete [] pwszName;
         *static_cast<ATLCOLUMNINFO *>(this)=rhs;

@@ -82,7 +82,7 @@ public:
     char *PQerrorMessage()
     {
         char *msg=::PQerrorMessage( m_conn );
-        ATLTRACE2(atlTraceDBProvider, 2, "CPgSession::PQerrorMessage %s", msg);
+        ATLTRACE2(atlTraceDBProvider, 2, "CPgSession::PQerrorMessage %s\n", msg);
         return msg;
     }
 

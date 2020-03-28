@@ -158,6 +158,7 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
                     message="Query returned unhandled type ";
                     _ltot( pRestype, number, 10 );
                     message+=number;
+                    message += "\n";
                     ATLTRACE2(atlTraceDBProvider, 0, (const char *)message );
                     throw PgOleError(E_FAIL, message);
                 }

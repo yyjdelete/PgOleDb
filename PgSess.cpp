@@ -236,7 +236,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
         } else {
             // Pretty serious condition - catalog table not queryable!
             ATLTRACE2(atlTraceDBProvider, 0,
-                "PgSource::PgConnectDB pg_type catalog table not queryable!" );
+                "PgSource::PgConnectDB pg_type catalog table not queryable!\n" );
             CErrorLookupService::ReportCustomError("pg_type catalog table not queryable!", E_FAIL,
                 IID_IPgSession);
             hr=E_FAIL;
