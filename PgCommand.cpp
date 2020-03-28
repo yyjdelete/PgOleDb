@@ -534,9 +534,9 @@ HRESULT CPgCommand::GetParameterInfo (
         return E_OUTOFMEMORY;
     }
 
-    for( unsigned int i=0; i<*pcParams; ++i ) {
+    for( DBORDINAL i=0; i<*pcParams; ++i ) {
         (*prgParamInfo)[i].dwFlags=DBPARAMFLAGS_ISINPUT|DBPARAMFLAGS_ISNULLABLE;
-        (*prgParamInfo)[i].iOrdinal=i+1;
+        (*prgParamInfo)[i].iOrdinal=i+1u;
         (*prgParamInfo)[i].pwszName=NULL;
         (*prgParamInfo)[i].pTypeInfo=NULL;
         (*prgParamInfo)[i].ulParamSize=m_params[i].ulParamSize;
@@ -921,9 +921,9 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
         offsets.resize(cBindings);
         statuses.resize(cBindings);
 
-        unsigned int i;
+        DBORDINAL i;
         for( i=0; i<cBindings; ++i ) {
-            ATLASSERT((i+1)==rgBindings[i].iOrdinal);
+            ATLASSERT((i+1u)==rgBindings[i].iOrdinal);
 
             const typeinfo *info=sess->GetTypeInfo(m_params[i].oid);
 

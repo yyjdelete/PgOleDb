@@ -128,7 +128,7 @@ struct typeinfo {
     static void StdC_nullterm( void *dst, size_t count, IPgSession *sess, const PGresult *res,
         int tup_num, int field_num)
     {
-        ATLASSERT(count>=static_cast<size_t>(PQgetlength(res, tup_num, field_num)+1));
+        ATLASSERT(count>=static_cast<size_t>(PQgetlength(res, tup_num, field_num))+1u);
         StdC_memcpy( dst, count, sess, res, tup_num, field_num );
         static_cast<char *>(dst)[PQgetlength(res, tup_num, field_num)]='\0';
     }

@@ -168,13 +168,14 @@ public:
         VARIANT *params_vars=reinterpret_cast<VARIANT *>(params_status+cRestrictions);
 #define CALC_OFFSET(a, b) (reinterpret_cast<const unsigned char *>(a)-(b))
 
-        int max_actual_restriction=0; // Maximal number of actual (non-empty) restriction
+        //DBORDINAL|DB_UPARAMS
+        DBORDINAL max_actual_restriction=0; // Maximal number of actual (non-empty) restriction
 
         for( unsigned int i=0; i<cRestrictions; ++i ) {
             if( rgRestrictions[i].vt!=VT_EMPTY ) {
-                uparams[max_actual_restriction]=max_actual_restriction+1;
+                uparams[max_actual_restriction]=max_actual_restriction+1u;
                 
-                bindings[max_actual_restriction].iOrdinal=max_actual_restriction+1;
+                bindings[max_actual_restriction].iOrdinal=max_actual_restriction+1u;
                 bindings[max_actual_restriction].obValue=CALC_OFFSET(params_vars+max_actual_restriction, params_data.get());
                 bindings[max_actual_restriction].obLength=CALC_OFFSET(params_length+max_actual_restriction, params_data.get());
                 bindings[max_actual_restriction].obStatus=CALC_OFFSET(params_status+max_actual_restriction, params_data.get());
@@ -249,11 +250,11 @@ public:
                         where_sql+=schema->constraints[i].column;
                         where_sql+="=$";
                         char buffer[34];
-                        where_sql+=itoa(++max_actual_restriction, buffer, 10);
+                        where_sql+=_ui64toa(++max_actual_restriction, buffer, 10);
                     } else {
                         where_sql+="$";
                         char buffer[34];
-                        where_sql+=itoa(++max_actual_restriction, buffer, 10);
+                        where_sql+=_ui64toa(++max_actual_restriction, buffer, 10);
                         where_sql+=" IS NULL";
                     }
                 }

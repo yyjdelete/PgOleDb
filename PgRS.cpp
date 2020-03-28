@@ -143,7 +143,7 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
                 ATLCOLUMNINFO info;
                 
                 info.pwszName=U82W(PQfname(pRes, i));
-                info.iOrdinal=i+1; // XXX Only bookmark is 0. We don't support bookmarks.
+                info.iOrdinal=i+1u; // XXX Only bookmark is 0. We don't support bookmarks.
                 info.cbOffset=0;
                 
                 unsigned long pRestype=PQftype(pRes, i);
