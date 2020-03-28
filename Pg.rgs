@@ -17,10 +17,10 @@ HKCR
 			VersionIndependentProgID = s 'PostgreSQL'
 			InprocServer32 = s '%MODULE%'
 			{
-				val ThreadingModel = s 'Apartment'
+				val ThreadingModel = s 'Both'
 			}
 			'OLE DB Provider' = s 'PostgreSQL OLE DB Provider'
-			OLEDB_SERVICES = d '4294967295'
+			val OLEDB_SERVICES = d '4294967295'
 			'TypeLib' = s '{E1DA2BDE-8336-4EBE-8AEA-32790B1A5E00}'
 			ExtendedErrors = s 'Extended Error Service'
 			{
