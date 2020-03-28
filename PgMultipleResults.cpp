@@ -42,14 +42,9 @@ HRESULT CPgMultipleResults::GetResult(
             return DB_S_NORESULT;
         }
 
-#if 0
-        // It would appear that I have been looking in too recent a version of the docs.
-        // The VC6 SDK still regards lResultFlag as reserved, and DBRESULTFLAG_* are not
-        // defined.
         // Disable this too-advanced flag.
         if( lResultFlag!=DBRESULTFLAG_DEFAULT && lResultFlag!=DBRESULTFLAG_ROWSET )
             throw PgOleError( E_NOINTERFACE, "lResultFlag unsupported" );
-#endif
 
         if( pcRowsAffected!=NULL )
             // We don't support indevidual rows count
