@@ -201,7 +201,7 @@
       <OutputFile>DebugT/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\DebugT\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
@@ -251,7 +251,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <OutputFile>DebugT/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\DebugT\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
@@ -297,7 +297,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <OutputFile>ReleaseMinSize/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\ReleaseMinSize\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
@@ -343,7 +343,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <OutputFile>ReleaseMinSize/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\ReleaseMinSize\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
@@ -394,7 +394,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <OutputFile>Debug/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\Debug\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
@@ -444,7 +444,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <OutputFile>Debug/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\Debug\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
@@ -492,7 +492,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <OutputFile>ReleaseMinDependency/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\ReleaseMinDependency\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
@@ -540,7 +540,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <OutputFile>ReleaseMinDependency/PgOleDb.dll</OutputFile>
       <ImportLibrary>.\ReleaseMinDependency\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpqdll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
     </Link>
     <CustomBuildStep>
