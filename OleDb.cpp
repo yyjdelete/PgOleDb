@@ -151,13 +151,13 @@ static void TraceDestroy()
 
 void _cdecl PgAtlTrace2(int category, UINT level, LPCTSTR lpszFormat, ...)
 {
-	if (level <= ATL_TRACE_LEVEL)
+	if (hLogFile!=INVALID_HANDLE_VALUE && level <= ATL_TRACE_LEVEL)
 	{
 		va_list args;
 		va_start(args, lpszFormat);
 
 		int nBuf;
-		TCHAR szBuffer[512];
+		TCHAR szBuffer[4096];//Must be longer than IDR_PG
 
 		nBuf = _vsntprintf(szBuffer, sizeof(szBuffer)/sizeof(*szBuffer), lpszFormat, args);
 		ATLASSERT(nBuf < sizeof(szBuffer)/sizeof(*szBuffer));
