@@ -353,14 +353,14 @@ public:
                 *prgRestrictionSupport=static_cast<ULONG *>
                     (CoTaskMemAlloc( (*pcSchemas)*sizeof(ULONG) ));
 
-                if( *prgRestrictionSupport!=NULL )
+                if( *prgRestrictionSupport==NULL )
                     throw PgOleError( E_OUTOFMEMORY );
             }
 
             int schema_index(0);
             GUID last_guid(IID_NULL);
             if( prgRestrictionSupport!=NULL ) {
-                prgRestrictionSupport[schema_index]=0;
+                (*prgRestrictionSupport)[schema_index]=0;
             }
 
             for( i=0; i<numschemas; ++i ) {
