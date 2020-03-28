@@ -141,7 +141,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
         ATLASSERT(sizeof(s_typenames)/sizeof(s_typenames[0])==
             sizeof(s_cust_types_type)/sizeof(s_cust_types_type[0]));
 
-        for( int i=0; i<(sizeof(s_typenames)/sizeof(s_typenames[0])); ++i ) {
+        int i;
+        for( i=0; i<(sizeof(s_typenames)/sizeof(s_typenames[0])); ++i ) {
             // If this assert fails, it means that the number at the declaration of
             // s_typenames doesn't match the number of actual definitions
             ATLASSERT(s_typenames!=NULL && s_cust_types_type[i].wType!=DBTYPE_EMPTY);

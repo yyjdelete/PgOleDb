@@ -29,9 +29,9 @@
 #endif // _MSC_VER > 1000
 
 #define STRICT
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0400
-#endif
+//#ifndef _WIN32_WINNT
+//#define _WIN32_WINNT 0x0400
+//#endif
 
 #include <windows.h>
 
@@ -39,7 +39,8 @@
 #define ATL_TRACE_LEVEL 3
 
 #ifdef TRACEOVERRIDE
-#define ATLTRACE PgAtlTrace
+//PgAtlTrace
+#define ATLTRACE __noop
 #define ATLTRACE2 PgAtlTrace2
 void _cdecl PgAtlTrace2(DWORD category, UINT level, LPCTSTR lpszFormat, ...);
 #endif

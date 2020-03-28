@@ -132,8 +132,8 @@ class CPgRowset :
     public IPgRowset
 {
 public:
-    HRESULT Execute(DBPARAMS * pParams, LONG* pcRowsAffected);
-    static ATLCOLUMNINFO* GetColumnInfo(CPgRowset *pv, ULONG *pcCols)
+    HRESULT Execute(DBPARAMS * pParams, DBROWCOUNT* pcRowsAffected);
+    static ATLCOLUMNINFO* GetColumnInfo(CPgRowset *pv, DBORDINAL *pcCols)
 	{
         ATLCOLUMNINFO *ret;
         ret=CRowsetImpl< CPgRowset, CPgRemoteStorage, CPgCommand, CPgVirtualArray >::
@@ -159,7 +159,7 @@ END_COM_MAP()
 
     HRESULT PostConstruct( CPgSession *sess, PGresult *pRes );
 
-	STDMETHOD(GetColumnInfo)(ULONG *pcColumns,
+	STDMETHOD(GetColumnInfo)(DBORDINAL *pcColumns,
 							 DBCOLUMNINFO **prgInfo,
 							 OLECHAR **ppStringsBuffer);
 

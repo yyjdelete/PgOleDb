@@ -24,7 +24,7 @@
 
 #include "ErrorLookupService.h"
 
-HRESULT CPgRowset::Execute(DBPARAMS * pParams, LONG* pcRowsAffected)
+HRESULT CPgRowset::Execute(DBPARAMS * pParams, DBROWCOUNT* pcRowsAffected)
 {
     ATLTRACE2(atlTraceDBProvider, 0, "CPgRowset::Execute\n");
     return S_OK;
@@ -46,7 +46,8 @@ BYTE& CPgVirtualArray::operator[] (int nIndex) const
     const int nfields=PQnfields(m_res);
     
     size_t offset=0;
-    for( int i=0; i<nfields; ++i ) {
+    int i;
+    for( i=0; i<nfields; ++i ) {
         int colsize=0;
         int datasize=0;
         
@@ -201,7 +202,7 @@ CPgRowset::~CPgRowset()
     }
 }
 
-HRESULT STDMETHODCALLTYPE CPgRowset::GetColumnInfo(ULONG *pcColumns,
+HRESULT STDMETHODCALLTYPE CPgRowset::GetColumnInfo(DBORDINAL *pcColumns,
                                         DBCOLUMNINFO **prgInfo,
                                         OLECHAR **ppStringsBuffer)
 {

@@ -21,9 +21,9 @@ CPgMultipleResults::~CPgMultipleResults()
 
 HRESULT CPgMultipleResults::GetResult(
                                       IUnknown     *pUnkOuter,
-                                      LONG         lResultFlag,
+                                      DBRESULTFLAG         lResultFlag,
                                       REFIID        riid,
-                                      LONG   *pcRowsAffected,
+                                      DBROWCOUNT   *pcRowsAffected,
                                       IUnknown    **ppRowset)
 {
     HRESULT hr=S_OK;

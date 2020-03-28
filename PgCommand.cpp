@@ -112,13 +112,13 @@ public:
 } const name_dbtype_map;
 
 // Static functions
-static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &status,
-                           DWORD &dst_length, auto_array<char> &dst_data,
+static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DBSTATUS &status,
+                           DBLENGTH &dst_length, auto_array<char> &dst_data,
                            IDataConvert *idataconv, DBTYPE dst_type ) throw (PgOleError)
 {
     HRESULT hr;
     status=DBSTATUS_E_UNAVAILABLE;
-    DWORD *plength=NULL;
+    DBLENGTH *plength=NULL;
     void *data;
 
     // Check what does the binding contain
@@ -133,11 +133,11 @@ static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &statu
     unsigned char *buffer=reinterpret_cast<unsigned char *>(pData);
 
     if( (bindings->dwPart&DBPART_STATUS)!=0 ) {
-        status=*reinterpret_cast<DWORD *>(buffer+bindings->obStatus);
+        status=*reinterpret_cast<DBSTATUS *>(buffer+bindings->obStatus);
     }
 
     if( (bindings->dwPart&DBPART_LENGTH)!=0 ) {
-        plength=reinterpret_cast<DWORD *>(buffer+bindings->obLength);
+        plength=reinterpret_cast<DBLENGTH *>(buffer+bindings->obLength);
     }
 
     if( (bindings->dwPart&DBPART_VALUE)==0 && status!=DBSTATUS_S_ISNULL &&
@@ -155,7 +155,7 @@ static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &statu
     if( dst_data.get()==NULL )
         throw PgOleError(E_OUTOFMEMORY, "No memory for converted data" );
     
-    DWORD dst_status;
+    DBSTATUS dst_status;
     hr=idataconv->DataConvert(bindings->wType, dst_type, *plength,
         &dst_length, data, dst_data.get(), dst_length, status, &dst_status,
         0, 0, DBDATACONVERT_DEFAULT );
@@ -168,10 +168,10 @@ static HRESULT ParseDBBind( const DBBINDING *bindings, void *pData, DWORD &statu
 }
 
 static size_t GetPGWidth( const typeinfo *info, const DBBINDING *bindings, void *pData,
-                         DWORD *status, IDataConvert *idataconv, IPgSession *sess )
+                         DBSTATUS *status, IDataConvert *idataconv, IPgSession *sess )
 {
-    DWORD stat;
-    DWORD dst_length;
+    DBSTATUS stat;
+    DBLENGTH dst_length;
     auto_array<char> dst_data;
 
     if( status==NULL )
@@ -193,8 +193,8 @@ static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, void *pD
 {
     HRESULT hr=S_OK;
     try {
-        DWORD status;
-        DWORD dst_length;
+        DBSTATUS status;
+        DBLENGTH dst_length;
         auto_array<char> dst_data;
 
         hr=ParseDBBind( bindings, pData, status, dst_length, dst_data, idataconv, info->wType );
@@ -213,7 +213,7 @@ static HRESULT PGCopy( const typeinfo *info, const DBBINDING *bindings, void *pD
 /////////////////////////////////////////////////////////////////////////////
 // CPgCommand
 HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParams, 
-								 LONG * pcRowsAffected, IUnknown ** ppRowset)
+								 DBROWCOUNT * pcRowsAffected, IUnknown ** ppRowset)
 {
     USES_CONVERSION;
     ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute\n");
@@ -324,7 +324,7 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
 }
 
 HRESULT CPgCommand::CreateResult(IUnknown* pUnkOuter, REFIID riid,
-                                 DBPARAMS * pParams, LONG * pcRowsAffected,
+                                 DBPARAMS * pParams, DBROWCOUNT * pcRowsAffected,
                                  IUnknown** ppRowset,
                                  PGresult *pRes)
 {
@@ -341,7 +341,7 @@ HRESULT CPgCommand::CreateResult(IUnknown* pUnkOuter, REFIID riid,
 }
 
 HRESULT CPgCommand::CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
-                                 DBPARAMS * pParams, LONG * pcRowsAffected,
+                                 DBPARAMS * pParams, DBROWCOUNT * pcRowsAffected,
                                  IUnknown** ppRowset,
                                  PGresult *pRes)
 {
@@ -444,7 +444,7 @@ HRESULT CPgCommand::CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
 }
 
 HRESULT CPgCommand::CreateRowset(IUnknown* pUnkOuter, REFIID riid,
-                                 DBPARAMS * pParams, LONG * pcRowsAffected,
+                                 DBPARAMS * pParams, DBROWCOUNT * pcRowsAffected,
                                  IUnknown** ppRowset,
                                  PGresult *pRes)
 {
@@ -506,7 +506,7 @@ void CPgCommand::FinalRelease()
     IAccessorImpl<CPgCommand>::FinalRelease();
 }
 HRESULT CPgCommand::GetParameterInfo (
-                                      ULONG         *pcParams,
+                                      DB_UPARAMS         *pcParams,
                                       DBPARAMINFO    **prgParamInfo,
                                       OLECHAR        **ppNamesBuffer)
 {
@@ -548,8 +548,8 @@ HRESULT CPgCommand::GetParameterInfo (
     return S_OK;
 }
 HRESULT CPgCommand::SetParameterInfo (
-        ULONG cParams,
-        const ULONG __RPC_FAR   rgParamOrdinals[],
+        DB_UPARAMS cParams,
+        const DB_UPARAMS   rgParamOrdinals[],
         const DBPARAMBINDINFO   rgParamBindInfo[])
 {
     ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::SetParameterInfo\n");
@@ -613,9 +613,9 @@ HRESULT CPgCommand::SetParameterInfo (
     return S_OK;
 }
 HRESULT CPgCommand::MapParameterNames (
-        ULONG            cParamNames,
-        const OLECHAR    *rgParamNames[],
-        LONG __RPC_FAR   rgParamOrdinals[])
+        DB_UPARAMS            cParamNames,
+        LPCWSTR    rgParamNames[],
+        DB_LPARAMS   rgParamOrdinals[])
 {
     // But we do not support named parameters!
     CErrorLookupService::ClearError();
@@ -905,7 +905,7 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
 
     try {
         DBACCESSORFLAGS dwAccessorFlags;
-        ULONG cBindings;
+        DBCOUNTITEM cBindings;
         
         hr=GetBindings( pParams->hAccessor, &dwAccessorFlags, &cBindings, &rgBindings );
         
@@ -917,11 +917,12 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
         
         size_t buffsize=0;
         std::vector<size_t> offsets;
-        std::vector<DWORD> statuses;
+        std::vector<DBSTATUS> statuses;
         offsets.resize(cBindings);
         statuses.resize(cBindings);
 
-        for( unsigned int i=0; i<cBindings; ++i ) {
+        unsigned int i;
+        for( i=0; i<cBindings; ++i ) {
             ATLASSERT((i+1)==rgBindings[i].iOrdinal);
 
             const typeinfo *info=sess->GetTypeInfo(m_params[i].oid);
@@ -976,12 +977,12 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
     return hr;
 }
 
-ATLCOLUMNINFO* CPgCommand::GetColumnInfo(CPgCommand* pv, ULONG* pcInfo)
+ATLCOLUMNINFO* CPgCommand::GetColumnInfo(CPgCommand* pv, DBORDINAL* pcInfo)
 {
     return CPgRowset::GetColumnInfo(pv->m_rowset,pcInfo);
 }
 
-HRESULT CPgCommand::GetColumnInfo ( ULONG        *pcColumns,
+HRESULT CPgCommand::GetColumnInfo ( DBORDINAL        *pcColumns,
                                    DBCOLUMNINFO **prgInfo,
                                    OLECHAR      **ppStringsBuffer)
 {
@@ -994,9 +995,9 @@ HRESULT CPgCommand::GetColumnInfo ( ULONG        *pcColumns,
     return static_cast<IColumnsInfo *>(m_rowset)->GetColumnInfo( pcColumns, prgInfo, ppStringsBuffer );
 }
 
-HRESULT CPgCommand::MapColumnIDs ( ULONG        cColumnIDs,
+HRESULT CPgCommand::MapColumnIDs ( DBORDINAL        cColumnIDs,
                                   const DBID   rgColumnIDs[],
-                                  ULONG        rgColumns[])
+                                  DBORDINAL        rgColumns[])
 {
     if( m_rowset==NULL )
         return DB_E_NOCOMMAND;

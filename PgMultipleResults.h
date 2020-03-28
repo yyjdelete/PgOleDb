@@ -75,9 +75,9 @@ END_COM_MAP()
 	virtual ~CPgMultipleResults();
     STDMETHOD(GetResult)(
        IUnknown     *pUnkOuter,
-       LONG         lResultFlag,
+       DBRESULTFLAG         lResultFlag,
        REFIID        riid,
-       LONG   *pcRowsAffected,
+       DBROWCOUNT   *pcRowsAffected,
        IUnknown    **ppRowset);
     void AddRowset( CPgRowset *rowset ) throw( PgOleError ) {
         m_rowsets.push_back(rowset);

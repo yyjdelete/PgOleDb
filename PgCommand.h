@@ -28,7 +28,7 @@ class CPgRemoteStorage
 {
 public:
     template <class T>
-    static ATLCOLUMNINFO* GetColumnInfo( T *pT, ULONG* pcCols )
+    static ATLCOLUMNINFO* GetColumnInfo( T *pT, DBORDINAL* pcCols )
     {
         if( pcCols!=NULL )
             *pcCols=pT->m_colInfo.GetSize();
@@ -88,8 +88,8 @@ public:
 	}
 	void FinalRelease();
 	HRESULT WINAPI Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParams, 
-						  LONG * pcRowsAffected, IUnknown ** ppRowset);
-	static ATLCOLUMNINFO* GetColumnInfo(CPgCommand* pv, ULONG* pcInfo);
+						  DBROWCOUNT * pcRowsAffected, IUnknown ** ppRowset);
+	static ATLCOLUMNINFO* GetColumnInfo(CPgCommand* pv, DBORDINAL* pcInfo);
     STDMETHOD(SetCommandText)(REFGUID rguidDialect,LPCOLESTR pwszCommand)
 	{
         USES_CONVERSION;
@@ -113,27 +113,27 @@ public:
 
     // ICommandWithParameters
     STDMETHOD(GetParameterInfo) (
-        ULONG         *pcParams,
+        DB_UPARAMS         *pcParams,
         DBPARAMINFO    **prgParamInfo,
         OLECHAR        **ppNamesBuffer);
     STDMETHOD(MapParameterNames) (
-        ULONG            cParamNames,
-        const OLECHAR    *rgParamNames[],
-        LONG __RPC_FAR   rgParamOrdinals[]);
+        DB_UPARAMS            cParamNames,
+        LPCWSTR    rgParamNames[],
+        DB_LPARAMS   rgParamOrdinals[]);
     STDMETHOD(SetParameterInfo) (
-        ULONG                   cParams,
-        const ULONG __RPC_FAR   rgParamOrdinals[],
+        DB_UPARAMS                   cParams,
+        const DB_UPARAMS   rgParamOrdinals[],
         const DBPARAMBINDINFO   rgParamBindInfo[]);
 
     // IColumnsInfo
     STDMETHOD(GetColumnInfo) (
-        ULONG        *pcColumns,
+        DBORDINAL    *pcColumns,
         DBCOLUMNINFO **prgInfo,
         OLECHAR      **ppStringsBuffer);
     STDMETHOD(MapColumnIDs) (
-        ULONG        cColumnIDs,
+        DBORDINAL        cColumnIDs,
         const DBID   rgColumnIDs[],
-        ULONG        rgColumns[]);
+        DBORDINAL        rgColumns[]);
 BEGIN_PROPSET_MAP(CPgCommand)
 	BEGIN_PROPERTY_SET(DBPROPSET_ROWSET)
 		PROPERTY_INFO_ENTRY(IAccessor)
@@ -155,15 +155,15 @@ BEGIN_PROPSET_MAP(CPgCommand)
 END_PROPSET_MAP()
 private:
     HRESULT CreateResult(IUnknown* pUnkOuter, REFIID riid,
-        DBPARAMS * pParams, LONG * pcRowsAffected,
+        DBPARAMS * pParams, DBROWCOUNT * pcRowsAffected,
         IUnknown** ppRowset,
         PGresult *pRes);
     HRESULT CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
-        DBPARAMS * pParams, LONG * pcRowsAffected,
+        DBPARAMS * pParams, DBROWCOUNT * pcRowsAffected,
         IUnknown** ppRowset,
         PGresult *pRes);
     HRESULT CreateRowset(IUnknown* pUnkOuter, REFIID riid,
-        DBPARAMS * pParams, LONG * pcRowsAffected,
+        DBPARAMS * pParams, DBROWCOUNT * pcRowsAffected,
         IUnknown** ppRowset,
         PGresult *pRes);
 
@@ -174,7 +174,7 @@ private:
         }
         unsigned long oid;
         int paramLength;
-        ULONG ulParamSize;
+        DBLENGTH ulParamSize;
         DBTYPE wType;
         BYTE bPrecision;
         BYTE bScale;
