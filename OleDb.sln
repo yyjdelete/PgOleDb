@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29924.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OleDb", "OleDb.vcxproj", "{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Traced|x86 = Debug Traced|x86
+		Debug|x86 = Debug|x86
+		Release MinDependency|x86 = Release MinDependency|x86
+		Release MinSize|x86 = Release MinSize|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Debug Traced|x86.ActiveCfg = Debug Traced|Win32
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Debug Traced|x86.Build.0 = Debug Traced|Win32
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Debug|x86.ActiveCfg = Debug|Win32
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Debug|x86.Build.0 = Debug|Win32
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Release MinDependency|x86.ActiveCfg = Release MinDependency|Win32
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Release MinDependency|x86.Build.0 = Release MinDependency|Win32
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Release MinSize|x86.ActiveCfg = Release MinSize|Win32
+		{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}.Release MinSize|x86.Build.0 = Release MinSize|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6217E134-96E2-4AB2-9010-64694CFEE6D6}
+	EndGlobalSection
+EndGlobal
