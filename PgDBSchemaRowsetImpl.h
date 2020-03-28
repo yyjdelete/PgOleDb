@@ -157,7 +157,7 @@ public:
         }
 
         auto_array<DBPARAMBINDINFO> prminfo(new DBPARAMBINDINFO[cRestrictions]);
-        auto_array<ULONG> uparams(new ULONG[cRestrictions]);
+        auto_array<DB_UPARAMS> uparams(new DB_UPARAMS[cRestrictions]);
 
         // Create the execution parameters
         auto_array<DBBINDING> bindings(new DBBINDING[cRestrictions]);
@@ -338,8 +338,9 @@ public:
             const SessType * const session=static_cast<const SessType *>(this);
             const int numschemas=sizeof(session->s_schema_queries)/sizeof(*session->s_schema_queries);
 
+            int i;
             // Count how many distinct schemas we have
-            for( int i=0; i<numschemas; ++i ) {
+            for( i=0; i<numschemas; ++i ) {
                 if( session->s_schema_queries[i].guid==IID_NULL )
                     (*pcSchemas)++;
             }

@@ -217,7 +217,9 @@ HRESULT STDMETHODCALLTYPE CPgRowset::GetColumnInfo(DBORDINAL *pcColumns,
     {
         ATLTRACE2(atlTraceDBProvider, 0, "Working around bug in IColumnsInfoImpl::GetColumnInfo\n");
 
-        for( ULONG iCol=0, iOffset=0; iCol<*pcColumns; ++iCol )
+        DBORDINAL iCol = 0;
+        size_t iOffset = 0;
+        for( ; iCol<*pcColumns; ++iCol )
         {
             if( (*prgInfo)[iCol].pwszName!=NULL ) {
                 (*prgInfo)[iCol].pwszName=*ppStringsBuffer+iOffset;

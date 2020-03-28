@@ -577,7 +577,7 @@ HRESULT CPgCommand::SetParameterInfo (
         if( m_params.size()<rgParamOrdinals[i] )
             m_params.resize(rgParamOrdinals[i]);
 
-        int ordinal=rgParamOrdinals[i]-1;
+        DB_UPARAMS ordinal=rgParamOrdinals[i]-1;
         CComPtr<IPgSession> isess;
 
         HRESULT hr=GetSite(IID_IPgSession, reinterpret_cast<void **>(&isess));
