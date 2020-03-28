@@ -52,13 +52,14 @@ class ATL_NO_VTABLE CPgCommand :
     public IPgCommandText,
 	public IColumnsInfo
 {
+//COM_INTERFACE_ENTRY2: https://social.msdn.microsoft.com/Forums/en-US/b18a0650-0cbe-4cd9-ba64-27a1b6a53e14/custom-atl-ole-db-provider-not-running-under-sql-server-2012-x64?forum=sqldataaccess
 public:
 BEGIN_COM_MAP(CPgCommand)
-	COM_INTERFACE_ENTRY(ICommand)
+	COM_INTERFACE_ENTRY2(ICommand, ICommandText)
 	COM_INTERFACE_ENTRY(IObjectWithSite)
 	COM_INTERFACE_ENTRY(IAccessor)
 	COM_INTERFACE_ENTRY(ICommandProperties)
-	COM_INTERFACE_ENTRY2(ICommand, ICommandText)
+	COM_INTERFACE_ENTRY(ICommandText)
 	COM_INTERFACE_ENTRY(IColumnsInfo)
 	COM_INTERFACE_ENTRY(IConvertType)
 	COM_INTERFACE_ENTRY(ICommandWithParameters)
