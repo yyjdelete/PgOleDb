@@ -89,8 +89,10 @@ HRESULT CPgSource::RefreshConnectString()
                 m_strConnect+=OLESTR(" ");
             }
         }
-        //For 9.1+, always use UTF8, even for login failed message
-        m_strConnect+=OLESTR("client_encoding=\'UNICODE\' ");
+        //For 9.1+, always use UTF8, hope it will also work for login failed message
+        //But infact it not work if login failed???
+        //https://www.postgresql.org/message-id/flat/CADT4RqA1F1cKWONw_BvX8LEtcO5BioU8%2BQ%2Bj%2B%3DNaK_ORTWQepw%40mail.gmail.com
+        m_strConnect+=OLESTR("client_encoding=\'UNICODE\' ");// options=\'-c lc_messages=C\'
 
         // Clear the memory
         ReleaseProperties( results, numproperties );
