@@ -156,17 +156,18 @@ HRESULT CPgSource::CreateSession(IUnknown *pUnkOuter,
     return hr;
 }
 
-_bstr_t CPgSource::EscapeString( const WCHAR *str ) // Escape a string inclusion in a string
+//Not used
+_bstr_t CPgSource::EscapeString( PGconn* conn, const WCHAR *str ) // Escape a string inclusion in a string
 {
     USES_CONVERSION;
     _bstr_t ret;
     size_t strl=wcslen(str);
     auto_array<char> to(new char[strl*4+1]);
     const char *src_str=W2U8(str);
+    int error;
+    PQescapeStringConn(conn, to.get(), src_str, strlen(src_str), &error);
 
-    PQescapeString(to.get(), src_str, strlen(src_str) );
-
-    ret=to.get();
+    ret=U82W(to.get());
 
     return ret;
 }

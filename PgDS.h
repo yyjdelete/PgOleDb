@@ -111,7 +111,7 @@ END_COM_MAP()
 public:
 
     // A few generally useful PostgreSQL related functions
-    static _bstr_t EscapeString( const WCHAR *str ); // Escape a string inclusion in a string
+    static _bstr_t EscapeString( PGconn* conn, const WCHAR *str ); // Escape a string inclusion in a string
     static _bstr_t EscapeID( const WCHAR *str ); // Escape an identifier
 };
 #endif //__CPgSource_H_
