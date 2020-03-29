@@ -49,8 +49,8 @@
 //PgAtlTrace
 #define ATLTRACE PgAtlTrace2
 #define ATLTRACE2 PgAtlTrace2
-void _cdecl PgAtlTrace2(int category, UINT level, LPCTSTR lpszFormat, ...);
-void _cdecl PgAtlTrace2(LPCTSTR lpszFormat, ...);
+void _cdecl PgAtlTrace2(int category, UINT level, _Printf_format_string_ LPCTSTR lpszFormat, ...);
+void _cdecl PgAtlTrace2(_Printf_format_string_ LPCTSTR lpszFormat, ...);
 #endif
 
 extern int gLogLevel;
@@ -126,19 +126,12 @@ public:
 
     static void DumpInterfaceSupportsErrorInfo(_In_ REFIID riid)
     {
-        OLECHAR guidStr[255];
-        StringFromGUID2(riid, guidStr, 254);
+        OLECHAR guidStr[39];
+        StringFromGUID2(riid, guidStr, 39);
         USES_CONVERSION;
-        LPOLESTR ProgID;
-        if (SUCCEEDED(ProgIDFromCLSID(riid, &ProgID)))
-        {
-            ATLTRACE2("InterfaceSupportsErrorInfo %s(%s)\n", OLE2A(guidStr), OLE2A(ProgID));
-            CoTaskMemFree(ProgID);
-        }
-        else
-        {
-            ATLTRACE2("InterfaceSupportsErrorInfo %s\n", OLE2A(guidStr));
-        }
+        //TODO: Try also read name from HKEY_CLASSES_ROOT/Interface/riid/
+        char* guidStrA = OLE2A(guidStr);
+        ATLTRACE2("InterfaceSupportsErrorInfo %s\n", guidStrA);
     }
 };
 

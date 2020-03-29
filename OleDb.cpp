@@ -149,27 +149,31 @@ static void TraceDestroy()
     }
 }
 
-void _cdecl PgAtlTrace2(int category, UINT level, LPCTSTR lpszFormat, ...)
+void _cdecl PgAtlTrace2(int category, UINT level, _Printf_format_string_ LPCTSTR lpszFormat, va_list args)
 {
-	if (hLogFile!=INVALID_HANDLE_VALUE && level <= ATL_TRACE_LEVEL)
-	{
-		va_list args;
-		va_start(args, lpszFormat);
+    if (hLogFile!=INVALID_HANDLE_VALUE && level <= ATL_TRACE_LEVEL)
+    {
+        int nBuf;
+        TCHAR szBuffer[4096];//Must be longer than IDR_PG
 
-		int nBuf;
-		TCHAR szBuffer[4096];//Must be longer than IDR_PG
-
-		nBuf = _vsntprintf(szBuffer, sizeof(szBuffer)/sizeof(*szBuffer), lpszFormat, args);
-		ATLASSERT(nBuf < sizeof(szBuffer)/sizeof(*szBuffer));
+        nBuf = _vsntprintf(szBuffer, sizeof(szBuffer)/sizeof(*szBuffer), lpszFormat, args);
+        ATLASSERT(nBuf < sizeof(szBuffer)/sizeof(*szBuffer));
 
         DWORD nWritten;
 
         WriteFile(hLogFile, szBuffer, nBuf, &nWritten, NULL );
-		va_end(args);
     }
 }
 
-void _cdecl PgAtlTrace2(LPCTSTR lpszFormat, ...)
+void _cdecl PgAtlTrace2(int category, UINT level, _Printf_format_string_ LPCTSTR lpszFormat, ...)
+{
+    va_list args;
+    va_start(args, lpszFormat);
+    PgAtlTrace2(category, level, lpszFormat, args);
+    va_end(args);
+}
+
+void _cdecl PgAtlTrace2(_Printf_format_string_ LPCTSTR lpszFormat, ...)
 {
     va_list args;
     va_start(args, lpszFormat);
