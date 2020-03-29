@@ -41,6 +41,9 @@
 //#define _ATL_FREE_THREADED//by default
 //#define _ATL_APARTMENT_THREADED
 #define ATL_TRACE_LEVEL 3
+#define COM_STDMETHOD_CAN_THROW
+//#define _ATL_DEBUG_PROVIDER_PROPS
+//#define OLEDBVER 0x270
 
 #ifdef TRACEOVERRIDE
 //PgAtlTrace

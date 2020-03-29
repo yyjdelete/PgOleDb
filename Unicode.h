@@ -31,11 +31,11 @@
 
 #define W2U8(lpw) (\
     ((_lpw = lpw) == NULL) ? NULL : (\
-    _convert = (lstrlenW(_lpw)+1)*3,\
+    _convert = ((size_t)lstrlenW(_lpw)+1)*3,\
     ATLW2AHELPER((LPSTR) alloca(_convert), _lpw, _convert, CP_UTF8)))
 #define U82W(lpa) (\
 	((_lpa = lpa) == NULL) ? NULL : (\
-		_convert = (lstrlenA(_lpa)+1),\
+		_convert = ((size_t)lstrlenA(_lpa)+1),\
 		ATLA2WHELPER((LPWSTR) alloca(_convert*2), _lpa, _convert, CP_UTF8)))
 
 #define W2CU8(lpw) ((LPCSTR)W2U8(lpw))
