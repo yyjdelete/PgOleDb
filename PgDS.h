@@ -32,7 +32,8 @@ class ATL_NO_VTABLE CPgSource :
 	public IDBInitializeImpl<CPgSource>,
 	public IDBPropertiesImpl<CPgSource>,
 	public IPersistImpl<CPgSource>,
-	public IInternalConnectionImpl<CPgSource>
+	public IInternalConnectionImpl<CPgSource>,
+	public ISupportErrorInfoImplAlways//IID_IDBCreateSession for MSSQL, IID_IDBInitialize for udl
 {
 private:
     _bstr_t m_strConnect;
@@ -107,6 +108,7 @@ BEGIN_COM_MAP(CPgSource)
 	COM_INTERFACE_ENTRY(IDBProperties)
 	COM_INTERFACE_ENTRY(IPersist)
 	COM_INTERFACE_ENTRY(IInternalConnection)
+	COM_INTERFACE_ENTRY(ISupportErrorInfo)
 END_COM_MAP()
 public:
 

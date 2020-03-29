@@ -120,7 +120,7 @@ static void TraceInit()
 
         if( res==ERROR_SUCCESS && dwValueSize>1 )
         {
-            hLogFile=CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ, // Allow reading the log while it's written
+            hLogFile=CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, // Allow reading the log while it's written
                 NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
         }
 
@@ -167,4 +167,12 @@ void _cdecl PgAtlTrace2(int category, UINT level, LPCTSTR lpszFormat, ...)
         WriteFile(hLogFile, szBuffer, nBuf, &nWritten, NULL );
 		va_end(args);
     }
+}
+
+void _cdecl PgAtlTrace2(LPCTSTR lpszFormat, ...)
+{
+    va_list args;
+    va_start(args, lpszFormat);
+    PgAtlTrace2(0, 0, lpszFormat, args);
+    va_end(args);
 }

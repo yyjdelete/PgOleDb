@@ -50,13 +50,7 @@
 #define ATLTRACE PgAtlTrace2
 #define ATLTRACE2 PgAtlTrace2
 void _cdecl PgAtlTrace2(int category, UINT level, LPCTSTR lpszFormat, ...);
-void _cdecl PgAtlTrace2(LPCTSTR lpszFormat, ...)
-{
-    va_list args;
-    va_start(args, lpszFormat);
-    PgAtlTrace2(0, 0, lpszFormat, args);
-    va_end(args);
-}
+void _cdecl PgAtlTrace2(LPCTSTR lpszFormat, ...);
 #endif
 
 extern int gLogLevel;
@@ -105,7 +99,67 @@ public:
     }
 };
 
+template <class T>
+void printarg(T t)
+{
+   std::cout << t << std::endl;
+}
+template <class ...Args>
+void expand(Args... args)
+{
+   int arr[] = {(printarg(args), 0)...};
+}
+
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+
+class ATL_NO_VTABLE ISupportErrorInfoImplAlways :
+    public ISupportErrorInfo
+{
+public:
+    STDMETHOD(InterfaceSupportsErrorInfo)(_In_ REFIID riid)
+    {
+        DumpInterfaceSupportsErrorInfo(riid);
+        return S_OK;
+    }
+
+    static void DumpInterfaceSupportsErrorInfo(_In_ REFIID riid)
+    {
+        OLECHAR guidStr[255];
+        StringFromGUID2(riid, guidStr, 254);
+        USES_CONVERSION;
+        LPOLESTR ProgID;
+        if (SUCCEEDED(ProgIDFromCLSID(riid, &ProgID)))
+        {
+            ATLTRACE2("InterfaceSupportsErrorInfo %s(%s)\n", OLE2A(guidStr), OLE2A(ProgID));
+            CoTaskMemFree(ProgID);
+        }
+        else
+        {
+            ATLTRACE2("InterfaceSupportsErrorInfo %s\n", OLE2A(guidStr));
+        }
+    }
+};
+
+template <const IID* ... piids>
+class ATL_NO_VTABLE ISupportErrorInfoImplArray :
+    public ISupportErrorInfo
+{
+public:
+    STDMETHOD(InterfaceSupportsErrorInfo)(_In_ REFIID riid)
+    {
+        ISupportErrorInfoImplAlways::DumpInterfaceSupportsErrorInfo(riid);
+        static const IID* arr[] = { const_cast<const IID*>(piids)... };//Report `E0067` but build success??
+
+        for (int i = 0; i < sizeof...(piids); i++)
+        {
+            if (InlineIsEqualGUID(*arr[i], riid))
+                return S_OK;
+        }
+
+        return S_FALSE;
+    }
+};
 
 #endif // !defined(AFX_STDAFX_H__CAB4C541_75BB_4579_9E2B_40F8DD61B3E7__INCLUDED)
