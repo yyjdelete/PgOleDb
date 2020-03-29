@@ -182,9 +182,10 @@ HRESULT CPgRowset::PostConstruct( CPgSession *sess, PGresult *pRes )
         throw PgOleError(E_FAIL, "Fatal error in query");
         break;
     default:
+        char* msg = sess->PQerrorMessage();
         ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::Execute unhandled status\n%s\n",
-            sess->PQerrorMessage() );
-        CErrorLookupService::ReportCustomError(sess->PQerrorMessage(), E_FAIL, IID_IRowset );
+            msg );
+        CErrorLookupService::ReportCustomError(msg, E_FAIL, IID_IRowset );
         throw PgOleError(E_FAIL, "Unhandled status in query result");
         break;
     }

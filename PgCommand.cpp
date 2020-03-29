@@ -762,7 +762,7 @@ HRESULT CPgCommand::FillParams()
             if( PQresultStatus(res)!=PGRES_TUPLES_OK ) {
                 hr=E_FAIL;
                 isess->Release();
-                char* msg = U82A(PQresultErrorMessage(res));
+                char* msg = PQresultErrorMessage(res);
                 ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand:FillParams error running query \"%s\": \"%s\"\n",
                     static_cast<LPCSTR>(argsquery), msg );
                 CErrorLookupService::ReportCustomError(msg, E_FAIL,

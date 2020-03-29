@@ -64,7 +64,7 @@ public:
         SetErrorInfo(0, NULL);
     }
     static void ReportError(HRESULT hres, const IID &Interface);
-    static void ReportCustomError(const _bstr_t &message, HRESULT hError, const IID &Interface);
+    static void ReportCustomError(const char* message, HRESULT hError, const IID &Interface);
 private:
     static void InternalReportError(HRESULT hError, const IID &Interface, DWORD dwDynamicErrorID );
 };

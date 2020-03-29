@@ -92,13 +92,13 @@ void CErrorLookupService::ReportError(HRESULT hError, const IID &Interface)
     InternalReportError(hError, Interface, 0);
 }
 
-void CErrorLookupService::ReportCustomError(const _bstr_t &message, HRESULT hError,
+void CErrorLookupService::ReportCustomError(const char* message, HRESULT hError,
                                             const IID &Interface )
 {
     HRESULT hr;
 
     ATLTRACE2(atlTraceDBProvider, 0, "CErrorLookupService::ReportCustomError HRES %08x:\n%s\n",
-        hError, static_cast<char *>(message) );
+        hError, message );
 
     if( LookupService==NULL ) {
         hr=::CoCreateInstance(CLSID_ErrorLookupService, NULL, CLSCTX_ALL,
@@ -107,9 +107,10 @@ void CErrorLookupService::ReportCustomError(const _bstr_t &message, HRESULT hErr
 
     if( LookupService!=NULL ) {
         DWORD ErrorDID;
-
+        USES_CONVERSION;
+        //message is UTF8, and need be convert to UTF16
         HRESULT hres=static_cast<IPgErrorLookup *>(LookupService)->
-            RegisterCustomErrorMessage(message, &ErrorDID);
+            RegisterCustomErrorMessage(U82W(message), &ErrorDID);
         
         InternalReportError(hError, Interface, ErrorDID);
     } else {
