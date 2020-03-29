@@ -81,7 +81,8 @@ public:
     }
     char *PQerrorMessage()
     {
-        char *msg=::PQerrorMessage( m_conn );
+        USES_CONVERSION;
+        char *msg= U82A(::PQerrorMessage( m_conn ));
         ATLTRACE2(atlTraceDBProvider, 2, "CPgSession::PQerrorMessage %s\n", msg);
         return msg;
     }

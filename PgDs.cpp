@@ -89,6 +89,8 @@ HRESULT CPgSource::RefreshConnectString()
                 m_strConnect+=OLESTR(" ");
             }
         }
+        //For 9.1+, always use UTF8, even for login failed message
+        m_strConnect+=OLESTR("client_encoding=\'UNICODE\' ");
 
         // Clear the memory
         ReleaseProperties( results, numproperties );

@@ -38,6 +38,9 @@
 		_convert = ((size_t)lstrlenA(_lpa)+1),\
 		ATLA2WHELPER((LPWSTR) alloca(_convert*2), _lpa, _convert, CP_UTF8)))
 
+#define U82A(lpa) W2A(U82W(lpa))
+#define A2U8(lpa) W2U8(A2W(lpa))
+
 #define W2CU8(lpw) ((LPCSTR)W2U8(lpw))
 #define U82CW(lpa) ((LPCWSTR)U82W(lpa))
 

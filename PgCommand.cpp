@@ -299,7 +299,7 @@ HRESULT CPgCommand::Execute(IUnknown * pUnkOuter, REFIID riid, DBPARAMS * pParam
         paramFormats.reset();
         
         if( pcRowsAffected!=NULL )
-            *pcRowsAffected=atol(PQcmdTuples(res));
+            *pcRowsAffected=atol(U82A(PQcmdTuples(res)));
         
         hr=CreateResult(pUnkOuter, riid, pParams, pcRowsAffected, ppRowset, res );
         
@@ -414,7 +414,7 @@ HRESULT CPgCommand::CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
             fetchquery+=cursorname;
             fetchquery+="\"";
 
-            PGresult *res=pgsess->PQexec( fetchquery );
+            PGresult *res=pgsess->PQexec( fetchquery );//ALL UTF8
 
             // And now create a Rowset from this newly executed query
             CComPtr<IPgRowset> pRowset;
@@ -425,7 +425,7 @@ HRESULT CPgCommand::CreateMultiResult(IUnknown* pUnkOuter, REFIID riid,
             fetchquery+=cursorname;
             fetchquery+="\"";
 
-            PGresult *res2=pgsess->PQexec( fetchquery );
+            PGresult *res2=pgsess->PQexec( fetchquery );//ALL UTF8
             PQclear(res2);
 
             if( FAILED(hr) )
@@ -762,9 +762,10 @@ HRESULT CPgCommand::FillParams()
             if( PQresultStatus(res)!=PGRES_TUPLES_OK ) {
                 hr=E_FAIL;
                 isess->Release();
+                char* msg = U82A(PQresultErrorMessage(res));
                 ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand:FillParams error running query \"%s\": \"%s\"\n",
-                    static_cast<LPCSTR>(argsquery), PQresultErrorMessage(res) );
-                CErrorLookupService::ReportCustomError(PQresultErrorMessage(res), E_FAIL,
+                    static_cast<LPCSTR>(argsquery), msg );
+                CErrorLookupService::ReportCustomError(msg, E_FAIL,
                     IID_ICommand );
                 CErrorLookupService::ReportCustomError("Error finding out procedure's parameters",
                     E_FAIL, IID_ICommand );

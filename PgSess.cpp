@@ -125,13 +125,13 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
         
         CErrorLookupService::ReportCustomError(error, hr, IID_IPgSession);
     } else {
-        {
-            // Set the client encoding to UTF-8
-            // XXX - Should, ideally, check return status. I'm not sure what we are supposed to do on failure here, though.
-            PGresult *res=PQexec( "SET client_encoding TO \"Unicode\"" );
+        //{
+        //    // Set the client encoding to UTF-8
+        //    // XXX - Should, ideally, check return status. I'm not sure what we are supposed to do on failure here, though.
+        //    PGresult *res=PQexec( "SET client_encoding TO \"Unicode\"" );
 
-            PQclear( res );
-        }
+        //    PQclear( res );
+        //}
         /* Find out if our database has any custom types, and if so, which, and what is
          * their OID.
          */
@@ -151,7 +151,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
             query+=s_typenames[i];
             query+="'";
 
-            PGresult *res=PQexec( query );
+            PGresult *res=PQexec( query );//ALL ASCII
 
             if( PQresultStatus( res )==PGRES_TUPLES_OK && PQntuples(res)==1 ) {
                 // There is such a type. Get it's OID and put it in the map
@@ -204,7 +204,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::PgConnectDB( BSTR connectString )
         }
 
         // Some information is only available through the pg_type catalog table
-        PGresult *res=PQexec("SELECT oid, typalign FROM pg_type");
+        PGresult *res=PQexec("SELECT oid, typalign FROM pg_type");//ALL ASCII
 
         if( PQresultStatus( res )==PGRES_TUPLES_OK ) {
             for( i=0; i<PQntuples(res); ++i ) {
@@ -305,7 +305,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::StartTransaction( /* [in] */ ISOLEVEL isoL
         break;
     }
 
-    PGresult *query_res=PQexec( query );
+    PGresult *query_res=PQexec( query );//ALL ASCII
 
     HRESULT res=S_OK;
 
@@ -347,7 +347,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::ErroredCommit( /* [in] */ BOOL fRetaining,
         return XACT_E_NOTSUPPORTED;
     }
 
-    PGresult *query_res=PQexec("COMMIT");
+    PGresult *query_res=PQexec("COMMIT");//ALL ASCII
 
     HRESULT res=S_OK;
 
@@ -382,7 +382,7 @@ HRESULT STDMETHODCALLTYPE CPgSession::Abort( /* [unique][in] */ BOID __RPC_FAR *
         return XACT_E_NOTSUPPORTED;
     }
 
-    PGresult *query_res=PQexec("ROLLBACK");
+    PGresult *query_res=PQexec("ROLLBACK");//ALL ASCII
 
     HRESULT res=S_OK;
 
@@ -434,7 +434,8 @@ HRESULT STDMETHODCALLTYPE CPgSession::OpenRowset(IUnknown *pUnk, DBID *pTID, DBI
             _bstr_t query="SELECT * FROM ";
             query+=CPgSource::EscapeID(pTID->uName.pwszName);
 
-            PGresult *res=PQexec(query);
+            USES_CONVERSION;
+            PGresult *res=PQexec(OLE2CU8(query));
 
             pRowset->PostConstruct(this, res);
         }
@@ -451,7 +452,7 @@ STDMETHODIMP CPgSession::GetPgStatus(BSTR * result, BSTR param)
     USES_CONVERSION;
 
     const char *answer=PQparameterStatus( m_conn, OLE2CA(param) );
-	m_last_status=answer;
+	m_last_status=U82COLE(answer);
     *result=m_last_status;
 
 	return S_OK;
