@@ -104,14 +104,12 @@
     <CustomBuild Include="Pg.rgs">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include=".gitignore" />
     <CustomBuild Include="AUTHORS" />
     <CustomBuild Include="ChangeLog" />
     <CustomBuild Include="COPYING" />
     <CustomBuild Include="Developers" />
     <CustomBuild Include="INSTALL" />
     <CustomBuild Include="README" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
   </ItemGroup>
 </Project>

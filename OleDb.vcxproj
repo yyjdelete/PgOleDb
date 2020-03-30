@@ -37,6 +37,7 @@
   <PropertyGroup Label="Globals">
     <Keyword>AtlProj</Keyword>
     <ProjectGuid>{0FF15296-D1AD-4E0F-B01E-9CD0C30E99F9}</ProjectGuid>
+    <TargetName>PgOleDb</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
     <PgRoot>D:\Linux\PostgreSQL\9_5_x86</PgRoot>
@@ -61,12 +62,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
@@ -87,12 +90,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -100,77 +105,55 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release MinDependency|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release MinDependency|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release MinSize|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release MinSize|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|Win32'">
-    <OutDir>.\DebugT\</OutDir>
-    <IntDir>.\DebugT\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|x64'">
-    <OutDir>.\DebugT64\</OutDir>
-    <IntDir>.\DebugT64\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release MinSize|Win32'">
-    <OutDir>.\ReleaseMinSize\</OutDir>
-    <IntDir>.\ReleaseMinSize\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release MinSize|x64'">
-    <OutDir>.\ReleaseMinSize64\</OutDir>
-    <IntDir>.\ReleaseMinSize64\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>.\Debug\</OutDir>
-    <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>.\Debug64\</OutDir>
-    <IntDir>.\Debug64\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release MinDependency|Win32'">
-    <OutDir>.\ReleaseMinDependency\</OutDir>
-    <IntDir>.\ReleaseMinDependency\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release MinDependency|x64'">
-    <OutDir>.\ReleaseMinDependency64\</OutDir>
-    <IntDir>.\ReleaseMinDependency64\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|Win32'">
@@ -183,43 +166,27 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(PgRoot)\include;$(PgRoot)\include\internal;$(PgRoot)\include\server;$(PgRoot)\include\server\port\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_DEBUG;TRACEOVERRIDE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\DebugT\</AssemblerListingLocation>
-      <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\DebugT\OleDb.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\DebugT\</ObjectFileName>
-      <ProgramDataBaseFileName>.\DebugT\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\DebugT\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\DebugT\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>DebugT/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\DebugT\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Traced|x64'">
     <ClCompile>
@@ -231,43 +198,27 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(PgRoot)\include;$(PgRoot)\include\internal;$(PgRoot)\include\server;$(PgRoot)\include\server\port\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_DEBUG;TRACEOVERRIDE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\DebugT64\</AssemblerListingLocation>
-      <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\DebugT64\OleDb.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\DebugT64\</ObjectFileName>
-      <ProgramDataBaseFileName>.\DebugT64\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\DebugT64\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\DebugT64\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>DebugT64/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\DebugT64\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release MinSize|Win32'">
     <ClCompile>
@@ -280,40 +231,27 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(PgRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\ReleaseMinSize\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\ReleaseMinSize\OleDb.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\ReleaseMinSize\</ObjectFileName>
-      <ProgramDataBaseFileName>.\ReleaseMinSize\</ProgramDataBaseFileName>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\ReleaseMinSize\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\ReleaseMinSize\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>ReleaseMinSize/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\ReleaseMinSize\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release MinSize|x64'">
     <ClCompile>
@@ -326,40 +264,27 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(PgRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\ReleaseMinSize64\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\ReleaseMinSize64\OleDb.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\ReleaseMinSize64\</ObjectFileName>
-      <ProgramDataBaseFileName>.\ReleaseMinSize64\</ProgramDataBaseFileName>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\ReleaseMinSize64\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\ReleaseMinSize64\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>ReleaseMinSize64/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\ReleaseMinSize64\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -371,43 +296,28 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(PgRoot)\include;$(PgRoot)\include\internal;$(PgRoot)\include\server;$(PgRoot)\include\server\port\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
-      <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\Debug\OleDb.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(OutDir)\</AssemblerListingLocation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\Debug\</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\Debug\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>Debug/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\Debug\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -419,43 +329,28 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <AdditionalIncludeDirectories>$(PgRoot)\include;$(PgRoot)\include\internal;$(PgRoot)\include\server;$(PgRoot)\include\server\port\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\Debug64\</AssemblerListingLocation>
-      <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\Debug64\OleDb.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(OutDir)\</AssemblerListingLocation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\Debug64\</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug64\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\Debug64\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug64\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>Debug64/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\Debug64\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release MinDependency|Win32'">
     <ClCompile>
@@ -468,42 +363,29 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(PgRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\ReleaseMinDependency\</AssemblerListingLocation>
-      <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\ReleaseMinDependency\OleDb.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(OutDir)\</AssemblerListingLocation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\ReleaseMinDependency\</ObjectFileName>
-      <ProgramDataBaseFileName>.\ReleaseMinDependency\</ProgramDataBaseFileName>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\ReleaseMinDependency\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\ReleaseMinDependency\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>ReleaseMinDependency/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\ReleaseMinDependency\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release MinDependency|x64'">
     <ClCompile>
@@ -516,42 +398,28 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(PgRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TRACEOVERRIDE;REGISTER_PROXY_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\ReleaseMinDependency64\</AssemblerListingLocation>
-      <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\ReleaseMinDependency64\OleDb.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(OutDir)\</AssemblerListingLocation>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <ObjectFileName>.\ReleaseMinDependency64\</ObjectFileName>
-      <ProgramDataBaseFileName>.\ReleaseMinDependency64\</ProgramDataBaseFileName>
     </ClCompile>
     <Midl>
-      <TypeLibraryName>.\ReleaseMinDependency64\OleDb.tlb</TypeLibraryName>
+      <TypeLibraryName>$(OutDir)\OleDb.tlb</TypeLibraryName>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\ReleaseMinDependency64\OleDb.bsc</OutputFile>
-    </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>ReleaseMinDependency64/PgOleDb.dll</OutputFile>
-      <ImportLibrary>.\ReleaseMinDependency64\PgOleDb.lib</ImportLibrary>
       <AdditionalLibraryDirectories>$(PgRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;libpq.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\OleDb.def</ModuleDefinitionFile>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
-    <CustomBuildStep>
-      <Command>regsvr32 /s /c "$(TargetPath)" 
-echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
-      <Message>Performing registration</Message>
-      <Outputs>$(OutDir)\regsvr32.trg;%(Outputs)</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ErrorLookupService.cpp" />
@@ -568,7 +436,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
     <ClCompile Include="TypeInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include=".cvsignore" />
+    <CustomBuild Include=".gitignore" />
     <CustomBuild Include="AUTHORS" />
     <CustomBuild Include="ChangeLog" />
     <CustomBuild Include="COPYING" />
@@ -608,9 +476,6 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReleaseNotes.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

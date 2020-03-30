@@ -11,3 +11,4 @@ OleDb.h
 dlldata.c
 .vs/
 *.user
+x64/
