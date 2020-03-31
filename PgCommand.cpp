@@ -980,18 +980,58 @@ HRESULT CPgCommand::FillinValues( char *paramValues[], int paramLengths[], size_
 
 ATLCOLUMNINFO* CPgCommand::GetColumnInfo(CPgCommand* pv, DBORDINAL* pcInfo)
 {
-    return CPgRowset::GetColumnInfo(pv->m_rowset,pcInfo);
+    static const ATLCOLUMNINFO array[1] = {};
+    //INVALID CAST??
+    if (pv->m_rowset != NULL)
+        return CPgRowset::GetColumnInfo(pv->m_rowset,pcInfo);
+    pcInfo = 0;
+    return NULL;
+}
+
+HRESULT CPgCommand::CollectColumnInfo()
+{
+    ATLTRACE2(atlTraceDBProvider, 0, "CPgCommand::CollectColumnInfo\n");
+        //Assert an normal select
+        IUnknown* uk;
+        if( m_parsed_command.length()==0 ) {
+            HRESULT hr=FillParams();
+            
+            if( FAILED(hr) )
+                throw PgOleError(hr, "FillParams failed at parsing the command");
+        }
+        if (m_params.size() != 0)
+            return DB_E_NOTABLE;
+        _bstr_t oldCmd = m_parsed_command;
+        m_parsed_command = "SELECT * FROM (" + oldCmd + ") as tmp WHERE 1=0";
+        HRESULT hr = Execute(NULL, IID_IUnknown, NULL, NULL, &uk);
+        m_parsed_command = oldCmd;
+        if (FAILED(hr)) {
+            return hr;
+        }
+        CComPtr<IPgRowset> object;
+        hr=uk->QueryInterface(&object);
+        if(SUCCEEDED(hr)) {
+            // Ok, we're sure it's a valid rowset - make sure our CComPtr doesn't release it
+            uk->AddRef();
+            m_rowset = static_cast<CPgRowset*>(static_cast<IPgRowset*>(object));
+        } else {
+            return DB_E_NOTABLE;
+        }
 }
 
 HRESULT CPgCommand::GetColumnInfo ( DBORDINAL        *pcColumns,
                                    DBCOLUMNINFO **prgInfo,
                                    OLECHAR      **ppStringsBuffer)
 {
-    if( m_rowset==NULL )
-        return DB_E_NOCOMMAND;
-    // XXX Strictly speaking, we are returning DB_E_NOCOMMAND even when we should have returned
-    // actual results. However, as everybody understands that we cannot return these results
-    // without further execution, they don't call us when we don't have them.
+    if (m_rowset == NULL) {
+        HRESULT hr = CollectColumnInfo();
+        if (FAILED(hr)) {
+            return hr;
+        }
+        // XXX Strictly speaking, we are returning DB_E_NOCOMMAND even when we should have returned
+        // actual results. However, as everybody understands that we cannot return these results
+        // without further execution, they don't call us when we don't have them.
+    }
 
     return static_cast<IColumnsInfo *>(m_rowset)->GetColumnInfo( pcColumns, prgInfo, ppStringsBuffer );
 }
@@ -1000,9 +1040,12 @@ HRESULT CPgCommand::MapColumnIDs ( DBORDINAL        cColumnIDs,
                                   const DBID   rgColumnIDs[],
                                   DBORDINAL        rgColumns[])
 {
-    if( m_rowset==NULL )
-        return DB_E_NOCOMMAND;
+    if (m_rowset == NULL) {
+        HRESULT hr = CollectColumnInfo();
+        if (FAILED(hr)) {
+            return hr;
+        }
+    }
     // See XXX comment for GetColumnInfo above.
-
     return m_rowset->MapColumnIDs (cColumnIDs, rgColumnIDs, rgColumns);
 }

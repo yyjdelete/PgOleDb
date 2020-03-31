@@ -39,7 +39,17 @@ public:
 
 class CPgRowset;
 
+/////////////////////////////////////////////////////////////////////////////
 // CPgCommand
+// From atldb.h: Command Object
+//
+// -Mandatory Interfaces:
+// ICommand)
+// IAccessor)
+// ICommandProperties
+// ICommandText - derives from ICommand
+// IColumnsInfo
+// IConvertType
 class ATL_NO_VTABLE CPgCommand : 
 	public CComObjectRootEx<CComObjectThreadModel>,
 	public IAccessorImpl<CPgCommand>,
@@ -50,6 +60,7 @@ class ATL_NO_VTABLE CPgCommand :
 	public ICommandWithParameters,
     public IPgCommand,
     public IPgCommandText,
+    public ISupportErrorInfoImplAlways,
 	public IColumnsInfo
 {
 //COM_INTERFACE_ENTRY2: https://social.msdn.microsoft.com/Forums/en-US/b18a0650-0cbe-4cd9-ba64-27a1b6a53e14/custom-atl-ole-db-provider-not-running-under-sql-server-2012-x64?forum=sqldataaccess
@@ -63,6 +74,7 @@ BEGIN_COM_MAP(CPgCommand)
 	COM_INTERFACE_ENTRY(IColumnsInfo)
 	COM_INTERFACE_ENTRY(IConvertType)
 	COM_INTERFACE_ENTRY(ICommandWithParameters)
+    COM_INTERFACE_ENTRY(ISupportErrorInfo)
     COM_INTERFACE_ENTRY(IPgCommand)
 END_COM_MAP()
 // ICommand
@@ -99,6 +111,7 @@ public:
         HRESULT hr=ICommandTextImpl<CPgCommand>::SetCommandText(rguidDialect, pwszCommand);
         SetParameterInfo(0, NULL, NULL );
         m_parsed_command="";
+        m_rowset = NULL;
         Unlock();
 
         return hr;
@@ -193,6 +206,7 @@ public:
         if( m_rowset==rs )
             m_rowset=NULL;
     }
+    HRESULT CollectColumnInfo();
 };
 
 #endif //__CPgRowset_H_
